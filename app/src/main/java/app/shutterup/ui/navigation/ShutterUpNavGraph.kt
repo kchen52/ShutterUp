@@ -292,15 +292,21 @@ private fun tabForRoute(route: String): ShutterUpDestination = when {
     else -> ShutterUpDestination.Home
 }
 
-private fun NavHostController.navigateTab(route: String) {
+/**
+ * Switch primary tabs. Settings is a non-tab overlay on Today, so it is
+ * discarded rather than saved — returning to Today always shows Home.
+ */
+internal fun NavHostController.navigateTab(route: String) {
+    popBackStack(ShutterUpDestinations.SETTINGS, inclusive = true)
     navigate(route) {
         popUpTo(ShutterUpDestinations.HOME) { saveState = true }
         launchSingleTop = true
-        restoreState = true
+        // Restoring Home's stack would bring Settings back after a tab switch.
+        restoreState = route != ShutterUpDestinations.HOME
     }
 }
 
-private fun NavHostController.navigateSettings() {
+internal fun NavHostController.navigateSettings() {
     navigate(ShutterUpDestinations.SETTINGS) {
         launchSingleTop = true
     }

@@ -33,6 +33,10 @@ mlkit-schema-compiler = "1.0.0-alpha1"
 exifinterface = "1.4.2"
 coroutines = "1.10.2"
 junit4 = "4.13.2"
+androidx-test-ext-junit = "1.3.0"
+androidx-test-runner = "1.7.0"
+androidx-test-rules = "1.7.0"
+espresso = "3.7.0"
 robolectric = "4.16.1"
 roborazzi = "1.71.0"
 camerax = "1.4.2"
@@ -106,6 +110,15 @@ kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 # Unit tests
 junit4 = { group = "junit", name = "junit", version.ref = "junit4" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
+
+# Instrumented UI tests (SPEC §15.2 — run on the Fold 7)
+androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext-junit" }
+androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "androidx-test-runner" }
+androidx-test-rules = { group = "androidx.test", name = "rules", version.ref = "androidx-test-rules" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso" }
+androidx-espresso-intents = { group = "androidx.test.espresso", name = "espresso-intents", version.ref = "espresso" }
+hilt-android-testing = { group = "com.google.dagger", name = "hilt-android-testing", version.ref = "hilt" }
+androidx-work-testing = { group = "androidx.work", name = "work-testing", version.ref = "workmanager" }
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 # Screenshot tests (Roborazzi over Robolectric; JVM-only, CI-verified)
 roborazzi = { group = "io.github.takahirom.roborazzi", name = "roborazzi", version.ref = "roborazzi" }
