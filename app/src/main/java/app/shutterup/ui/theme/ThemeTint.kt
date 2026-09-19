@@ -51,6 +51,26 @@ fun themeAccent(theme: String, scheme: ColorScheme): Color {
     return Color(hslToColor(floatArrayOf(harmonizedHue(theme, scheme), RAW_SATURATION, lightness)))
 }
 
+// Complementary of primary: mid-chroma so a large outline stays playful, not neon.
+private const val COMPLEMENT_SATURATION_LIGHT = 0.52f
+private const val COMPLEMENT_SATURATION_DARK = 0.44f
+private const val COMPLEMENT_LIGHTNESS_LIGHT = 0.48f
+private const val COMPLEMENT_LIGHTNESS_DARK = 0.68f
+
+/**
+ * Opposite hue of [ColorScheme.primary], softened so it can sit on a
+ * theme-tinted card without shouting. Follows dynamic colour: the wallpaper
+ * seed changes primary, so this accent changes with it.
+ */
+fun complementaryAccent(scheme: ColorScheme, darkTheme: Boolean): Color {
+    val primaryHsl = FloatArray(3)
+    colorToHsl(scheme.primary.toArgb(), primaryHsl)
+    val hue = wrapHue(primaryHsl[0] + 180f)
+    val saturation = if (darkTheme) COMPLEMENT_SATURATION_DARK else COMPLEMENT_SATURATION_LIGHT
+    val lightness = if (darkTheme) COMPLEMENT_LIGHTNESS_DARK else COMPLEMENT_LIGHTNESS_LIGHT
+    return Color(hslToColor(floatArrayOf(hue, saturation, lightness)))
+}
+
 @Composable
 fun ProvideThemeTint(theme: String, darkTheme: Boolean, content: @Composable () -> Unit) {
     val tint = themeTint(theme, MaterialTheme.colorScheme, darkTheme)
