@@ -53,4 +53,11 @@ class InMemoryPreferencesRepository @Inject constructor() : PreferencesRepositor
     override suspend fun setLastNotifiedDate(date: LocalDate?) {
         lastNotifiedDate.value = date
     }
+
+    private val seriesEnabled = MutableStateFlow(false)
+
+    override fun observeSeriesEnabled(): Flow<Boolean> = seriesEnabled.asStateFlow()
+    override suspend fun setSeriesEnabled(enabled: Boolean) {
+        seriesEnabled.value = enabled
+    }
 }

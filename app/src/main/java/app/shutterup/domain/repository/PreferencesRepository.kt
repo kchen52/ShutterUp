@@ -12,6 +12,8 @@ interface PreferencesRepository {
     suspend fun setPreciseTiming(enabled: Boolean)
     fun observeThemeFocus(): Flow<String?>
     suspend fun setThemeFocus(focus: String?)
+    fun observeSeriesEnabled(): Flow<Boolean>
+    suspend fun setSeriesEnabled(enabled: Boolean)
     fun observePaused(): Flow<Boolean>
     suspend fun setPaused(paused: Boolean)
     fun observeOnboardingComplete(): Flow<Boolean>

@@ -12,8 +12,9 @@ import androidx.room.TypeConverters
         AchievementEntity::class,
         StreakStateEntity::class,
         LibraryUsageEntity::class,
+        SeriesEntity::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = true,
 )
 @TypeConverters(ShutterUpConverters::class)
@@ -21,4 +22,5 @@ abstract class ShutterUpDatabase : RoomDatabase() {
     abstract fun dayPromptDao(): DayPromptDao
     abstract fun entryDao(): EntryDao
     abstract fun gamificationDao(): GamificationDao
+    abstract fun seriesDao(): SeriesDao
 }

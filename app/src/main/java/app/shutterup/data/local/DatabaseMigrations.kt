@@ -39,3 +39,26 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_entries_date` ON `entries` (`date`)")
     }
 }
+
+/** v2 day prompts → v3 series table plus nullable series columns on day_prompts. */
+val MIGRATION_2_3 = object : Migration(2, 3) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS `series` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                `title` TEXT NOT NULL,
+                `startDate` INTEGER NOT NULL,
+                `endDate` INTEGER NOT NULL,
+                `theme` TEXT NOT NULL,
+                `source` TEXT NOT NULL
+            )
+            """.trimIndent(),
+        )
+        db.execSQL("ALTER TABLE `day_prompts` ADD COLUMN `seriesId` INTEGER")
+        db.execSQL("ALTER TABLE `day_prompts` ADD COLUMN `seriesIndex` INTEGER")
+        db.execSQL(
+            "CREATE INDEX IF NOT EXISTS `index_day_prompts_seriesId` ON `day_prompts` (`seriesId`)",
+        )
+    }
+}
