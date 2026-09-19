@@ -12,17 +12,21 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import app.shutterup.R
+import app.shutterup.domain.model.DayStatus
 import app.shutterup.ui.detail.samplePrompt
 import app.shutterup.ui.theme.ShutterUpTheme
 import app.shutterup.ui.theme.themeTint
@@ -77,10 +81,11 @@ fun TodayWidgetPreviewContent(
                             .background(scheme.primaryContainer, RoundedCornerShape(50))
                             .padding(horizontal = 8.dp, vertical = 4.dp),
                     ) {
-                        Text(
-                            text = "✓",
-                            color = scheme.onPrimaryContainer,
-                            style = MaterialTheme.typography.labelMedium,
+                        Icon(
+                            painter = painterResource(R.drawable.ic_aperture_check),
+                            contentDescription = "Completed",
+                            tint = scheme.onPrimaryContainer,
+                            modifier = Modifier.size(18.dp),
                         )
                     }
                 }
@@ -137,6 +142,14 @@ fun sampleTodayWidgetState(): TodayWidgetState = TodayWidgetState.from(
     thumbPath = null,
 )
 
+fun sampleCompletedTodayWidgetState(): TodayWidgetState = TodayWidgetState.from(
+    date = LocalDate.of(2026, 9, 19),
+    prompt = samplePrompt().copy(status = DayStatus.COMPLETED_NO_PHOTO),
+    streakDays = 15,
+    paused = false,
+    thumbPath = null,
+)
+
 @Preview(name = "Medium light", widthDp = 250, heightDp = 140)
 @Composable
 private fun WidgetMediumLightPreview() {
@@ -168,6 +181,18 @@ private fun WidgetSmallLightPreview() {
         TodayWidgetPreviewContent(
             state = sampleTodayWidgetState(),
             size = TodayWidgetPreviewSize.Small,
+            darkTheme = false,
+        )
+    }
+}
+
+@Preview(name = "Medium completed light", widthDp = 250, heightDp = 140)
+@Composable
+private fun WidgetMediumCompletedLightPreview() {
+    ShutterUpTheme(darkTheme = false) {
+        TodayWidgetPreviewContent(
+            state = sampleCompletedTodayWidgetState(),
+            size = TodayWidgetPreviewSize.Medium,
             darkTheme = false,
         )
     }

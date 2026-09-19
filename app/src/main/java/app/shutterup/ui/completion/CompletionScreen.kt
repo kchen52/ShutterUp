@@ -52,6 +52,7 @@ import app.shutterup.domain.model.PromptSourceRef
 import app.shutterup.ui.badges.BadgeEmblem
 import app.shutterup.ui.badges.badgeDescription
 import app.shutterup.ui.badges.badgeDisplayName
+import app.shutterup.ui.components.ApertureCheckMark
 import app.shutterup.ui.components.Kicker
 import app.shutterup.ui.components.LibraryTag
 import app.shutterup.ui.detail.samplePrompt
@@ -90,6 +91,7 @@ fun CompletionScreen(
     onDone: () -> Unit = {},
     onRetake: () -> Unit = {},
     showBadgeSheet: Boolean = true,
+    apertureProgress: Float? = null,
 ) {
     val prompt = state.prompt
     val dark = androidx.compose.foundation.isSystemInDarkTheme()
@@ -141,6 +143,13 @@ fun CompletionScreen(
                     }
                 }
             }
+            ApertureCheckMark(
+                size = 28.dp,
+                color = MaterialTheme.colorScheme.secondary,
+                progress = apertureProgress,
+                playOnce = true,
+                contentDescription = "Completed",
+            )
             val kicker = buildString {
                 append(prompt?.theme?.uppercase().orEmpty())
                 if (state.streak.current > 0) {
@@ -252,6 +261,7 @@ private fun CompletionPreviewLight() {
             CompletionScreen(
                 state = sampleCompletionState(firstEver = true),
                 showBadgeSheet = false,
+                apertureProgress = 1f,
             )
         }
     }
@@ -271,6 +281,7 @@ private fun CompletionPreviewDark() {
             CompletionScreen(
                 state = sampleCompletionState(firstEver = false),
                 showBadgeSheet = false,
+                apertureProgress = 1f,
             )
         }
     }

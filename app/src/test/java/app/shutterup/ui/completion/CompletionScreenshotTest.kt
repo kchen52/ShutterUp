@@ -1,5 +1,6 @@
 package app.shutterup.ui.completion
 
+import androidx.compose.material3.Surface
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
 import app.shutterup.ui.theme.ShutterUpTheme
@@ -23,10 +24,13 @@ class CompletionScreenshotTest {
     fun completionLight() {
         composeRule.setContent {
             ShutterUpTheme(darkTheme = false) {
-                CompletionScreen(
-                    state = sampleCompletionState(firstEver = true),
-                    showBadgeSheet = false,
-                )
+                Surface {
+                    CompletionScreen(
+                        state = sampleCompletionState(firstEver = true),
+                        showBadgeSheet = false,
+                        apertureProgress = 1f,
+                    )
+                }
             }
         }
         composeRule.onRoot().captureRoboImage()
@@ -36,10 +40,13 @@ class CompletionScreenshotTest {
     fun completionDark() {
         composeRule.setContent {
             ShutterUpTheme(darkTheme = true) {
-                CompletionScreen(
-                    state = sampleCompletionState(firstEver = false),
-                    showBadgeSheet = false,
-                )
+                Surface {
+                    CompletionScreen(
+                        state = sampleCompletionState(firstEver = false),
+                        showBadgeSheet = false,
+                        apertureProgress = 1f,
+                    )
+                }
             }
         }
         composeRule.onRoot().captureRoboImage()

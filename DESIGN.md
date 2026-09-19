@@ -81,7 +81,7 @@ Theme labels and dates are `labelMedium`, **uppercase**, letter-spacing +1.0 —
 
 ### 2.5 Iconography
 
-Material Symbols **Rounded**, weight 400, optical size 24. Filled variant for the selected navigation item only. Custom icons (aperture for Shoot, snowflake for freeze) are drawn as vectors matching that style — 2 dp stroke, rounded caps.
+Material Symbols **Rounded**, weight 400, optical size 24. Filled variant for the selected navigation item only. Custom icons (aperture for Shoot, snowflake for freeze, rounded check for completed) are drawn as vectors matching that style — 2 dp stroke, rounded caps. The completed check is the final frame of **Aperture settle** (§6); Calendar and the widget reuse that static form.
 
 ### 2.6 Elevation and surfaces
 
@@ -210,6 +210,7 @@ The reward moment. Restraint, but a moment.
 │         [ photo,             │  native aspect, max 60% height,
 │           16dp radius ]      │  centred, hairline outline
 │                              │
+│            ✓                 │  28 dp aperture-settle check
 │                              │
 │ REFLECTIONS · DAY 15         │  kicker
 │ Find the sky in a puddle     │  headlineMedium
@@ -224,7 +225,7 @@ The reward moment. Restraint, but a moment.
 └──────────────────────────────┘
 ```
 
-- On entry: photo scales from 0.92 → 1.0 with a spring (stiffness medium-low, damping 0.8) while fading in over 350 ms; text fades in 150 ms later; streak number rolls up (§6).
+- On entry: photo scales from 0.92 → 1.0 with a spring (stiffness medium-low, damping 0.8) while fading in over 350 ms; the aperture-settle check plays once beneath the photo; streak number rolls up (§6). Screenshots and previews show the check's final frame.
 - If a badge unlocked: after the streak roll finishes (~800 ms), a `ModalBottomSheet` rises with the emblem (§5), name in `headlineSmall`, one-line description, and a `Nice` dismiss button. One badge per sheet; multiple unlocks queue.
 - Expanded: photo left (55 %), text/note/actions right, vertically centred.
 
@@ -254,7 +255,7 @@ Day cell (44 dp square, 12 dp radius), states:
 | Status | Rendering |
 |---|---|
 | Completed | 1:1 thumbnail, 12 dp radius, hairline outline |
-| Completed, no photo | `secondaryContainer` fill, check glyph in `onSecondaryContainer` |
+| Completed, no photo | `secondaryContainer` fill; day number `labelSmall` at top-start; 18 dp aperture-settle check (final frame) sitting lower-centre in `onSecondaryContainer` |
 | Skipped | `outlineVariant` 1.5 dp ring, small horizontal dash inside |
 | Missed | 6 dp dot in `outlineVariant`, centred, day number in `outline` |
 | Frozen (skipped/missed + freeze) | as above plus a 12 dp snowflake badge top-right in `tertiary` |
@@ -348,12 +349,13 @@ Unlock animation: emblem scales 0.6 → 1.0 with a spring (overshoot allowed), f
 
 ## 6. Motion
 
-M3 motion tokens (`emphasized` easing family). Five named transitions; anything else is default.
+M3 motion tokens (`emphasized` easing family). Six named transitions; anything else is default.
 
 | Name | Where | Spec |
 |---|---|---|
 | **Card reveal** | Today card on app launch / day change | Fade 0→1 + translateY 24 dp→0, 400 ms, emphasized decelerate. Status row follows 80 ms later. |
 | **Photo arrive** | Completion screen entry | Scale 0.92→1.0 spring (stiffness 200, damping ratio 0.8) + fade 350 ms. |
+| **Aperture settle** | Completion, below the photo | Six-blade 2 dp rounded-stroke iris closes (0–58 %), then resolves into a rounded check (46–100 %). 700 ms, emphasized. Reduced motion and inspection/preview: final check, no motion. Does not replay on recomposition or fold. Calendar completed-without-photo cells and the widget completed chip reuse the static final frame. |
 | **Shared photo** | Calendar cell → Day, Feed card → Day, Recent strip → Day | `SharedTransitionLayout` bounds transform, 400 ms emphasized. The kicker and title fade in after the bounds settle. |
 | **Number roll** | Streak count on Completion and Today | `AnimatedContent` vertical slide + fade, 300 ms, one digit group. |
 | **Badge unlock** | Completion bottom sheet | Sheet: standard. Emblem: spring scale 0.6→1.0, then shimmer 600 ms. |
@@ -408,7 +410,7 @@ Glance `AppWidget`, two sizes. Uses dynamic colour via `GlanceTheme`; title uses
 
 - **4×2** — theme-tinted background (same 12 % rule over `widgetBackground`), kicker `TUESDAY · REFLECTIONS`, title (serif, 20 sp, 2 lines), one-liner (14 sp, 2 lines), `Shoot` pill button bottom-right. Tap anywhere → Prompt Detail; button → `autoLaunchCamera`.
 - **2×2** — kicker + title only (serif, 18 sp, 3 lines). Tap → Prompt Detail.
-- Completed state: replace text with the thumbnail (rounded 16 dp) and a small check chip.
+- Completed state: replace text with the thumbnail (rounded 16 dp) and a small chip holding the static aperture-settle check (18 dp, same vector as Calendar).
 - Paused: "Paused" in the title slot.
 
 ---
@@ -433,7 +435,7 @@ In-app wordmark: "ShutterUp" in Fraunces 500, used only on Onboarding page 1 and
 - Inner screen is nearly square (~2184×1968). List-detail split **40/60** for Today, **45/55** for Calendar, so photos in the right pane stay large.
 - Never place the primary action across the hinge line. On the inner display the hinge falls near the horizontal centre; the Shoot button lives in the right pane's bottom-right, not centred on the screen.
 - Cover screen is tall and narrow (~21:9): the pending Today card wraps its content. The completed photo card still uses the 55 % height rule so the image has room; on the inner screen that photo card is capped at 420 dp tall.
-- Fold/unfold mid-Completion: the photo keeps its position on screen (state is preserved; no re-animation).
+- Fold/unfold mid-Completion: the photo keeps its position on screen (state is preserved; no re-animation). The aperture-settle check stays on its final frame.
 - Tabletop posture (v1.1): photo on the top half, text and actions on the bottom half, 16 dp gap either side of the hinge.
 
 ---
@@ -442,7 +444,8 @@ In-app wordmark: "ShutterUp" in Fraunces 500, used only on Onboarding page 1 and
 
 - All text meets WCAG AA against its surface, including over theme tints (guaranteed by the low-alpha rule) and over photo scrims (scrim ≥ 60 % `scrim` colour).
 - Touch targets ≥ 48 dp; calendar cells are 44 dp visual with 48 dp touch.
-- Every calendar cell has a content description: "19 September, completed" / "17 September, missed, streak frozen".
+- Every calendar cell has a content description: "19 September, completed" / "17 September, missed, streak frozen". The check inside a completed cell is decorative.
+- Completion announces "Completed" once on the aperture-settle mark; the photo stays "Today's photo".
 - Emblems have content descriptions with badge name and locked/unlocked state.
 - Full support for font scaling to 200 %; layouts reflow, nothing truncates except 3-line titles.
 - Motion honours the system animation scale (§6).

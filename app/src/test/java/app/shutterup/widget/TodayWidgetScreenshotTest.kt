@@ -38,7 +38,25 @@ class TodayWidgetScreenshotTest {
     @Test
     fun smallDark() = capture(TodayWidgetPreviewSize.Small, dark = true)
 
-    private fun capture(size: TodayWidgetPreviewSize, dark: Boolean) {
+    @Test
+    fun mediumCompletedLight() = capture(
+        TodayWidgetPreviewSize.Medium,
+        dark = false,
+        state = sampleCompletedTodayWidgetState(),
+    )
+
+    @Test
+    fun mediumCompletedDark() = capture(
+        TodayWidgetPreviewSize.Medium,
+        dark = true,
+        state = sampleCompletedTodayWidgetState(),
+    )
+
+    private fun capture(
+        size: TodayWidgetPreviewSize,
+        dark: Boolean,
+        state: TodayWidgetState = sampleTodayWidgetState(),
+    ) {
         composeRule.setContent {
             ShutterUpTheme(darkTheme = dark) {
                 Surface(modifier = Modifier.fillMaxSize()) {
@@ -49,7 +67,7 @@ class TodayWidgetScreenshotTest {
                         contentAlignment = Alignment.Center,
                     ) {
                         TodayWidgetPreviewContent(
-                            state = sampleTodayWidgetState(),
+                            state = state,
                             size = size,
                             darkTheme = dark,
                         )

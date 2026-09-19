@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.Preferences
+import androidx.glance.ColorFilter
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
@@ -35,11 +36,12 @@ import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
+import androidx.glance.layout.size
 import androidx.glance.text.FontFamily
 import androidx.glance.text.Text
-import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import app.shutterup.MainActivity
+import app.shutterup.R
 import app.shutterup.navigation.DeepLinks
 import java.io.File
 
@@ -153,6 +155,7 @@ private fun CompletedGlance(state: TodayWidgetState, medium: Boolean) {
                     fontSize = 10.sp,
                 ),
                 maxLines = if (medium) 1 else 2,
+                modifier = GlanceModifier.defaultWeight(),
             )
             Box(
                 modifier = GlanceModifier
@@ -160,13 +163,11 @@ private fun CompletedGlance(state: TodayWidgetState, medium: Boolean) {
                     .background(GlanceTheme.colors.primaryContainer)
                     .padding(horizontal = 8.dp, vertical = 4.dp),
             ) {
-                Text(
-                    text = "✓",
-                    style = TextStyle(
-                        color = GlanceTheme.colors.onPrimaryContainer,
-                        fontSize = 12.sp,
-                        textAlign = TextAlign.Center,
-                    ),
+                Image(
+                    provider = ImageProvider(R.drawable.ic_aperture_check),
+                    contentDescription = "Completed",
+                    colorFilter = ColorFilter.tint(GlanceTheme.colors.onPrimaryContainer),
+                    modifier = GlanceModifier.size(18.dp),
                 )
             }
         }
