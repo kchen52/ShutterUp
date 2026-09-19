@@ -1,6 +1,7 @@
 package app.shutterup.ui.navigation
 
 import android.net.Uri
+import app.shutterup.navigation.DeepLinks
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -227,12 +228,12 @@ private fun NavHostController.navigateTab(route: String) {
     }
 }
 
-/** Deep link `shutterup://day/<ISO-date>` into Prompt Detail (SPEC §8.1, §15.2). */
+/** Deep links `shutterup://day|detail/<ISO-date>` into Prompt Detail (SPEC §8.1). */
 fun NavHostController.navigateDayUri(uri: Uri?) {
     if (uri == null) return
-    if (uri.scheme != "shutterup" || uri.host != "day") return
+    if (!DeepLinks.isPromptLink(uri.scheme, uri.host)) return
     val date = uri.pathSegments.firstOrNull() ?: return
-    val auto = uri.getBooleanQueryParameter("autoLaunchCamera", false)
-    val reroll = uri.getBooleanQueryParameter("reroll", false)
+    val auto = uri.getBooleanQueryParameter(DeepLinks.QUERY_AUTO_LAUNCH, false)
+    val reroll = uri.getBooleanQueryParameter(DeepLinks.QUERY_REROLL, false)
     navigate(ShutterUpDestinations.detail(date, auto, reroll))
 }

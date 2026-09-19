@@ -25,6 +25,7 @@ import app.shutterup.domain.repository.DayPromptRepository
 import app.shutterup.domain.repository.EntryRepository
 import app.shutterup.domain.repository.GamificationRepository
 import app.shutterup.domain.repository.PreferencesRepository
+import app.shutterup.widget.TodayWidgetUpdater
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.io.File
 import java.time.Clock
@@ -106,6 +107,7 @@ class PromptDetailViewModel @Inject constructor(
     private val thumbs: ThumbnailWriter,
     private val trimmer: VideoClipExporter,
     private val notifications: NotificationHelper,
+    private val widgetUpdater: TodayWidgetUpdater,
     private val clock: Clock,
     private val zone: ZoneId,
 ) : ViewModel() {
@@ -191,6 +193,7 @@ class PromptDetailViewModel @Inject constructor(
     fun confirmSkip() {
         viewModelScope.launch {
             skipDay()
+            widgetUpdater.refresh()
             _state.update { it.copy(showSkipDialog = false) }
         }
     }
@@ -423,6 +426,7 @@ class PromptDetailViewModel @Inject constructor(
             is CompleteCaptureResult.Saved -> {
                 files.deleteQuietly(source)
                 notifications.cancel(date)
+                widgetUpdater.refresh()
                 _state.update {
                     it.copy(
                         pending = null,

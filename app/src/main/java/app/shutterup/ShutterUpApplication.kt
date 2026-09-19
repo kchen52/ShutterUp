@@ -3,6 +3,7 @@ package app.shutterup
 import android.app.Application
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
+import app.shutterup.widget.TodayWidgetUpdater
 import app.shutterup.work.NotificationScheduler
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -23,9 +24,9 @@ class ShutterUpApplication : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
-        EntryPointAccessors.fromApplication(this, SchedulerEntryPoint::class.java)
-            .notificationScheduler()
-            .onSettingsChanged()
+        val entry = EntryPointAccessors.fromApplication(this, SchedulerEntryPoint::class.java)
+        entry.notificationScheduler().onSettingsChanged()
+        entry.todayWidgetUpdater().refreshAsync()
     }
 }
 
@@ -33,4 +34,5 @@ class ShutterUpApplication : Application(), Configuration.Provider {
 @InstallIn(SingletonComponent::class)
 interface SchedulerEntryPoint {
     fun notificationScheduler(): NotificationScheduler
+    fun todayWidgetUpdater(): TodayWidgetUpdater
 }

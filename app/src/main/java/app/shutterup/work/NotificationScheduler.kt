@@ -1,6 +1,11 @@
 package app.shutterup.work
 
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
@@ -10,6 +15,7 @@ import androidx.work.WorkManager
 import app.shutterup.domain.repository.DayPromptRepository
 import app.shutterup.domain.repository.PreferencesRepository
 import app.shutterup.domain.scheduling.DailyNotificationScheduler
+import app.shutterup.domain.scheduling.PreciseTimingPolicy
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.Clock
 import java.time.Duration
@@ -39,7 +45,27 @@ class NotificationScheduler @Inject constructor(
             paused = prefs.observePaused().first(),
             zone = zone,
         )
+        val precise = prefs.observePreciseTiming().first()
+        setBootReceiverEnabled(precise)
+        val alarmManager = context.getSystemService(AlarmManager::class.java)
+        val canExact = alarmManager?.canScheduleExactAlarms() == true
+        val useExact = PreciseTimingPolicy.useExactAlarm(precise, canExact)
         val workManager = WorkManager.getInstance(context)
+        if (useExact) {
+            workManager.cancelUniqueWork(DAILY_WORK_NAME)
+            if (trigger == null) {
+                cancelExactAlarm(alarmManager)
+                return@runBlocking
+            }
+            val pending = exactPendingIntent(create = true) ?: return@runBlocking
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                trigger.toEpochMilli(),
+                pending,
+            )
+            return@runBlocking
+        }
+        cancelExactAlarm(alarmManager)
         if (trigger == null) {
             workManager.cancelUniqueWork(DAILY_WORK_NAME)
             return@runBlocking
@@ -77,9 +103,36 @@ class NotificationScheduler @Inject constructor(
         scheduleTopUp()
     }
 
+    private fun exactPendingIntent(create: Boolean): PendingIntent? {
+        val intent = Intent(context, ExactAlarmReceiver::class.java).setAction(ExactAlarmReceiver.ACTION)
+        val flags = PendingIntent.FLAG_IMMUTABLE or
+            if (create) PendingIntent.FLAG_UPDATE_CURRENT else PendingIntent.FLAG_NO_CREATE
+        return PendingIntent.getBroadcast(context, EXACT_REQUEST_CODE, intent, flags)
+    }
+
+    private fun cancelExactAlarm(alarmManager: AlarmManager?) {
+        val existing = exactPendingIntent(create = false) ?: return
+        alarmManager?.cancel(existing)
+        existing.cancel()
+    }
+
+    private fun setBootReceiverEnabled(enabled: Boolean) {
+        val component = ComponentName(context, BootCompletedReceiver::class.java)
+        context.packageManager.setComponentEnabledSetting(
+            component,
+            if (enabled) {
+                PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+            } else {
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+            },
+            PackageManager.DONT_KILL_APP,
+        )
+    }
+
     companion object {
         const val DAILY_WORK_NAME = "daily-prompt"
         const val DAILY_WORK_TAG = "daily-prompt"
         const val TOP_UP_WORK_NAME = "buffer-topup"
+        const val EXACT_REQUEST_CODE = 7109
     }
 }

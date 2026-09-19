@@ -12,6 +12,7 @@ import app.shutterup.domain.ai.Availability
 import app.shutterup.domain.ai.PromptGenerator
 import app.shutterup.domain.repository.GamificationRepository
 import app.shutterup.domain.repository.PreferencesRepository
+import app.shutterup.widget.TodayWidgetUpdater
 import app.shutterup.work.NotificationScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -70,6 +71,7 @@ private data class AiSlice(
 class SettingsViewModel @Inject constructor(
     private val preferences: PreferencesRepository,
     private val scheduler: NotificationScheduler,
+    private val widgetUpdater: TodayWidgetUpdater,
     @Named("primaryGenerator") private val generator: PromptGenerator,
     private val nano: NanoPromptGenerator,
     gamification: GamificationRepository,
@@ -151,6 +153,7 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             preferences.setPaused(paused)
             scheduler.onSettingsChanged()
+            widgetUpdater.refresh()
         }
     }
 

@@ -37,13 +37,22 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <!-- Notification tap / widget tap deep link: shutterup://day/<date> (SPEC §8.1). -->
+            <!-- Notification tap: shutterup://day/<date> (SPEC §8.1). -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data
                     android:host="day"
+                    android:scheme="shutterup" />
+            </intent-filter>
+            <!-- Widget body / Shoot: shutterup://detail/<date> -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:host="detail"
                     android:scheme="shutterup" />
             </intent-filter>
         </activity>
@@ -80,6 +89,46 @@
             <intent-filter>
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".work.ExactAlarmReceiver"
+            android:exported="false" />
+        <receiver
+            android:name=".work.ExactAlarmPermissionReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".work.BootCompletedReceiver"
+            android:enabled="false"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".widget.TodaySmallWidgetReceiver"
+            android:exported="true"
+            android:label="@string/widget_label_small">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/today_widget_small_info" />
+        </receiver>
+        <receiver
+            android:name=".widget.TodayMediumWidgetReceiver"
+            android:exported="true"
+            android:label="@string/widget_label_medium">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/today_widget_medium_info" />
         </receiver>
     </application>
 

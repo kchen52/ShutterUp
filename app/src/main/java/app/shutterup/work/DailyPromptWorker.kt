@@ -10,6 +10,7 @@ import app.shutterup.domain.model.DayStatus
 import app.shutterup.domain.repository.DayPromptRepository
 import app.shutterup.domain.repository.PreferencesRepository
 import app.shutterup.domain.rollover.DayRolloverUseCase
+import app.shutterup.widget.TodayWidgetUpdater
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import java.time.Clock
@@ -26,6 +27,7 @@ class DailyPromptWorker @AssistedInject constructor(
     private val days: DayPromptRepository,
     private val prefs: PreferencesRepository,
     private val notifications: NotificationHelper,
+    private val widgetUpdater: TodayWidgetUpdater,
     private val clock: Clock,
 ) : CoroutineWorker(context, params) {
     override suspend fun doWork(): Result {
@@ -35,6 +37,7 @@ class DailyPromptWorker @AssistedInject constructor(
             rollover.rollover(today, paused)
             if (paused) {
                 scheduler.scheduleNext()
+                runCatching { widgetUpdater.refresh() }
                 return Result.success()
             }
             prompts.ensureLibraryPrompt(today, prefs.observeThemeFocus().first())
@@ -50,6 +53,7 @@ class DailyPromptWorker @AssistedInject constructor(
                 }
             }
             scheduler.scheduleNext()
+            runCatching { widgetUpdater.refresh() }
             Result.success()
         } catch (_: Exception) {
             Result.retry()
