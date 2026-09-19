@@ -15,6 +15,8 @@ interface PromptGenerator {
     suspend fun generate(request: GenerationRequest): Result<GeneratedPrompt>
     suspend fun generateSeries(request: GenerationRequest): Result<GeneratedSeries> =
         Result.failure(UnsupportedOperationException("series generation is not supported"))
+    suspend fun generateMonthlyIssue(request: MonthlyIssueRequest): Result<GeneratedMonthlyIssue> =
+        Result.failure(UnsupportedOperationException("monthly issue generation is not supported"))
 }
 
 /** Mirrors the ML Kit `FeatureStatus` values relevant to generation. */
@@ -80,4 +82,21 @@ data class GeneratedSeries(
     val theme: String,
     val prompts: List<GeneratedPrompt>,
     val libraryIds: List<String?> = emptyList(),
+)
+
+/** Inputs Nano may see for a month (SPEC §7.9). Text only — never photographs. */
+data class MonthlyIssueRequest(
+    val monthLabel: String,
+    val completedCount: Int,
+    val titles: List<String>,
+    val themeCounts: List<Pair<String, Int>>,
+    val notes: List<String>,
+    val longestRun: Int,
+)
+
+/** Headline + body written on-device for a finished month. */
+data class GeneratedMonthlyIssue(
+    val headline: String,
+    val body: String,
+    val modelName: String? = null,
 )

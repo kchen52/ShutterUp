@@ -1,6 +1,7 @@
 package app.shutterup.data.ai.nano
 
 import app.shutterup.domain.ai.GenerationRequest
+import app.shutterup.domain.ai.MonthlyIssueRequest
 import app.shutterup.domain.ai.PromptSource
 import app.shutterup.domain.ai.Season
 import java.time.DayOfWeek
@@ -93,5 +94,42 @@ class NanoPromptTextTest {
         assertEquals(7, mapped.prompts.size)
         assertEquals("Hands day 1", mapped.prompts.first().title)
         assertEquals("nano-v2", mapped.prompts.first().modelName)
+    }
+
+    @Test
+    fun monthlySystemPrompt_isTextOnlyAndForbidsVisualClaims() {
+        val request = MonthlyIssueRequest(
+            monthLabel = "September 2026",
+            completedCount = 24,
+            titles = listOf("Puddle sky", "Ceiling lamp"),
+            themeCounts = listOf("Reflections" to 14, "Looking up" to 6),
+            notes = listOf("the glass in the stairwell again"),
+            longestRun = 11,
+        )
+        val text = NanoPromptText.monthlySystemPrompt(request)
+        assertTrue(text.contains("September 2026"))
+        assertTrue(text.contains("Puddle sky"))
+        assertTrue(text.contains("Reflections (14)"))
+        assertTrue(text.contains("the glass in the stairwell again"))
+        assertTrue(text.contains("cannot see the photographs"))
+        assertTrue(text.contains("never quote"))
+        assertTrue(text.contains("No exclamation"))
+    }
+
+    @Test
+    fun mapMonthly_copiesHeadlineAndBody() {
+        val mapped = NanoPromptText.mapMonthly(
+            NanoMonthlyOutput(
+                headline = "Light and glass.",
+                body = "You looked up more than usual. Twenty-four days, mostly reflections.",
+            ),
+            "nano-v2",
+        )
+        assertEquals("Light and glass.", mapped.headline)
+        assertEquals("nano-v2", mapped.modelName)
+        assertEquals(
+            "You looked up more than usual. Twenty-four days, mostly reflections.",
+            mapped.body,
+        )
     }
 }

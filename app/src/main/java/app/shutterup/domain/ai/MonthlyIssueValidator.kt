@@ -1,13 +1,14 @@
 package app.shutterup.domain.ai
 
 import app.shutterup.domain.monthly.MonthlyIssueCopy
+import javax.inject.Inject
 
 /**
  * Post-filter for a month's headline and body (SPEC §7.9). First failing
  * check wins. Rejects length, punctuation, emoji, hashtags, URLs, praise,
  * guilt, invented visual detail, and verbatim notes.
  */
-class MonthlyIssueValidator {
+class MonthlyIssueValidator @Inject constructor() {
     fun validate(
         copy: MonthlyIssueCopy,
         notes: List<String> = emptyList(),

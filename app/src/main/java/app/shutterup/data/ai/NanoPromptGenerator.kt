@@ -1,13 +1,16 @@
 package app.shutterup.data.ai
 
 import android.util.Log
+import app.shutterup.data.ai.nano.NanoMonthlyOutput
 import app.shutterup.data.ai.nano.NanoPromptOutput
 import app.shutterup.data.ai.nano.NanoPromptText
 import app.shutterup.data.ai.nano.NanoSeriesOutput
 import app.shutterup.domain.ai.Availability
+import app.shutterup.domain.ai.GeneratedMonthlyIssue
 import app.shutterup.domain.ai.GeneratedPrompt
 import app.shutterup.domain.ai.GeneratedSeries
 import app.shutterup.domain.ai.GenerationRequest
+import app.shutterup.domain.ai.MonthlyIssueRequest
 import app.shutterup.domain.ai.PromptGenerator
 import app.shutterup.domain.ai.PromptParser
 import app.shutterup.domain.ai.PromptSource
@@ -93,8 +96,30 @@ class NanoPromptGenerator @Inject constructor(
                 }
             }
         }
-    } catch (e: Exception) {
+        } catch (e: Exception) {
         Log.w(TAG, "generateSeries failed", e)
+        Result.failure(e)
+    }
+
+    override suspend fun generateMonthlyIssue(request: MonthlyIssueRequest): Result<GeneratedMonthlyIssue> = try {
+        withTimeout(GENERATION_TIMEOUT_MS) {
+            val modelName = baseModelName()
+            if (client.isStructuredOutputFeatureAvailable()) {
+                val base = GenerateContentRequest.Builder(TextPart(NanoPromptText.monthlySystemPrompt(request))).build()
+                val typed = generateTypedContentRequest(base, NanoMonthlyOutput::class)
+                val response = client.generateContent(typed).candidates.firstOrNull()?.response
+                    ?: error("Nano returned no structured monthly candidates")
+                Result.success(NanoPromptText.mapMonthly(response, modelName))
+            } else {
+                val text = client.generateContent(
+                    NanoPromptText.monthlySystemPrompt(request) + "\nReturn ONLY the JSON object.",
+                ).candidates.firstOrNull()?.text
+                    ?: error("Nano returned no monthly text")
+                PromptParser.parseMonthly(text).map { it.copy(modelName = modelName) }
+            }
+        }
+    } catch (e: Exception) {
+        Log.w(TAG, "generateMonthlyIssue failed", e)
         Result.failure(e)
     }
 
