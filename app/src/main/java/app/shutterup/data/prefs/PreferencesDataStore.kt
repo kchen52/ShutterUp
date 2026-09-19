@@ -10,6 +10,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import app.shutterup.domain.repository.PreferencesRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
+import java.time.LocalDate
 import java.time.LocalTime
 import javax.inject.Inject
 import javax.inject.Named
@@ -89,6 +90,21 @@ class PreferencesDataStore(
         dataStore.edit { it[KEY_DEBUG_FAKE_AI] = useFake }
     }
 
+    override fun observeLastNotifiedDate(): Flow<LocalDate?> =
+        dataStore.data.map { prefs ->
+            prefs[KEY_LAST_NOTIFIED_DATE]?.let(LocalDate::parse)
+        }
+
+    override suspend fun setLastNotifiedDate(date: LocalDate?) {
+        dataStore.edit { prefs ->
+            if (date == null) {
+                prefs.remove(KEY_LAST_NOTIFIED_DATE)
+            } else {
+                prefs[KEY_LAST_NOTIFIED_DATE] = date.toString()
+            }
+        }
+    }
+
     private companion object {
         const val PREFS_FILE = "shutterup_prefs.preferences_pb"
         const val DEFAULT_NOTIFY_HOUR = 9
@@ -100,5 +116,6 @@ class PreferencesDataStore(
         val KEY_PAUSED = booleanPreferencesKey("paused")
         val KEY_ONBOARDING_COMPLETE = booleanPreferencesKey("onboarding_complete")
         val KEY_DEBUG_FAKE_AI = booleanPreferencesKey("debug_fake_ai")
+        val KEY_LAST_NOTIFIED_DATE = stringPreferencesKey("last_notified_date")
     }
 }

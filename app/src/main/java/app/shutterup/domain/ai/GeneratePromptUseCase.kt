@@ -27,6 +27,33 @@ class GeneratePromptUseCase @Inject constructor(
         return generateFresh(date, themeFocus, rerollUsed = false)
     }
 
+    /**
+     * Library-only path for the notification worker (SPEC §7.6): never calls Nano.
+     * Returns the persisted prompt for [date], or picks from the bundled bank.
+     */
+    suspend fun ensureLibraryPrompt(date: LocalDate, themeFocus: String?): GeneratedPrompt {
+        prompts.getDay(date)?.let { return it.toGeneratedPrompt() }
+        val request = GenerationRequest(
+            date = date,
+            themeFocus = themeFocus,
+            recentTitles = prompts.recentTitles(30),
+            recentThemes = prompts.recentThemes(14),
+            dayOfWeek = date.dayOfWeek,
+            season = seasonForDate(date),
+            excludeConstraintKinds = emptySet(),
+        )
+        val recentTitles = prompts.recentTitles(90)
+        val recentThemeLedes = prompts.recentDays(90).map { ThemeLede(it.theme, it.oneLiner) }
+        var picked = library.pick(request)
+        var generated = picked.toGeneratedPrompt()
+        if (validator.validate(generated, recentTitles, recentThemeLedes) is ValidationResult.Invalid) {
+            picked = library.pick(request)
+            generated = picked.toGeneratedPrompt()
+        }
+        persistAndRecord(date, generated, picked.id, rerollUsed = false)
+        return generated
+    }
+
     suspend fun topUpBuffer(
         today: LocalDate,
         themeFocus: String?,
@@ -105,11 +132,20 @@ class GeneratePromptUseCase @Inject constructor(
         }
 
         val result = checkNotNull(chosen)
+        persistAndRecord(date, result, libraryId, rerollUsed)
+        return result
+    }
+
+    private suspend fun persistAndRecord(
+        date: LocalDate,
+        result: GeneratedPrompt,
+        libraryId: String?,
+        rerollUsed: Boolean,
+    ) {
         persist(date, result, libraryId, rerollUsed)
         if (result.source == PromptSource.LIBRARY && libraryId != null) {
             gamification.recordLibraryUsage(LibraryUsage(libraryId, date))
         }
-        return result
     }
 
     private suspend fun persist(

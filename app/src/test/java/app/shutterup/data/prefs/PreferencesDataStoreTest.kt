@@ -1,6 +1,7 @@
 package app.shutterup.data.prefs
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import java.time.LocalDate
 import java.time.LocalTime
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -61,6 +62,19 @@ class PreferencesDataStoreTest {
         assertTrue(repo.observeDebugUseFakeAi().first())
         repo.setDebugUseFakeAi(false)
         assertFalse(repo.observeDebugUseFakeAi().first())
+    }
+
+    @Test
+    fun lastNotifiedDateRoundTripIncludingNull() = runTest {
+        val repo = newRepo()
+        assertNull(repo.observeLastNotifiedDate().first())
+
+        val date = LocalDate.of(2024, 6, 15)
+        repo.setLastNotifiedDate(date)
+        assertEquals(date, repo.observeLastNotifiedDate().first())
+
+        repo.setLastNotifiedDate(null)
+        assertNull(repo.observeLastNotifiedDate().first())
     }
 
     private fun TestScope.newRepo(): PreferencesDataStore {
