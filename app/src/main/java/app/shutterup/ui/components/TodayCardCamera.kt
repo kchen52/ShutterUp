@@ -18,15 +18,15 @@ import app.shutterup.ui.theme.ShutterUpTheme
 import app.shutterup.ui.theme.complementaryAccent
 
 /**
- * Oversized bottom-start sticker: most of the body hangs off the left
- * edge so only the right side — plus a sliver of the lens — stays on the
- * card. Callers overlay this with `matchParentSize` so the graphic does
- * not stretch the wrap-content card.
+ * Oversized bottom-start sticker, leaned right: most of the body hangs
+ * off the left edge so only the right side — plus a sliver of the lens —
+ * stays on the card. Callers overlay this with `matchParentSize` so the
+ * graphic does not stretch the wrap-content card.
  */
-val TodayCardCameraSpillX = 260.dp
-val TodayCardCameraSpillY = 190.dp
-val TodayCardCameraSize = 520.dp
-const val TodayCardCameraTilt = 24f
+val TodayCardCameraSpillX = 230.dp
+val TodayCardCameraSpillY = 24.dp
+val TodayCardCameraSize = 480.dp
+const val TodayCardCameraTilt = 22f
 
 /**
  * Material Symbols photo_camera outline (weight 200) for the Today card corner.
