@@ -73,6 +73,10 @@ android {
         abortOnError = true
         checkReleaseBuilds = true
     }
+
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+    }
 }
 
 // Kotlin compilation is built into AGP 9; configure the toolchain target on the
@@ -136,6 +140,9 @@ dependencies {
 
     // Unit tests
     testImplementation(libs.junit4)
+    testImplementation(libs.kotlinx.coroutines.test)
+    // Robolectric runs SDK-35 shadows (JDK 17 compatible); DAO behavior is SDK-independent.
+    testImplementation(libs.robolectric)
 }
 
 // The permission guard test reads the merged manifest (SPEC §15.1 ManifestGuardTest).
