@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
@@ -66,11 +65,9 @@ import app.shutterup.ui.components.NotificationPermissionCard
 import app.shutterup.ui.components.ShootButton
 import app.shutterup.ui.components.StreakStatus
 import app.shutterup.ui.components.TodayCardCamera
-import app.shutterup.ui.components.TodayCardCameraInsetBottom
-import app.shutterup.ui.components.TodayCardCameraInsetEnd
+import app.shutterup.ui.components.TodayCardCameraPaddingBottom
+import app.shutterup.ui.components.TodayCardCameraPaddingEnd
 import app.shutterup.ui.components.TodayCardCameraSize
-import app.shutterup.ui.components.TodayCardCameraSpillX
-import app.shutterup.ui.components.TodayCardCameraSpillY
 import app.shutterup.ui.components.TodayCardCameraTilt
 import app.shutterup.ui.detail.samplePrompt
 import app.shutterup.ui.settings.SettingsCopy
@@ -273,15 +270,18 @@ private fun TodayCard(
         )
         return
     }
-    Box(modifier = Modifier.fillMaxWidth()) {
-        Card(
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = minHeight),
+        shape = RoundedCornerShape(28.dp),
+        colors = CardDefaults.cardColors(containerColor = LocalThemeTint.current),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+    ) {
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(end = TodayCardCameraInsetEnd, bottom = TodayCardCameraInsetBottom)
                 .heightIn(min = minHeight),
-            shape = RoundedCornerShape(28.dp),
-            colors = CardDefaults.cardColors(containerColor = LocalThemeTint.current),
-            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         ) {
             Column(
                 modifier = Modifier
@@ -330,16 +330,14 @@ private fun TodayCard(
                     }
                 }
             }
+            TodayCardCamera(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = TodayCardCameraPaddingEnd, bottom = TodayCardCameraPaddingBottom)
+                    .rotate(TodayCardCameraTilt)
+                    .size(TodayCardCameraSize),
+            )
         }
-        // Sibling of the card so the outline can sit on the tinted surface
-        // and still spill past the 28 dp corner (Card would clip its children).
-        TodayCardCamera(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .offset(x = TodayCardCameraSpillX, y = TodayCardCameraSpillY)
-                .rotate(TodayCardCameraTilt)
-                .size(TodayCardCameraSize),
-        )
     }
 }
 

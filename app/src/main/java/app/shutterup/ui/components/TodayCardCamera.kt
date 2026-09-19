@@ -16,19 +16,17 @@ import app.shutterup.ui.icons.CameraOutlineIcon
 import app.shutterup.ui.theme.ShutterUpTheme
 import app.shutterup.ui.theme.complementaryAccent
 
-/** Inset that lets the outline sit on the corner and still spill off it. */
-val TodayCardCameraInsetEnd = 22.dp
-val TodayCardCameraInsetBottom = 18.dp
-val TodayCardCameraSpillX = 6.dp
-val TodayCardCameraSpillY = 8.dp
-val TodayCardCameraSize = 112.dp
-const val TodayCardCameraTilt = -16f
+/** Keeps the tilted outline inside the card's 28 dp corner. */
+val TodayCardCameraPaddingEnd = 8.dp
+val TodayCardCameraPaddingBottom = 12.dp
+val TodayCardCameraSize = 108.dp
+const val TodayCardCameraTilt = -10f
 
 /**
  * Playful camera outline for the Today card corner.
  *
- * Decorative only — complementary to the system primary, tilted a few degrees
- * so it feels like a sticker that didn't quite land square.
+ * Decorative only — complementary to the system primary, drawn as a child of
+ * the card so nothing renders past the rounded edge.
  */
 @Composable
 fun TodayCardCamera(modifier: Modifier = Modifier) {

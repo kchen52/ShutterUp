@@ -18,10 +18,10 @@ import androidx.compose.ui.unit.dp
 import app.shutterup.ui.theme.ShutterUpTheme
 
 /**
- * Decorative compact-camera outline for the Today card.
+ * Front-on compact camera: wide body, viewfinder bump, big protruding lens.
  *
- * Drawn at a 96 dp viewport with a 2.2 dp stroke so it stays editorial
- * (DESIGN.md §2.5) when shown large in the card corner.
+ * Drawn at a 96 dp viewport with a 2.4 dp stroke so the silhouette stays
+ * readable when shown large in the Today card corner (DESIGN.md §2.5).
  */
 val CameraOutlineIcon: ImageVector = ImageVector.Builder(
     name = "CameraOutlineIcon",
@@ -30,66 +30,62 @@ val CameraOutlineIcon: ImageVector = ImageVector.Builder(
     viewportWidth = 96f,
     viewportHeight = 96f,
 ).apply {
-    // Soft-box body, pulled to the viewport so the corner can hang off the card.
+    // One silhouette: wide body + viewfinder so it reads as a single object.
     strokePath {
-        moveTo(18f, 32f)
-        lineTo(78f, 32f)
-        arcTo(10f, 10f, 0f, false, true, 88f, 42f)
-        lineTo(88f, 78f)
-        arcTo(10f, 10f, 0f, false, true, 78f, 88f)
-        lineTo(18f, 88f)
-        arcTo(10f, 10f, 0f, false, true, 8f, 78f)
-        lineTo(8f, 42f)
-        arcTo(10f, 10f, 0f, false, true, 18f, 32f)
+        moveTo(16f, 78f)
+        lineTo(80f, 78f)
+        arcTo(10f, 10f, 0f, false, false, 90f, 68f)
+        lineTo(90f, 46f)
+        arcTo(10f, 10f, 0f, false, false, 80f, 36f)
+        lineTo(78f, 36f)
+        lineTo(78f, 22f)
+        arcTo(8f, 8f, 0f, false, false, 70f, 14f)
+        lineTo(58f, 14f)
+        arcTo(8f, 8f, 0f, false, false, 50f, 22f)
+        lineTo(50f, 36f)
+        lineTo(16f, 36f)
+        arcTo(10f, 10f, 0f, false, false, 6f, 46f)
+        lineTo(6f, 68f)
+        arcTo(10f, 10f, 0f, false, false, 16f, 78f)
         close()
     }
-    // Viewfinder hump — the bit that peeks over the card edge.
+    // Lens barrel sitting proud of the body — the "this is a camera" cue.
     strokePath {
-        moveTo(58f, 12f)
-        lineTo(74f, 12f)
-        arcTo(6f, 6f, 0f, false, true, 80f, 18f)
-        lineTo(80f, 32f)
-        lineTo(52f, 32f)
-        lineTo(52f, 18f)
-        arcTo(6f, 6f, 0f, false, true, 58f, 12f)
-        close()
-    }
-    // Lens — a curious "eye".
-    strokePath {
-        moveTo(60f, 60f)
-        arcTo(18f, 18f, 0f, true, true, 24f, 60f)
-        arcTo(18f, 18f, 0f, true, true, 60f, 60f)
+        moveTo(64f, 60f)
+        arcTo(22f, 22f, 0f, true, true, 20f, 60f)
+        arcTo(22f, 22f, 0f, true, true, 64f, 60f)
         close()
     }
     strokePath {
-        moveTo(51f, 60f)
-        arcTo(9f, 9f, 0f, true, true, 33f, 60f)
-        arcTo(9f, 9f, 0f, true, true, 51f, 60f)
+        moveTo(55f, 60f)
+        arcTo(13f, 13f, 0f, true, true, 29f, 60f)
+        arcTo(13f, 13f, 0f, true, true, 55f, 60f)
         close()
     }
-    // Catchlight, like a wink of sky in the glass.
     strokePath {
-        moveTo(34f, 52f)
-        arcTo(6.5f, 6.5f, 0f, false, true, 42f, 49f)
-    }
-    // Shutter button.
-    strokePath {
-        moveTo(81f, 42f)
-        arcTo(4f, 4f, 0f, true, true, 73f, 42f)
-        arcTo(4f, 4f, 0f, true, true, 81f, 42f)
+        moveTo(48f, 60f)
+        arcTo(6f, 6f, 0f, true, true, 36f, 60f)
+        arcTo(6f, 6f, 0f, true, true, 48f, 60f)
         close()
     }
-    // Flash window.
+    // Flash window on the face, left of the lens.
     strokePath {
-        moveTo(16f, 42f)
-        lineTo(28f, 42f)
-        arcTo(3f, 3f, 0f, false, true, 31f, 45f)
-        lineTo(31f, 51f)
-        arcTo(3f, 3f, 0f, false, true, 28f, 54f)
+        moveTo(16f, 44f)
+        lineTo(26f, 44f)
+        arcTo(3f, 3f, 0f, false, true, 29f, 47f)
+        lineTo(29f, 51f)
+        arcTo(3f, 3f, 0f, false, true, 26f, 54f)
         lineTo(16f, 54f)
         arcTo(3f, 3f, 0f, false, true, 13f, 51f)
-        lineTo(13f, 45f)
-        arcTo(3f, 3f, 0f, false, true, 16f, 42f)
+        lineTo(13f, 47f)
+        arcTo(3f, 3f, 0f, false, true, 16f, 44f)
+        close()
+    }
+    // Shutter release on the viewfinder deck.
+    strokePath {
+        moveTo(74f, 28f)
+        arcTo(4.5f, 4.5f, 0f, true, true, 65f, 28f)
+        arcTo(4.5f, 4.5f, 0f, true, true, 74f, 28f)
         close()
     }
 }.build()
@@ -100,7 +96,7 @@ private fun ImageVector.Builder.strokePath(
     path(
         fill = null,
         stroke = SolidColor(Color.Black),
-        strokeLineWidth = 2.2f,
+        strokeLineWidth = 2.4f,
         strokeLineCap = StrokeCap.Round,
         strokeLineJoin = StrokeJoin.Round,
         pathBuilder = builder,
