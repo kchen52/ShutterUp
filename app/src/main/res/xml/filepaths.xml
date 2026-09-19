@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Pending capture file verified after TakePicture returns (SPEC §9). -->
+    <cache-path
+        name="pending"
+        path="pending/" />
+</paths>

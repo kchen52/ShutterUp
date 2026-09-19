@@ -1,0 +1,91 @@
+# ShutterUp version catalog.
+#
+# Pins verified against current docs on 2026-09-19 (SPEC §18.3):
+# - ML Kit genai-prompt 1.0.0-beta4 is the latest per the ML Kit release notes
+#   (get-started page still shows beta2; beta3 had an AICore feature regression,
+#   so beta4 is the deliberate choice).
+# - material3-adaptive 1.3.0, WorkManager 2.11.2, androidx.hilt 1.4.0 are the
+#   current stable releases per the AndroidX stable channel.
+# - Kotlin 2.4.10 + AGP 9.3.0 + Gradle 9.5.0 + KSP 2.3.10 + Hilt 2.60.1 +
+#   Compose BOM 2026.06.01 + DataStore 1.2.1 mirror a proven 2026 setup.
+# - Room stays on the 2.x line (2.8.5); Room 3.x is not required for v1.
+
+[versions]
+agp = "9.3.0"
+kotlin = "2.4.10"
+ksp = "2.3.10"
+hilt = "2.60.1"
+androidx-hilt = "1.3.0"
+compose-bom = "2026.06.01"
+room = "2.8.5"
+datastore = "1.2.1"
+workmanager = "2.11.2"
+lifecycle = "2.10.0"
+activity = "1.13.0"
+navigation = "2.9.8"
+adaptive = "1.2.0"
+navigation-suite = "1.4.0"
+material3 = "1.4.0"
+coil = "3.5.0"
+glance = "1.2.0"
+mlkit-prompt = "1.0.0-beta4"
+exifinterface = "1.4.2"
+coroutines = "1.10.2"
+junit4 = "4.13.2"
+
+[libraries]
+# Compose (versions via BOM)
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
+androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
+androidx-compose-material-icons-core = { group = "androidx.compose.material", name = "material-icons-core" }
+androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
+androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity" }
+androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle" }
+androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycle" }
+androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
+
+# Adaptive layouts (separate release train from the Compose BOM)
+androidx-adaptive = { group = "androidx.compose.material3.adaptive", name = "adaptive", version.ref = "adaptive" }
+androidx-adaptive-layout = { group = "androidx.compose.material3.adaptive", name = "adaptive-layout", version.ref = "adaptive" }
+androidx-adaptive-navigation = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation", version.ref = "adaptive" }
+androidx-navigation-suite = { group = "androidx.compose.material3", name = "material3-adaptive-navigation-suite", version.ref = "navigation-suite" }
+
+# Persistence
+androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
+
+# Background work
+androidx-work-runtime = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workmanager" }
+
+# DI
+hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
+hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
+androidx-hilt-work = { group = "androidx.hilt", name = "hilt-work", version.ref = "androidx-hilt" }
+androidx-hilt-compiler = { group = "androidx.hilt", name = "hilt-compiler", version.ref = "androidx-hilt" }
+androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "androidx-hilt" }
+
+# On-device AI (Gemini Nano via ML Kit GenAI Prompt API; SPEC §7.2)
+mlkit-genai-prompt = { group = "com.google.mlkit", name = "genai-prompt", version.ref = "mlkit-prompt" }
+
+# Images
+coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
+androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifinterface" }
+
+# Widget
+glance-appwidget = { group = "androidx.glance", name = "glance-appwidget", version.ref = "glance" }
+
+# Coroutines
+kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
+
+# Unit tests
+junit4 = { group = "junit", name = "junit", version.ref = "junit4" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

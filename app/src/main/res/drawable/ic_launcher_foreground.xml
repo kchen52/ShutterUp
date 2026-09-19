@@ -1,0 +1,17 @@
+<!-- Placeholder foreground: open shutter ring. Replaced by the final
+     aperture-onto-sun icon in the widget/onboarding/icon milestone (DESIGN.md §9). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#2B2622"
+        android:pathData="M54,30m-24,0a24,24 0,1 1,48 0a24,24 0,1 1,-48 0"
+        android:strokeWidth="6"
+        android:strokeColor="#2B2622"
+        android:strokeLineCap="round" />
+    <path
+        android:fillColor="#E0A458"
+        android:pathData="M48,48m-9,0a9,9 0,1 1,18 0a9,9 0,1 1,-18 0" />
+</vector>
