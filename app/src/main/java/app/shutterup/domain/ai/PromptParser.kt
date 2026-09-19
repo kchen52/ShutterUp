@@ -26,6 +26,28 @@ object PromptParser {
             }
         }
 
+    fun parseSeries(json: String, source: PromptSource): Result<GeneratedSeries> =
+        runAsIllegalArgument {
+            val root = JsonReader(json).readDocument()
+            val obj = root as? Js.Obj
+                ?: throw IllegalArgumentException("top-level value must be an object")
+            val title = requiredString(obj, "title", index = null)
+            if (title.length > 40) fail("title exceeds 40 characters", index = null)
+            val promptsValue = obj.map["prompts"] ?: fail("missing prompts", index = null)
+            val arr = promptsValue as? Js.Arr ?: fail("prompts must be an array", index = null)
+            if (arr.elements.size != 7) fail("prompts must contain 7 objects", index = null)
+            val prompts = arr.elements.mapIndexed { index, element ->
+                val item = element as? Js.Obj
+                    ?: fail("item must be an object", index)
+                parseGenerated(item, source, index)
+            }
+            val theme = when (val value = obj.map["theme"]) {
+                is Js.Str -> value.value
+                else -> prompts.first().theme
+            }
+            GeneratedSeries(title = title, theme = theme, prompts = prompts)
+        }
+
     private fun parseGenerated(obj: Js.Obj, source: PromptSource, index: Int?): GeneratedPrompt {
         val fields = parseSharedFields(obj, index)
         return GeneratedPrompt(

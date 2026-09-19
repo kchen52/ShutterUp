@@ -3,8 +3,10 @@ package app.shutterup.data.ai
 import android.util.Log
 import app.shutterup.data.ai.nano.NanoPromptOutput
 import app.shutterup.data.ai.nano.NanoPromptText
+import app.shutterup.data.ai.nano.NanoSeriesOutput
 import app.shutterup.domain.ai.Availability
 import app.shutterup.domain.ai.GeneratedPrompt
+import app.shutterup.domain.ai.GeneratedSeries
 import app.shutterup.domain.ai.GenerationRequest
 import app.shutterup.domain.ai.PromptGenerator
 import app.shutterup.domain.ai.PromptParser
@@ -69,6 +71,30 @@ class NanoPromptGenerator @Inject constructor(
         }
     } catch (e: Exception) {
         Log.w(TAG, "generate failed", e)
+        Result.failure(e)
+    }
+
+    override suspend fun generateSeries(request: GenerationRequest): Result<GeneratedSeries> = try {
+        withTimeout(GENERATION_TIMEOUT_MS) {
+            val modelName = baseModelName()
+            if (client.isStructuredOutputFeatureAvailable()) {
+                val base = GenerateContentRequest.Builder(TextPart(NanoPromptText.seriesSystemPrompt(request))).build()
+                val typed = generateTypedContentRequest(base, NanoSeriesOutput::class)
+                val response = client.generateContent(typed).candidates.firstOrNull()?.response
+                    ?: error("Nano returned no structured series candidates")
+                Result.success(NanoPromptText.mapSeries(response, modelName))
+            } else {
+                val text = client.generateContent(
+                    NanoPromptText.seriesSystemPrompt(request) + "\nReturn ONLY the JSON object.",
+                ).candidates.firstOrNull()?.text
+                    ?: error("Nano returned no series text")
+                PromptParser.parseSeries(text, PromptSource.ON_DEVICE_AI).map { series ->
+                    series.copy(prompts = series.prompts.map { it.copy(modelName = modelName) })
+                }
+            }
+        }
+    } catch (e: Exception) {
+        Log.w(TAG, "generateSeries failed", e)
         Result.failure(e)
     }
 
