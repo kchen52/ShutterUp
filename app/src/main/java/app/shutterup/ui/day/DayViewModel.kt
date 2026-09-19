@@ -5,8 +5,8 @@ import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.shutterup.capture.DeleteDayPhotoUseCase
 import app.shutterup.domain.model.DayPrompt
-import app.shutterup.domain.model.DayStatus
 import app.shutterup.domain.model.Entry
 import app.shutterup.domain.repository.DayPromptRepository
 import app.shutterup.domain.repository.EntryRepository
@@ -50,6 +50,7 @@ class DayViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val prompts: DayPromptRepository,
     private val entries: EntryRepository,
+    private val deleteDayPhoto: DeleteDayPhotoUseCase,
     gamification: GamificationRepository,
     clock: Clock,
     zone: ZoneId,
@@ -108,21 +109,7 @@ class DayViewModel @Inject constructor(
      */
     fun confirmDelete(alsoGallery: Boolean) {
         viewModelScope.launch {
-            val current = entries.observeEntries(date).first()
-            if (alsoGallery) {
-                current.forEach { entry ->
-                    runCatching {
-                        context.contentResolver.delete(entry.mediaUri.toUri(), null, null)
-                    }
-                }
-            }
-            entries.delete(date)
-            val prompt = prompts.getDay(date)
-            if (prompt != null &&
-                (prompt.status == DayStatus.COMPLETED || prompt.status == DayStatus.COMPLETED_NO_PHOTO)
-            ) {
-                prompts.upsert(prompt.copy(status = DayStatus.COMPLETED_NO_PHOTO))
-            }
+            deleteDayPhoto(date, alsoFromGallery = alsoGallery)
             _state.update { it.copy(showDeleteDialog = false, snackbar = "Deleted.") }
         }
     }
