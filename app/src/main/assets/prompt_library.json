@@ -1,0 +1,3852 @@
+[
+  {
+    "id": "f1-001",
+    "title": "Window Beam Still Life",
+    "oneLiner": "Place one everyday object where morning light cuts a sharp shape across it.",
+    "details": "Find a window with direct morning light and a plain surface nearby. Set a single object—a mug, book, or fruit—so the light beam grazes one edge. Watch how the bright strip and the shadow divide the frame. Move slowly until the light line feels deliberate, not accidental.",
+    "tips": [
+      "Expose for the bright patch and let shadows fall deep.",
+      "Try rotating the object until texture catches the beam."
+    ],
+    "constraint": "Shoot from table height only.",
+    "theme": "Morning Light",
+    "tags": [
+      "indoor",
+      "light",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f1-002",
+    "title": "Desk at First Light",
+    "oneLiner": "Capture your desk or table as the first soft light of the day arrives.",
+    "details": "Before you turn on any lamps, photograph the surface where you work or eat. Let the cool early glow reveal clutter, texture, or empty space. You are documenting a quiet transition, not staging a perfect setup. Include only objects already there.",
+    "tips": [
+      "Keep the phone steady against the table edge.",
+      "Include one strong diagonal from a window frame or object edge."
+    ],
+    "constraint": null,
+    "theme": "Morning Light",
+    "tags": [
+      "indoor",
+      "light",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f1-003",
+    "title": "Building Edge Glow",
+    "oneLiner": "Find where early sun catches one edge of a building or fence near you.",
+    "details": "Step outside briefly and look for a corner, railing, or wall panel lit while the rest stays dim. Fill most of the frame with the shadow side and let the lit edge be a thin highlight. This works in alleys, courtyards, or along your own street.",
+    "tips": [
+      "Stand in shade so you do not blow out the bright edge.",
+      "Use grid lines to align the glowing edge with a frame border."
+    ],
+    "constraint": "No zoom—use your default lens only.",
+    "theme": "Morning Light",
+    "tags": [
+      "outdoor",
+      "light",
+      "urban"
+    ]
+  },
+  {
+    "id": "f1-004",
+    "title": "Warm Spoon Moment",
+    "oneLiner": "Photograph a spoon or utensil catching golden light on a kitchen counter.",
+    "details": "Hold or rest a metal spoon where morning light turns it warm. Watch the handle, bowl, and counter each take a different tone. You are chasing a small highlight, not a full breakfast spread. Keep the background simple so the gleam stays obvious.",
+    "tips": [
+      "Angle the spoon until one clean highlight appears.",
+      "Tap to focus on the brightest curve."
+    ],
+    "constraint": "Only one utensil may appear in frame.",
+    "theme": "Morning Light",
+    "tags": [
+      "indoor",
+      "light",
+      "macro",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f1-005",
+    "title": "Ground Lines at Dawn",
+    "oneLiner": "Shoot long morning shadows stretching across pavement or a path you can reach safely.",
+    "details": "Look down at how early light stretches shadows from poles, posts, or your own feet. Let one shadow cut diagonally through the frame. Stay on familiar ground and avoid roads. The story is geometry written on the ground.",
+    "tips": [
+      "Shoot from hip height to lengthen shadows further.",
+      "Wait until a shadow crosses an interesting texture."
+    ],
+    "constraint": null,
+    "theme": "Morning Light",
+    "tags": [
+      "outdoor",
+      "light",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f1-006",
+    "title": "Houseplant Halo",
+    "oneLiner": "Backlight a houseplant so leaves glow around the edges.",
+    "details": "Place yourself between the plant and the window, or shift the pot until light shines through the leaves. Some leaves will turn translucent while others fall dark. Move closer until the glowing edges dominate the frame.",
+    "tips": [
+      "Tap exposure on the brightest leaf edge.",
+      "Try one leaf filling the frame for an abstract look."
+    ],
+    "constraint": "Spend no more than ten minutes finding the angle.",
+    "theme": "Morning Light",
+    "tags": [
+      "indoor",
+      "light",
+      "nature",
+      "macro"
+    ]
+  },
+  {
+    "id": "f1-007",
+    "title": "Curtain Glow Portrait",
+    "oneLiner": "Let morning light filter through a curtain and become the subject.",
+    "details": "Find a window with sheer or thin curtains and shoot the fabric itself. Notice folds, seams, and dust catching soft light. You do not need a view outside—the curtain is enough. Move until the brightest area sits off-center.",
+    "tips": [
+      "Shoot with the window behind the curtain, not beside it.",
+      "Underexpose slightly to keep fold detail."
+    ],
+    "constraint": null,
+    "theme": "Morning Light",
+    "tags": [
+      "indoor",
+      "light",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f1-008",
+    "title": "Quiet Street Corner",
+    "oneLiner": "Frame an empty corner of your neighborhood as day begins.",
+    "details": "Choose a familiar intersection or storefront before it gets busy. Let pale morning light flatten colors and soften edges. Include a sign, wall, or curb as anchor. Keep people out of frame or show them only as distant shapes.",
+    "tips": [
+      "Stand across the street for a wider, calmer view.",
+      "Use leading lines from the curb or building edge."
+    ],
+    "constraint": "No faces visible anywhere in the shot.",
+    "theme": "Morning Light",
+    "tags": [
+      "outdoor",
+      "light",
+      "urban"
+    ]
+  },
+  {
+    "id": "f1-009",
+    "title": "Light Pool on the Floor",
+    "oneLiner": "Photograph a rectangle of morning light lying on your floor.",
+    "details": "Close doors and curtains until one patch of sunlight remains on the floor. Place nothing in it—or let one shoe or book edge touch the border. The patch itself is the subject. Step back until the bright shape reads clearly against darker flooring.",
+    "tips": [
+      "Shoot straight down for a graphic look.",
+      "Wait a minute and capture the patch as it slowly moves."
+    ],
+    "constraint": "Use only natural light—no lamps.",
+    "theme": "Morning Light",
+    "tags": [
+      "indoor",
+      "light",
+      "minimal",
+      "playful"
+    ]
+  },
+  {
+    "id": "f1-010",
+    "title": "Blind Stripes on the Wall",
+    "oneLiner": "Capture parallel shadow stripes from blinds or slats on a plain wall.",
+    "details": "Adjust blinds or stand near a railing so bars of shadow repeat across a surface. Fill the frame with the pattern and let it go slightly crooked for energy. You are making a graphic study from ordinary architecture. Move closer until the stripes feel bold.",
+    "tips": [
+      "Shoot when sunlight is direct for crisp edges.",
+      "Try a slight tilt so stripes cut diagonally."
+    ],
+    "constraint": "Fill at least eighty percent of the frame with stripes.",
+    "theme": "Shadows",
+    "tags": [
+      "indoor",
+      "light",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f1-011",
+    "title": "Object Shadow Portrait",
+    "oneLiner": "Make the shadow of a single object more important than the object itself.",
+    "details": "Place a cup, plant, or tool near a wall or sheet of paper under side light. Compose so the shadow is large and centered while the object stays small or partly out of frame. The shadow tells the shape story. Shift the light by moving the object, not the sun.",
+    "tips": [
+      "Use a desk lamp if window light is too soft.",
+      "Focus on the shadow edge, not the object."
+    ],
+    "constraint": null,
+    "theme": "Shadows",
+    "tags": [
+      "indoor",
+      "still-life",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f1-012",
+    "title": "Layered Lamp Shadows",
+    "oneLiner": "Use two light sources to stack soft shadows from one small object.",
+    "details": "Turn on two lamps at different angles near a table. Set one simple object—a bottle, box, or hand—in the middle. Notice how shadows overlap and blur. Photograph where the layers look richest, not where they disappear.",
+    "tips": [
+      "Move one lamp closer to soften its shadow.",
+      "Raise exposure slightly so overlapping tones stay visible."
+    ],
+    "constraint": null,
+    "theme": "Shadows",
+    "tags": [
+      "indoor",
+      "light",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f1-013",
+    "title": "Hand Shadow Play",
+    "oneLiner": "Cast a playful shadow shape from your hand onto a wall or door.",
+    "details": "Shine a lamp or phone flashlight at your hand between the light and a pale surface. Twist fingers until the shadow looks like something else—a bird, crown, or abstract creature. Shoot the wall, not your hand. Keep it silly and quick.",
+    "tips": [
+      "Get close to the wall so the shadow stays sharp.",
+      "Dim the room so the shadow contrast pops."
+    ],
+    "constraint": "Your hand must not appear in the photo.",
+    "theme": "Shadows",
+    "tags": [
+      "indoor",
+      "playful",
+      "light"
+    ]
+  },
+  {
+    "id": "f1-014",
+    "title": "Railing Shadow Grid",
+    "oneLiner": "Find repeating shadows from a fence or railing crossing a sidewalk.",
+    "details": "Walk a familiar route and watch for bars or mesh casting a grid on the ground. Stand where the pattern stretches away from you. Include a crack, leaf, or mark inside one shadow cell for scale. Stay on the sidewalk and off the road.",
+    "tips": [
+      "Shoot when the sun is low for longer repeats.",
+      "Align the phone so grid lines lead into a corner."
+    ],
+    "constraint": null,
+    "theme": "Shadows",
+    "tags": [
+      "outdoor",
+      "light",
+      "urban",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f1-015",
+    "title": "Window Silhouette Study",
+    "oneLiner": "Silhouette a small object against a bright window or open doorway.",
+    "details": "Place something with a recognizable outline—a plant, bottle, or chair—between you and the bright opening. Expose for the window so the object falls dark. Shape matters more than surface detail. Move until the silhouette reads in one glance.",
+    "tips": [
+      "Tap the bright background to lock exposure.",
+      "Clean clutter from the window ledge first."
+    ],
+    "constraint": "Shoot from inside looking toward the light.",
+    "theme": "Shadows",
+    "tags": [
+      "indoor",
+      "light",
+      "minimal",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f1-016",
+    "title": "Corner Shadow Triangle",
+    "oneLiner": "Find a sharp triangular shadow where two walls or planes meet.",
+    "details": "Look at room corners, stairwells, or cabinet edges where light creates a wedge of darkness. Fill the frame with the triangle and a sliver of lit surface. This is abstract geometry hiding in your home. Walk slowly and watch corners change as you pass.",
+    "tips": [
+      "Use portrait orientation to emphasize height.",
+      "Step back if the triangle feels too small."
+    ],
+    "constraint": null,
+    "theme": "Shadows",
+    "tags": [
+      "indoor",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f1-017",
+    "title": "Your Shadow Leading",
+    "oneLiner": "Place your own shadow in the frame as a leading line toward something ahead.",
+    "details": "Stand so your shadow stretches toward a door, tree, or bench you can reach safely. Keep your body out of shot—only the shadow guides the eye. This turns a simple walk into a self-portrait without showing your face. Try early or late day for length.",
+    "tips": [
+      "Hold the phone at chest height for a natural stretch.",
+      "Wait until no one else’s shadow enters the frame."
+    ],
+    "constraint": "No zoom and no selfie mode.",
+    "theme": "Shadows",
+    "tags": [
+      "outdoor",
+      "light",
+      "playful"
+    ]
+  },
+  {
+    "id": "f1-018",
+    "title": "Paper Cut Shadow",
+    "oneLiner": "Cut or tear a simple shape from paper and photograph its crisp shadow.",
+    "details": "Use scrap paper and scissors to make a basic form—a circle, star, or letter. Hold it near a lamp so the shadow lands on a flat surface. Shoot the surface, not the paper. Small moves change the shadow size dramatically.",
+    "tips": [
+      "Move the paper closer to the surface for sharper edges.",
+      "Use white or colored paper for different shadow moods."
+    ],
+    "constraint": "The cut shape must be visible only as a shadow.",
+    "theme": "Shadows",
+    "tags": [
+      "indoor",
+      "playful",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f1-019",
+    "title": "Spoon World Upside Down",
+    "oneLiner": "Photograph a room reflected upside down inside a spoon or shiny ladle.",
+    "details": "Hold a spoon so it fills part of the frame and mirrors your surroundings. The curve distorts furniture and windows into a tiny planet. Move your hand until the reflection is centered and readable. Kitchen tools become fisheye lenses.",
+    "tips": [
+      "Polish the spoon or wipe it dry first.",
+      "Tap focus on the reflection, not the metal rim."
+    ],
+    "constraint": "The reflection must fill at least half the frame.",
+    "theme": "Reflections",
+    "tags": [
+      "indoor",
+      "macro",
+      "playful",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f1-020",
+    "title": "Mirror Double Room",
+    "oneLiner": "Use a wall mirror to show the same space twice in one frame.",
+    "details": "Stand at an angle to a mirror so you capture both the real corner and its reflection. Hide yourself behind the phone or step aside so you barely appear. The goal is a calm duplicate world, not a selfie. Adjust until the seam between worlds feels invisible.",
+    "tips": [
+      "Clean smudges from the mirror edge first.",
+      "Include one object that appears in both halves."
+    ],
+    "constraint": null,
+    "theme": "Reflections",
+    "tags": [
+      "indoor",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f1-021",
+    "title": "Window Glass Reversal",
+    "oneLiner": "Shoot through a window so the reflection and the view beyond overlap.",
+    "details": "Stand inside and aim at a window where you can see both the outside scene and interior reflections layered together. Move until tree, sky, or building merges with a lamp or ceiling line inside the glass. You are composing on a transparent canvas.",
+    "tips": [
+      "Shoot at an angle to reduce your own reflection.",
+      "Wipe one clean patch on the glass for clarity."
+    ],
+    "constraint": null,
+    "theme": "Reflections",
+    "tags": [
+      "indoor",
+      "light",
+      "urban"
+    ]
+  },
+  {
+    "id": "f1-022",
+    "title": "Screen on the Table",
+    "oneLiner": "Capture a phone or tablet screen reflecting the room on a tabletop.",
+    "details": "Turn the screen off or show a dark wallpaper so the glass acts like a mirror. Place it flat or propped on a table and shoot from above or the side. Notice how ceiling lines and windows shrink on the glass. Keep fingerprints—they add texture.",
+    "tips": [
+      "Tilt the device until one reflection dominates.",
+      "Use a plain table surface for contrast."
+    ],
+    "constraint": null,
+    "theme": "Reflections",
+    "tags": [
+      "indoor",
+      "still-life",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f1-023",
+    "title": "Countertop Sky",
+    "oneLiner": "Find a glossy counter or appliance top mirroring light from above.",
+    "details": "Look at kitchen counters, fridges, or polished furniture for soft sky-or-ceiling reflections. Move until the highlight forms a shape you like. You do not need a literal sky—any bright ceiling patch works. Treat the surface as a dark pond.",
+    "tips": [
+      "Lower the phone close to the surface for a wider reflection.",
+      "Expose for the highlight to deepen surrounding tones."
+    ],
+    "constraint": "Shoot within arm’s reach of the surface.",
+    "theme": "Reflections",
+    "tags": [
+      "indoor",
+      "light",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f1-024",
+    "title": "Parked Glass Abstract",
+    "oneLiner": "Photograph colors and shapes reflected in a parked car window you can reach safely.",
+    "details": "Walk to your own car or a parked vehicle on a quiet street and photograph from the sidewalk without touching it. Fill the frame with glass reflections of sky, trees, or buildings. Distortion is welcome. Keep faces and license plates out of frame.",
+    "tips": [
+      "Stand oblique to the glass to layer reflections.",
+      "Use portrait mode off—edges stay cleaner."
+    ],
+    "constraint": "No people or readable plates in the shot.",
+    "theme": "Reflections",
+    "tags": [
+      "outdoor",
+      "urban",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f1-025",
+    "title": "Glasses World Miniature",
+    "oneLiner": "Photograph the tiny room reflected in one lens of eyeglasses.",
+    "details": "Rest glasses on a table or hold them steady with the lenses facing a bright scene. Move in until one lens fills the viewfinder. The room bends into a bubble. This works with sunglasses or reading glasses you already own.",
+    "tips": [
+      "Use macro mode or get as close as focus allows.",
+      "Shield overhead glare with your hand above the frame."
+    ],
+    "constraint": null,
+    "theme": "Reflections",
+    "tags": [
+      "indoor",
+      "macro",
+      "playful"
+    ]
+  },
+  {
+    "id": "f1-026",
+    "title": "Floor Tile Mirror",
+    "oneLiner": "Shoot a polished floor tile reflecting ceiling lights or a window.",
+    "details": "Find a glossy tile, linoleum patch, or waxed wood floor in your home. Crouch low so lights and furniture flip into the lower half of the frame. Symmetry can be perfect or broken—both work. Keep the space yours and private.",
+    "tips": [
+      "Hold the phone upside down near the floor for stability.",
+      "Wait until a cloud or curtain softens window reflections."
+    ],
+    "constraint": "Camera must stay below knee height.",
+    "theme": "Reflections",
+    "tags": [
+      "indoor",
+      "light",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f1-027",
+    "title": "Shop Window Layers",
+    "oneLiner": "Frame overlapping reflections in a storefront window from the sidewalk.",
+    "details": "Stand outside a closed or quiet shop and shoot the glass where street and interior signs stack together. You are collecting layers, not shopping. Avoid capturing staff or shoppers clearly. Step back if reflections become too chaotic.",
+    "tips": [
+      "Press the lens lightly against your jacket to reduce glare.",
+      "Pick the hour when interior lights compete with daylight."
+    ],
+    "constraint": null,
+    "theme": "Reflections",
+    "tags": [
+      "outdoor",
+      "urban",
+      "light"
+    ]
+  },
+  {
+    "id": "f1-028",
+    "title": "Lamp Pool at Night",
+    "oneLiner": "Photograph a single lamp casting a warm circle of light in an otherwise dark room.",
+    "details": "Turn off other lights and let one lamp define the scene. Include the edge of a table, book, or wall where brightness falls off into shadow. You are mapping how far light travels in your space. Do not look directly into the bulb.",
+    "tips": [
+      "Set exposure low so the room stays mostly dark.",
+      "Include the lamp base if it anchors the story."
+    ],
+    "constraint": "Only one light source may be on.",
+    "theme": "Night Lights",
+    "tags": [
+      "indoor",
+      "night",
+      "light"
+    ]
+  },
+  {
+    "id": "f1-029",
+    "title": "String Light Bokeh",
+    "oneLiner": "Turn small string or fairy lights into soft glowing orbs in the background.",
+    "details": "Hang or drape lights you already have and shoot something simple in front—a mug, plant, or hand at the edge. Let the lights blur into circles behind. Focus on the near subject so the bokeh blooms. This works on a shelf or headboard.",
+    "tips": [
+      "Move farther from the lights to enlarge the bokeh.",
+      "Use night mode off for rounder blur shapes."
+    ],
+    "constraint": null,
+    "theme": "Night Lights",
+    "tags": [
+      "indoor",
+      "night",
+      "playful"
+    ]
+  },
+  {
+    "id": "f1-030",
+    "title": "Screen Glow in Dark",
+    "oneLiner": "Let a TV, monitor, or tablet be the only light painting a face or object nearby.",
+    "details": "In a dim room, play a bright image on a screen and place an object or your hands where the glow lands. Colors from the screen become your light gel. You are not photographing the show—you are using it as a lamp. Keep content generic and private.",
+    "tips": [
+      "Pause on a bright frame for even illumination.",
+      "Turn off room lights completely."
+    ],
+    "constraint": "No readable text from the screen in frame.",
+    "theme": "Night Lights",
+    "tags": [
+      "indoor",
+      "night",
+      "light"
+    ]
+  },
+  {
+    "id": "f1-031",
+    "title": "Streetlamp Cone",
+    "oneLiner": "Shoot upward at a streetlamp from a safe sidewalk spot at night.",
+    "details": "Find a lit lamp post on a familiar corner and frame it against the dark sky. Include branches, wires, or building edges if they cross the cone of light. Stay on the pavement and watch for traffic. The lamp is the hero, not the street.",
+    "tips": [
+      "Do not stare into the bulb while composing.",
+      "Expose for the lit area to silhouette surroundings."
+    ],
+    "constraint": "Camera must point upward—no horizon line.",
+    "theme": "Night Lights",
+    "tags": [
+      "outdoor",
+      "night",
+      "urban",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f1-032",
+    "title": "Candle Edge Flame",
+    "oneLiner": "Capture a candle flame lighting just the rim of a nearby object.",
+    "details": "Light a candle you own and place a cup, book, or fruit close enough to catch a warm rim light. Keep the flame sharp while the rest falls soft. Blow it out when you finish. Never leave candles unattended after shooting.",
+    "tips": [
+      "Turn off flash and other lights.",
+      "Brace your elbows on the table for steadiness."
+    ],
+    "constraint": null,
+    "theme": "Night Lights",
+    "tags": [
+      "indoor",
+      "night",
+      "light",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f1-033",
+    "title": "Fridge Light Drama",
+    "oneLiner": "Use the brief glow of an open fridge to illuminate one shelf scene.",
+    "details": "Open the refrigerator door in a dark kitchen and photograph one shelf before the light changes. Let containers and labels fall slightly soft if motion happens—that is part of the story. Close the door promptly to save energy. Stay safe on a dry floor.",
+    "tips": [
+      "Pick the most colorful shelf for contrast.",
+      "Shoot quickly—ten seconds max per take."
+    ],
+    "constraint": null,
+    "theme": "Night Lights",
+    "tags": [
+      "indoor",
+      "night",
+      "playful",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f1-034",
+    "title": "Neon Color Streak",
+    "oneLiner": "Photograph a neon or LED sign color reflecting on wet pavement at night.",
+    "details": "After rain or near a puddle you can reach from the sidewalk, catch colored light streaking on the ground. If no puddle exists, shoot the sign glow on a plain wall instead. You need no specific weather—any night with a lit sign nearby works. Avoid readable brand names if possible.",
+    "tips": [
+      "Get low to emphasize color on the ground.",
+      "Tap the brightest color to set exposure."
+    ],
+    "constraint": null,
+    "theme": "Night Lights",
+    "tags": [
+      "outdoor",
+      "night",
+      "urban",
+      "light"
+    ]
+  },
+  {
+    "id": "f1-035",
+    "title": "Bedside Reading Glow",
+    "oneLiner": "Show a book or notebook lit by a bedside lamp in an otherwise dim room.",
+    "details": "Stack pillow, blanket, and lamp into a small night scene. Let warm light fall across an open page or closed cover—you choose. The rest of the room can disappear into shadow. This is intimate scale, not a whole bedroom tour.",
+    "tips": [
+      "Angle the lamp to graze pages, not glare at the lens.",
+      "Include a corner of blanket for texture."
+    ],
+    "constraint": "Only warm-toned light—no overhead fixtures.",
+    "theme": "Night Lights",
+    "tags": [
+      "indoor",
+      "night",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f1-036",
+    "title": "Keyboard Backlight Mood",
+    "oneLiner": "Let laptop keyboard backlight be the only color in a dark desk scene.",
+    "details": "Open a laptop in a dim room so keys glow beneath your hands or an empty keyboard. Include one nearby object touched by the spill of light. You are showing how tiny LEDs define a workspace at night. Do not photograph passwords or private messages on screen.",
+    "tips": [
+      "Lower screen brightness if the keys disappear.",
+      "Shoot from a slight angle to show key rows."
+    ],
+    "constraint": null,
+    "theme": "Night Lights",
+    "tags": [
+      "indoor",
+      "night",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f1-037",
+    "title": "Flat Light Through Glass",
+    "oneLiner": "Shoot through a window on a soft day to flatten color and texture outside.",
+    "details": "Stand indoors and use the window as a frame for a muted exterior—trees, walls, or distant buildings. Soft light lowers contrast and quiets the scene. You are not waiting for rain or fog; any diffused daylight through glass works. Keep the window frame visible for depth.",
+    "tips": [
+      "Tap the glass edge to avoid focusing on smudges.",
+      "Include condensation or dust if it adds mood."
+    ],
+    "constraint": null,
+    "theme": "Overcast Mood",
+    "tags": [
+      "indoor",
+      "light",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f1-038",
+    "title": "Muted Still Life Trio",
+    "oneLiner": "Arrange three gray or neutral objects into a quiet tabletop composition.",
+    "details": "Choose items already in your home—stones, cups, cloth—in similar tones. Place them with space between so each shape breathes. Soft window light is enough; you are chasing calm, not drama. Step back until the trio feels balanced in the frame.",
+    "tips": [
+      "Remove anything brightly colored from the background.",
+      "Shoot from slightly above for a clear layout."
+    ],
+    "constraint": "Use no more than three objects total.",
+    "theme": "Overcast Mood",
+    "tags": [
+      "indoor",
+      "still-life",
+      "minimal",
+      "monochrome"
+    ]
+  },
+  {
+    "id": "f1-039",
+    "title": "Steam Soft Portrait",
+    "oneLiner": "Photograph fogged bathroom glass or a steamy mirror after a shower.",
+    "details": "Run hot water briefly or use recent steam on a mirror. Shoot the softened surface where fingerprints or wipe marks create paths. You stay inside your own bathroom—no public spaces. Turn off harsh fan lights if they kill the mood.",
+    "tips": [
+      "Wipe one small clear circle for a focal point.",
+      "Shoot within a minute before steam clears."
+    ],
+    "constraint": null,
+    "theme": "Overcast Mood",
+    "tags": [
+      "indoor",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f1-040",
+    "title": "Grey Wall Texture",
+    "oneLiner": "Fill the frame with the subtle texture of a painted wall or concrete in shade.",
+    "details": "Find a plain wall in shadow—indoors or on a covered porch—and move close until texture replaces subject. Look for hairline cracks, roller marks, or fine grain. This is meditative looking, not travel. Let the image feel almost monochrome.",
+    "tips": [
+      "Move parallel to the wall to avoid skew.",
+      "Tap to focus on the mid-frame texture."
+    ],
+    "constraint": null,
+    "theme": "Overcast Mood",
+    "tags": [
+      "indoor",
+      "minimal",
+      "monochrome"
+    ]
+  },
+  {
+    "id": "f1-041",
+    "title": "Linen Fold Study",
+    "oneLiner": "Photograph soft folds in a towel, sheet, or cloth under diffused light.",
+    "details": "Drape fabric on a bed or table and let gentle light model the hills and valleys. Avoid bold patterns—solid or heather tones work best. You are sculpting with cloth, not styling a room. Move the fabric until one fold leads the eye.",
+    "tips": [
+      "Side light from a window adds depth without harsh shadow.",
+      "Use portrait orientation to emphasize vertical folds."
+    ],
+    "constraint": "No patterns louder than a thin stripe.",
+    "theme": "Overcast Mood",
+    "tags": [
+      "indoor",
+      "still-life",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f1-042",
+    "title": "Desk Lamp Soft Cone",
+    "oneLiner": "Let a single desk lamp create a gentle pool on papers or a blank notebook.",
+    "details": "Turn off overhead lights and work with one lamp on a desk or table. Include pens, clips, or empty pages where light fades out. The mood is overcast in feeling even at night. You are showing how small light sources tame a workspace.",
+    "tips": [
+      "Use white or cream paper to catch soft gradation.",
+      "Expose for the lit center, not the room."
+    ],
+    "constraint": null,
+    "theme": "Overcast Mood",
+    "tags": [
+      "indoor",
+      "light",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f1-043",
+    "title": "Shaded Path Quiet",
+    "oneLiner": "Walk a shaded path or alley where direct sun cannot reach the ground.",
+    "details": "Choose a familiar route under awnings, trees, or between buildings where light stays even. Photograph the ground, wall, or tunnel of shade itself—no need for blue sky. Stay where you feel safe and off traffic lanes. The image should feel hushed.",
+    "tips": [
+      "Look for one accent color in an otherwise dull scene.",
+      "Shoot straight down the path for depth."
+    ],
+    "constraint": "No direct sunlight visible in frame.",
+    "theme": "Overcast Mood",
+    "tags": [
+      "outdoor",
+      "urban",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f1-044",
+    "title": "Foggy Window Droplets",
+    "oneLiner": "Capture water droplets on a window pane with a soft world behind them.",
+    "details": "Use a kitchen or bedroom window with condensation, or breathe lightly on cold glass. Focus on the droplets while the outside blurs. You create mood without stepping out. Wipe one stripe if you want a partial view through.",
+    "tips": [
+      "Get close enough that droplets become large spheres.",
+      "Use macro mode if available."
+    ],
+    "constraint": null,
+    "theme": "Overcast Mood",
+    "tags": [
+      "indoor",
+      "macro",
+      "nature"
+    ]
+  },
+  {
+    "id": "f1-045",
+    "title": "Concrete in Flat Light",
+    "oneLiner": "Photograph a sidewalk or patio slab where light has almost no shadow.",
+    "details": "Find open shade or bright cloud cover so concrete looks even and pale. Include a leaf, crack, or gum spot for interest. You are documenting urban quiet, not architecture tours. Keep feet and other people out of frame.",
+    "tips": [
+      "Shoot straight down for a graphic map-like view.",
+      "Convert to black and white in your mind while composing."
+    ],
+    "constraint": null,
+    "theme": "Overcast Mood",
+    "tags": [
+      "outdoor",
+      "urban",
+      "monochrome",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f1-046",
+    "title": "Shelf of Quiet Objects",
+    "oneLiner": "Line up muted objects on a shelf and shoot them in soft, even light.",
+    "details": "Pick books, boxes, or jars in dusty blues, grays, or browns. Arrange them with small gaps and shoot straight on. Avoid glossy highlights that shout for attention. This is a still life for a slow afternoon indoors.",
+    "tips": [
+      "Remove one brightly colored item if it steals focus.",
+      "Use a small step stool to match shelf height."
+    ],
+    "constraint": "All objects must sit on one shelf level.",
+    "theme": "Overcast Mood",
+    "tags": [
+      "indoor",
+      "still-life",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f1-047",
+    "title": "One Red on White",
+    "oneLiner": "Place a single red object on a white or pale surface and let it dominate.",
+    "details": "Use a tomato, pen, sock, or lid—anything red you already have. Clear the surface so nothing else competes. The simplicity is the challenge. Move the object off-center using the rule of thirds.",
+    "tips": [
+      "Shoot in daylight to keep white from turning gray.",
+      "Tap the red object to hold color accuracy."
+    ],
+    "constraint": "Only one red item allowed in the frame.",
+    "theme": "Color Pop",
+    "tags": [
+      "indoor",
+      "still-life",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f1-048",
+    "title": "Citrus Slice Burst",
+    "oneLiner": "Cut a lemon or orange and photograph the bright interior against a dark plate.",
+    "details": "Slice fruit you have in the kitchen and set it cut-side up. Let juice and segments glow against a dark bowl or cutting board. Shoot within a few minutes while it looks fresh. Wash your hands and surface when done.",
+    "tips": [
+      "Backlight slightly with window light for translucent segments.",
+      "Fill the frame with the cut face, not the whole fruit."
+    ],
+    "constraint": null,
+    "theme": "Color Pop",
+    "tags": [
+      "indoor",
+      "macro",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f1-049",
+    "title": "Potted Bloom Close-Up",
+    "oneLiner": "Find the brightest flower or leaf on a houseplant you already own.",
+    "details": "Move close to a balcony pot or windowsill plant and isolate one vivid bloom or new leaf. Blur the rest into green background. You are not visiting a garden—you are mining color at home. Gentle window light beats harsh noon sun.",
+    "tips": [
+      "Use portrait orientation to blur background distance.",
+      "Shield harsh direct sun with a curtain if needed."
+    ],
+    "constraint": "One plant only—no bouquet arrangements.",
+    "theme": "Color Pop",
+    "tags": [
+      "indoor",
+      "nature",
+      "macro"
+    ]
+  },
+  {
+    "id": "f1-050",
+    "title": "Rainbow Book Spines",
+    "oneLiner": "Stack or line up books so their spines make a stripe of color.",
+    "details": "Pull a few books from a shelf and arrange spines facing the camera. You do not need a full rainbow—three strong colors are enough. Keep titles optional and never required. Shoot straight on so lines stay vertical.",
+    "tips": [
+      "Sort by color beforehand for faster setup.",
+      "Leave a finger-width gap between spines for rhythm."
+    ],
+    "constraint": null,
+    "theme": "Color Pop",
+    "tags": [
+      "indoor",
+      "still-life",
+      "playful"
+    ]
+  },
+  {
+    "id": "f1-051",
+    "title": "Spice Jar Spectrum",
+    "oneLiner": "Line up spice jars or tea tins so their labels and powders pop with color.",
+    "details": "Open a cabinet and choose jars with bold lids or contents—paprika, turmeric, pepper. Set them on a counter with labels facing you or turned away for mystery. Light from the side makes powders glow. Put lids back when finished.",
+    "tips": [
+      "Wipe jar bases so they stand evenly.",
+      "Shoot at counter height, not overhead."
+    ],
+    "constraint": null,
+    "theme": "Color Pop",
+    "tags": [
+      "indoor",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f1-052",
+    "title": "Bright Door Portal",
+    "oneLiner": "Find a boldly painted door or gate on a building you can photograph from public space.",
+    "details": "Walk your neighborhood for a door in red, blue, or yellow. Frame it closed, with little else in shot. You are celebrating flat color and shape. Do not enter private property—shoot from the street or path only.",
+    "tips": [
+      "Stand directly facing the door to reduce skew.",
+      "Include the frame or handle for scale."
+    ],
+    "constraint": "The door must fill at least half the frame.",
+    "theme": "Color Pop",
+    "tags": [
+      "outdoor",
+      "urban",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f1-053",
+    "title": "Toy Color Spot",
+    "oneLiner": "Place one brightly colored toy or game piece alone on a neutral background.",
+    "details": "Choose a block, figurine, or card from something you own. Set it on gray carpet, wood, or paper so color explodes against quiet surroundings. This is playful still life without staging an entire collection. Move in until the object feels large.",
+    "tips": [
+      "Use daylight from the side for a soft shadow.",
+      "Rotate the object until its brightest face shows."
+    ],
+    "constraint": null,
+    "theme": "Color Pop",
+    "tags": [
+      "indoor",
+      "playful",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f1-054",
+    "title": "Nail Polish Lineup",
+    "oneLiner": "Arrange three nail polish bottles in a color gradient on a bathroom counter.",
+    "details": "Use bottles you already have, aligned cap-to-cap or staggered. Let glass and liquid add shine. The counter can be messy at the edges—life is allowed. Shoot before caps wander off.",
+    "tips": [
+      "Reflect a white ceiling in the bottles for clean highlights.",
+      "Wipe wet polish from bottles for a neat look."
+    ],
+    "constraint": "Exactly three bottles—no more, no less.",
+    "theme": "Color Pop",
+    "tags": [
+      "indoor",
+      "still-life",
+      "macro"
+    ]
+  },
+  {
+    "id": "f1-055",
+    "title": "Umbrella Color Splash",
+    "oneLiner": "Open a bright umbrella or bag outdoors and fill the frame with its color.",
+    "details": "Use your own umbrella, tote, or jacket on a familiar path or backyard. Hold or prop it so fabric texture shows. Sky or ground can peek in, but color is king. Close up when wind picks up.",
+    "tips": [
+      "Shoot from underneath for a canopy look.",
+      "Underexpose slightly so saturation holds."
+    ],
+    "constraint": null,
+    "theme": "Color Pop",
+    "tags": [
+      "outdoor",
+      "playful"
+    ]
+  },
+  {
+    "id": "f2-001",
+    "title": "Steam Over the Kettle",
+    "oneLiner": "Catch the moment steam curls above a kettle or pot on your stove.",
+    "details": "Wait until the water is just boiling and watch how the steam catches the light. Move closer and try a few angles until the wisps feel sculptural rather than messy. A dark background behind the kettle will help the steam stand out.",
+    "tips": [
+      "Shoot near a window so side light reveals the steam.",
+      "Tap to focus on the spout, not the background.",
+      "Take several shots; steam changes every second."
+    ],
+    "constraint": "Shoot from no closer than arm's length.",
+    "theme": "Kitchen Stories",
+    "tags": [
+      "indoor",
+      "light",
+      "motion"
+    ]
+  },
+  {
+    "id": "f2-002",
+    "title": "Spice Jar Labels",
+    "oneLiner": "Line up spice jars so their labels and lids tell a small color story.",
+    "details": "Pull a few jars from the rack and arrange them by color or height on the counter. Look for repeating shapes—round lids, rectangular labels—and leave a little breathing room between jars. The goal is a tidy portrait of your everyday pantry.",
+    "tips": [
+      "Wipe jar fronts clean before shooting.",
+      "Try a slightly overhead angle to show all the lids.",
+      "Use portrait orientation to stack jars vertically."
+    ],
+    "constraint": null,
+    "theme": "Kitchen Stories",
+    "tags": [
+      "indoor",
+      "still-life",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f2-003",
+    "title": "Cutting Board Still",
+    "oneLiner": "Photograph a cutting board mid-prep with a spoon, peelings, or crumbs.",
+    "details": "Set up a simple prep scene on your board—half-chopped onion, citrus peel, or bread crumbs. Step back and look for the shapes your hands left behind. The board itself is a frame; let the mess feel intentional.",
+    "tips": [
+      "Shoot from table height for a natural cooking view.",
+      "Include the spoon handle to suggest action.",
+      "Avoid clutter beyond the board edges."
+    ],
+    "constraint": "Include exactly three distinct objects.",
+    "theme": "Kitchen Stories",
+    "tags": [
+      "indoor",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f2-004",
+    "title": "Dish Rack Geometry",
+    "oneLiner": "Find repeating lines and circles in your drying dishes and rack.",
+    "details": "Walk up to the dish rack and study how plates, glasses, and utensils repeat. Look for circles nested inside rectangles and the gaps between items. A single strong angle can turn an ordinary chore into a clean composition.",
+    "tips": [
+      "Move in close to simplify the background.",
+      "Align the rack edge with your frame for structure.",
+      "Try black-and-white if colors compete."
+    ],
+    "constraint": "No digital zoom allowed.",
+    "theme": "Kitchen Stories",
+    "tags": [
+      "indoor",
+      "minimal",
+      "monochrome"
+    ]
+  },
+  {
+    "id": "f2-005",
+    "title": "Morning Coffee Ring",
+    "oneLiner": "Capture a coffee or tea ring stain on a counter or saucer.",
+    "details": "Find a dried ring left by a mug—on a saucer, napkin, or counter. Treat it like a tiny landscape: notice the edge sharpness and the pale center. Move your phone until the ring feels centered and calm.",
+    "tips": [
+      "Shoot straight down for a graphic circle.",
+      "Use soft window light to avoid harsh glare.",
+      "Tap to focus on the ring's outer edge."
+    ],
+    "constraint": null,
+    "theme": "Kitchen Stories",
+    "tags": [
+      "indoor",
+      "minimal",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f2-006",
+    "title": "Refrigerator Shelf Portrait",
+    "oneLiner": "Open the fridge and frame one shelf like a curated still life.",
+    "details": "Pick the shelf that looks most interesting—condiments, fruit, or leftovers in containers. Hold the door steady and compose before the cold air fogs your lens. Let the shelf lines guide the viewer's eye across the frame.",
+    "tips": [
+      "Turn off the flash; use the fridge light.",
+      "Hold the phone steady against the door frame.",
+      "Crop tight so only one shelf fills the frame."
+    ],
+    "constraint": "Finish within ten minutes.",
+    "theme": "Kitchen Stories",
+    "tags": [
+      "indoor",
+      "still-life",
+      "playful"
+    ]
+  },
+  {
+    "id": "f2-007",
+    "title": "Whisk and Bowl",
+    "oneLiner": "Pair a mixing bowl with a whisk or spoon as a simple kitchen portrait.",
+    "details": "Set a bowl on the counter and lean the whisk inside or across the rim. Notice how the curve of the whisk echoes the bowl's circle. Keep the background plain—a wall or tile works well.",
+    "tips": [
+      "Choose one dominant color for bowl and background.",
+      "Shoot from slightly above to show the bowl interior.",
+      "Leave empty space on one side of the frame."
+    ],
+    "constraint": "Use only warm tones in the frame.",
+    "theme": "Kitchen Stories",
+    "tags": [
+      "indoor",
+      "still-life",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f2-008",
+    "title": "Salt and Pepper Pair",
+    "oneLiner": "Photograph your salt and pepper shakers as a matched duo.",
+    "details": "Place the shakers side by side on a clear patch of table or counter. Look for symmetry—or deliberate mismatch—in their shapes and wear. A plain surface behind them keeps attention on the pair.",
+    "tips": [
+      "Align both shakers to the same height in frame.",
+      "Move back slightly to avoid wide-angle distortion.",
+      "Try a low angle so they feel monumental."
+    ],
+    "constraint": null,
+    "theme": "Kitchen Stories",
+    "tags": [
+      "indoor",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f2-009",
+    "title": "First Light on the Bed",
+    "oneLiner": "Catch morning sunlight falling across an unmade or freshly made bed.",
+    "details": "Notice where the first light hits pillows, folds, or a blanket. Wait for a patch of brightness that feels gentle rather than harsh. The rumpled fabric can suggest the start of the day without showing your face.",
+    "tips": [
+      "Expose for the bright patch, not the shadows.",
+      "Shoot before you straighten the covers.",
+      "Use the window as a natural side light source."
+    ],
+    "constraint": "Shoot from bed height only.",
+    "theme": "Morning Rituals",
+    "tags": [
+      "indoor",
+      "light"
+    ]
+  },
+  {
+    "id": "f2-010",
+    "title": "Steam on the Bathroom Mirror",
+    "oneLiner": "Photograph fogged mirror glass after a shower, before it clears.",
+    "details": "Look for soft gradients where steam thins and reveals a sliver of reflection. You might wipe a small arc with your finger for contrast, or leave the glass fully fogged. Work quickly while the condensation still looks even.",
+    "tips": [
+      "Avoid including your full reflection.",
+      "Focus on the texture of the condensation.",
+      "Wipe one letter or shape for a focal point."
+    ],
+    "constraint": null,
+    "theme": "Morning Rituals",
+    "tags": [
+      "indoor",
+      "light",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f2-011",
+    "title": "Breakfast Table Readiness",
+    "oneLiner": "Set out breakfast items before eating and photograph the quiet moment.",
+    "details": "Arrange a bowl, mug, spoon, and napkin as if someone is about to sit down. Step back and check that nothing feels crowded. The scene should feel paused—morning waiting to begin.",
+    "tips": [
+      "Use natural light from a nearby window.",
+      "Remove clutter that is not part of breakfast.",
+      "Try a diagonal composition across the table."
+    ],
+    "constraint": "Include exactly four items on the table.",
+    "theme": "Morning Rituals",
+    "tags": [
+      "indoor",
+      "still-life",
+      "light"
+    ]
+  },
+  {
+    "id": "f2-012",
+    "title": "Alarm Clock Glow",
+    "oneLiner": "Photograph your bedside clock or phone showing the morning time.",
+    "details": "Frame the digits or clock face without making readability the whole story. Notice glow, reflection, and the objects around it—glasses, book, lamp. Keep the mood quiet and early.",
+    "tips": [
+      "Turn off overhead lights for a softer glow.",
+      "Hold the phone steady for a sharp readout.",
+      "Crop tight on the clock and one nearby object."
+    ],
+    "constraint": "No flash allowed.",
+    "theme": "Morning Rituals",
+    "tags": [
+      "indoor",
+      "night",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f2-013",
+    "title": "Slippers by the Door",
+    "oneLiner": "Capture the pair of shoes or slippers you reach for each morning.",
+    "details": "Find where your morning footwear lives—by the bed, closet, or entry mat. Photograph them as a pair, slightly worn and real. The angle should feel like you just stepped out of them.",
+    "tips": [
+      "Shoot from floor level for intimacy.",
+      "Align both shoes pointing the same direction.",
+      "Include a sliver of floor texture for context."
+    ],
+    "constraint": null,
+    "theme": "Morning Rituals",
+    "tags": [
+      "indoor",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f2-014",
+    "title": "Kettle Before the Pour",
+    "oneLiner": "Frame your kettle, French press, or mug before the first pour of the day.",
+    "details": "Set the vessel on a clear counter with nothing competing behind it. Look for steam, condensation, or a waiting mug nearby. This is the breath before the ritual starts.",
+    "tips": [
+      "Place the mug slightly off-center.",
+      "Catch a highlight along the kettle's curve.",
+      "Keep the background darker than the subject."
+    ],
+    "constraint": "Use only one color family besides white or gray.",
+    "theme": "Morning Rituals",
+    "tags": [
+      "indoor",
+      "still-life",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f2-015",
+    "title": "Journal and Pen at Dawn",
+    "oneLiner": "Photograph an open notebook and pen in early morning light.",
+    "details": "Open your journal to a blank or partially written page—no private text need appear legible. Let window light graze the paper texture. The pen should point toward the light or off the page edge.",
+    "tips": [
+      "Blur private writing by angling the page.",
+      "Expose for the paper, not the window.",
+      "Include the pen shadow for depth."
+    ],
+    "constraint": "Shoot within fifteen minutes of waking.",
+    "theme": "Morning Rituals",
+    "tags": [
+      "indoor",
+      "light",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f2-016",
+    "title": "Porch Coffee Quiet",
+    "oneLiner": "Take your morning drink outside and photograph the cup in open air.",
+    "details": "Step onto a porch, balcony, or stoop with your mug and find a simple background—railing, steps, or sky. Let the outdoor light feel cooler than your kitchen. The cup should still feel like the first sip of the day.",
+    "tips": [
+      "Place the mug where sky or greenery softens behind it.",
+      "Watch for wind moving steam if the drink is hot.",
+      "Keep your hand out of frame unless asked elsewhere."
+    ],
+    "constraint": null,
+    "theme": "Morning Rituals",
+    "tags": [
+      "outdoor",
+      "light",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f2-017",
+    "title": "Towel Weave Close-Up",
+    "oneLiner": "Fill the frame with the weave of a bath or kitchen towel.",
+    "details": "Hold the fabric near a window and move in until the threads become landscape. Look for loops, grid patterns, or frayed edges. Small shifts in angle change how deep the texture feels.",
+    "tips": [
+      "Tap to focus on the nearest threads.",
+      "Avoid direct sun that blows out highlights.",
+      "Try portrait mode only if edges stay clean."
+    ],
+    "constraint": "Fill at least eighty percent of the frame with texture.",
+    "theme": "Textures Up Close",
+    "tags": [
+      "indoor",
+      "macro",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f2-018",
+    "title": "Wood Grain Table",
+    "oneLiner": "Photograph the grain pattern on a wooden table or cutting board.",
+    "details": "Move your phone slowly across the surface until a flowing line of grain leads through the frame. Notice knots, scratches, and color shifts that give the wood character. Treat the table like a map.",
+    "tips": [
+      "Shoot at a shallow angle to catch side light.",
+      "Keep the frame free of objects.",
+      "Use monochrome if color distracts."
+    ],
+    "constraint": null,
+    "theme": "Textures Up Close",
+    "tags": [
+      "indoor",
+      "macro",
+      "monochrome"
+    ]
+  },
+  {
+    "id": "f2-019",
+    "title": "Citrus Peel Landscape",
+    "oneLiner": "Peel an orange or lemon and photograph the pitted skin up close.",
+    "details": "After peeling, hold a piece of rind near light and move in until the dimples dominate the frame. The color should feel bright and organic. Rotate the peel until a highlight runs through the texture.",
+    "tips": [
+      "Wipe excess juice to avoid glare.",
+      "Place a neutral plate underneath for contrast.",
+      "Focus on the closest bump on the peel."
+    ],
+    "constraint": "No zoom; move your body closer instead.",
+    "theme": "Textures Up Close",
+    "tags": [
+      "indoor",
+      "macro",
+      "light"
+    ]
+  },
+  {
+    "id": "f2-020",
+    "title": "Knit Stitch Pattern",
+    "oneLiner": "Capture the repeating stitches of a sweater, blanket, or sock.",
+    "details": "Lay the knit flat or drape it so stitches catch raking light. Follow one row of loops across the frame like a rhythm. Small depth changes make some stitches pop forward.",
+    "tips": [
+      "Use side light from a window.",
+      "Avoid busy backgrounds behind the fabric.",
+      "Hold the phone parallel to the surface."
+    ],
+    "constraint": "Use black and white only.",
+    "theme": "Textures Up Close",
+    "tags": [
+      "indoor",
+      "macro",
+      "monochrome"
+    ]
+  },
+  {
+    "id": "f2-021",
+    "title": "Sponge Pores",
+    "oneLiner": "Photograph the holey surface of a kitchen sponge or loofah.",
+    "details": "Move close enough that the pores feel like caves or craters. A damp sponge may catch sharper highlights; a dry one looks softer. Keep the background simple so the holes stay graphic.",
+    "tips": [
+      "Angle the light to create shadows inside holes.",
+      "Tap focus on the center of the sponge.",
+      "Try a square crop for abstract impact."
+    ],
+    "constraint": null,
+    "theme": "Textures Up Close",
+    "tags": [
+      "indoor",
+      "macro",
+      "playful"
+    ]
+  },
+  {
+    "id": "f2-022",
+    "title": "Book Page Fibers",
+    "oneLiner": "Open a book and photograph the rough edge or paper texture.",
+    "details": "Fan the pages slightly or shoot the cut edge where fibers show. Bring the phone close until individual paper lines appear. Choose a book with cream or off-white paper for warmth.",
+    "tips": [
+      "Avoid readable text in sharp focus.",
+      "Use soft daylight to keep paper neutral.",
+      "Hold pages gently so they do not tear."
+    ],
+    "constraint": "Shoot straight down onto the pages.",
+    "theme": "Textures Up Close",
+    "tags": [
+      "indoor",
+      "macro",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f2-023",
+    "title": "Tile Grout Lines",
+    "oneLiner": "Frame a section of floor or wall tile where grout lines make a grid.",
+    "details": "Find a clean patch of tile and align the grout into parallel lines. Small chips or wear add honesty. The grid can feel geometric and calm when you crop tightly.",
+    "tips": [
+      "Stand directly above for a flat grid.",
+      "Wipe the tile if footprints show.",
+      "Include at least four complete tiles."
+    ],
+    "constraint": "Finish in under five minutes.",
+    "theme": "Textures Up Close",
+    "tags": [
+      "indoor",
+      "macro",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f2-024",
+    "title": "Bark Beyond the Glass",
+    "oneLiner": "From indoors, photograph tree bark or leaves pressed near a window.",
+    "details": "Step outside briefly or open the window to frame bark, a branch, or leaves from just outside the glass. Shoot from inside so the window frame hints at the boundary. Texture should fill most of the view.",
+    "tips": [
+      "Focus on the natural texture, not the glass.",
+      "Wait for even light to avoid harsh shadows.",
+      "Keep the composition centered on one trunk section."
+    ],
+    "constraint": null,
+    "theme": "Textures Up Close",
+    "tags": [
+      "outdoor",
+      "macro",
+      "nature"
+    ]
+  },
+  {
+    "id": "f2-025",
+    "title": "Three Objects, One Surface",
+    "oneLiner": "Arrange any three household objects into a balanced still life.",
+    "details": "Choose items with different heights and shapes—a cup, book, and candle, for example. Place them on a plain table and move around until the spacing feels even. Negative space between objects matters as much as the objects themselves.",
+    "tips": [
+      "Odd numbers often compose more naturally.",
+      "Use one window as your only light source.",
+      "Remove everything else from the table."
+    ],
+    "constraint": "Exactly three objects, no more.",
+    "theme": "Still Life",
+    "tags": [
+      "indoor",
+      "still-life",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f2-026",
+    "title": "Keys on the Entry Tray",
+    "oneLiner": "Photograph your keys resting where you drop them each day.",
+    "details": "Find the bowl, hook, or tray that holds your keys. Include the surface texture beneath them—wood, ceramic, or fabric. The jumble of metal shapes can feel sculptural when lit from one side.",
+    "tips": [
+      "Add one non-key object for scale if needed.",
+      "Avoid showing legible personal tags.",
+      "Shoot at a slight angle, not flat overhead."
+    ],
+    "constraint": null,
+    "theme": "Still Life",
+    "tags": [
+      "indoor",
+      "still-life",
+      "light"
+    ]
+  },
+  {
+    "id": "f2-027",
+    "title": "Fruit Bowl Portrait",
+    "oneLiner": "Arrange a few pieces of fruit in a bowl and photograph the cluster.",
+    "details": "Use whatever fruit you have—apples, bananas, citrus. Stack or overlap pieces so colors talk to each other. Watch for bruises and decide whether to hide or highlight them.",
+    "tips": [
+      "Place the brightest fruit on a rule-of-thirds point.",
+      "Remove price stickers before shooting.",
+      "Try a dark tablecloth to pop color."
+    ],
+    "constraint": "Use no more than five pieces of fruit.",
+    "theme": "Still Life",
+    "tags": [
+      "indoor",
+      "still-life",
+      "light"
+    ]
+  },
+  {
+    "id": "f2-028",
+    "title": "Reading Glasses Rest",
+    "oneLiner": "Capture glasses folded beside a book, remote, or lamp.",
+    "details": "Set the glasses where you left them last—on a side table, desk, or nightstand. Let the arms and lenses create delicate lines. One nearby object is enough context without clutter.",
+    "tips": [
+      "Avoid reflections of yourself in the lenses.",
+      "Use soft light to prevent glare.",
+      "Focus on the hinge or temple curve."
+    ],
+    "constraint": "Shoot from tabletop height.",
+    "theme": "Still Life",
+    "tags": [
+      "indoor",
+      "still-life",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f2-029",
+    "title": "Candle and Matchbook",
+    "oneLiner": "Pair an unlit candle with matches or a lighter as a quiet still life.",
+    "details": "Place both on a stable surface with space between them so the eye travels across the gap. Notice wax texture and paper grain on the matchbook. Do not light the candle—composition only.",
+    "tips": [
+      "Align objects on a diagonal for energy.",
+      "Keep backgrounds plain and uncluttered.",
+      "Expose for the candle, not the window."
+    ],
+    "constraint": null,
+    "theme": "Still Life",
+    "tags": [
+      "indoor",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f2-030",
+    "title": "Umbrella Drying",
+    "oneLiner": "Photograph a closed umbrella dripping or drying by the door.",
+    "details": "Find where wet gear lands after rain—a stand, mat, or corner. Capture fabric folds and droplets without stepping into traffic or weather. The scene should feel like a pause after coming home.",
+    "tips": [
+      "Shoot indoors where you are safe and dry.",
+      "Focus on fabric texture, not the floor mess.",
+      "Use ambient hall light rather than flash."
+    ],
+    "constraint": "No people or faces in frame.",
+    "theme": "Still Life",
+    "tags": [
+      "indoor",
+      "still-life",
+      "light"
+    ]
+  },
+  {
+    "id": "f2-031",
+    "title": "Desk Lamp Still",
+    "oneLiner": "Turn on a desk lamp and photograph it lighting one small object.",
+    "details": "Place a pen, stone, or cup in the pool of light and let the rest fall to shadow. The lamp itself can be partly in frame as the light source. Balance bright and dark areas so detail survives in both.",
+    "tips": [
+      "Lower phone exposure slightly to hold highlights.",
+      "Avoid pointing the lamp into the lens.",
+      "Crop so the lit object is the clear subject."
+    ],
+    "constraint": "Only one artificial light source allowed.",
+    "theme": "Still Life",
+    "tags": [
+      "indoor",
+      "light",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f2-032",
+    "title": "Garden Trowel on the Step",
+    "oneLiner": "Photograph a garden tool resting on outdoor steps after light yard work.",
+    "details": "Set a trowel, glove, or small pot on stone or wood steps near your door. Include a hint of soil or a leaf for context. Stay on your own property and keep the setup simple.",
+    "tips": [
+      "Shoot in open shade to avoid harsh sun.",
+      "Place the tool diagonally across the steps.",
+      "Wipe mud from your hands before handling the phone."
+    ],
+    "constraint": null,
+    "theme": "Still Life",
+    "tags": [
+      "outdoor",
+      "still-life",
+      "nature"
+    ]
+  },
+  {
+    "id": "f2-033",
+    "title": "Single Chair, Empty Room",
+    "oneLiner": "Frame one chair surrounded by open floor or wall space.",
+    "details": "Move furniture aside if needed so the chair sits in generous empty space. The emptiness should feel intentional, not accidental. Let walls and floor create a simple stage around the seat.",
+    "tips": [
+      "Stand back to show more empty space than chair.",
+      "Keep vertical lines straight in the frame.",
+      "Use soft daylight for even tones."
+    ],
+    "constraint": "At least sixty percent of the frame must be empty.",
+    "theme": "Negative Space",
+    "tags": [
+      "indoor",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f2-034",
+    "title": "Lone Mug on Counter",
+    "oneLiner": "Place one mug on a wide counter and leave most of the frame bare.",
+    "details": "Clear the counter except for a single mug placed off-center. The bare surface becomes the subject as much as the cup. Look for subtle texture in laminate, stone, or wood.",
+    "tips": [
+      "Push the mug toward a corner of the frame.",
+      "Avoid reflections of clutter in shiny counters.",
+      "Expose for the empty surface, not the mug."
+    ],
+    "constraint": null,
+    "theme": "Negative Space",
+    "tags": [
+      "indoor",
+      "minimal",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f2-035",
+    "title": "Corner Where Walls Meet",
+    "oneLiner": "Photograph an empty room corner where two walls and the ceiling meet.",
+    "details": "Find a clean corner and align your phone so lines converge calmly. Shadows along the seam add depth without needing objects. The image should feel quiet and architectural.",
+    "tips": [
+      "Hold the phone level to keep lines true.",
+      "Include a slice of floor for grounding.",
+      "Try monochrome for a graphic look."
+    ],
+    "constraint": "No objects larger than a light switch.",
+    "theme": "Negative Space",
+    "tags": [
+      "indoor",
+      "minimal",
+      "monochrome"
+    ]
+  },
+  {
+    "id": "f2-036",
+    "title": "Shadow on Blank Wall",
+    "oneLiner": "Catch one object's shadow stretching across an otherwise empty wall.",
+    "details": "Hold or place something simple—a plant, hand silhouette, or chair—between a light source and a blank wall. The shadow becomes the subject; the object may sit outside frame. Move until the shadow shape feels crisp or softly blurred.",
+    "tips": [
+      "Side light from a window makes longer shadows.",
+      "Keep the wall free of frames and switches if possible.",
+      "Tap exposure on the wall, not the window."
+    ],
+    "constraint": "The object casting the shadow stays out of frame.",
+    "theme": "Negative Space",
+    "tags": [
+      "indoor",
+      "light",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f2-037",
+    "title": "Sky Slice Above the Fence",
+    "oneLiner": "From your yard, frame mostly open sky with only a sliver of fence or wall top.",
+    "details": "Point upward so sky fills the frame and man-made edges sit along one border. Clouds or clear blue both work. Stay safely on ground level in your own outdoor space.",
+    "tips": [
+      "Keep the horizon line low in the frame.",
+      "Do not stare into bright sun through the lens.",
+      "Use grid lines to keep the edge level."
+    ],
+    "constraint": null,
+    "theme": "Negative Space",
+    "tags": [
+      "outdoor",
+      "minimal",
+      "nature"
+    ]
+  },
+  {
+    "id": "f2-038",
+    "title": "Open Drawer, Empty Gap",
+    "oneLiner": "Pull open a drawer and photograph the empty space inside it.",
+    "details": "Remove contents temporarily so the drawer cavity reads as a rectangle of space. Include the front edge for context. The goal is to make ordinary furniture feel like a geometric study.",
+    "tips": [
+      "Shoot straight on to square the rectangle.",
+      "Use daylight to avoid yellow indoor cast.",
+      "Close surrounding drawers to reduce clutter."
+    ],
+    "constraint": "Finish within ten minutes.",
+    "theme": "Negative Space",
+    "tags": [
+      "indoor",
+      "minimal",
+      "playful"
+    ]
+  },
+  {
+    "id": "f2-039",
+    "title": "Hanger on Bare Rod",
+    "oneLiner": "Hang a single empty hanger on a closet rod surrounded by open space.",
+    "details": "Clear neighboring clothes if needed so one hanger floats in calm space. The hook and shoulders make a subtle glyph against the wall. Soft closet light keeps the mood gentle.",
+    "tips": [
+      "Center the hanger or place it on a third line.",
+      "Avoid showing identifiable clothing elsewhere.",
+      "Use portrait orientation to emphasize emptiness."
+    ],
+    "constraint": "Only one hanger visible.",
+    "theme": "Negative Space",
+    "tags": [
+      "indoor",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f2-040",
+    "title": "Window Bright, Room Dark",
+    "oneLiner": "Expose for a bright window so the interior falls into silhouette.",
+    "details": "Stand inside and aim toward the window without including your reflection. Let the frame glow while furniture or walls become simple dark shapes. The contrast tells a story of inside versus out.",
+    "tips": [
+      "Tap the window to set exposure, then recompose.",
+      "Hide mirrors that might show you.",
+      "Shoot during daytime for a strong glow."
+    ],
+    "constraint": null,
+    "theme": "Negative Space",
+    "tags": [
+      "indoor",
+      "light"
+    ]
+  },
+  {
+    "id": "f2-041",
+    "title": "Hands Kneading Dough",
+    "oneLiner": "Photograph your own hands working dough on a floured counter.",
+    "details": "Set the phone on a stable surface or ask for a timer shot if available—but your hands must be yours. Capture flour dust, finger pressure, and the fold of dough. Crop at the wrists so faces stay out.",
+    "tips": [
+      "Wipe the lens if flour dusts it.",
+      "Use burst mode for the best gesture.",
+      "Side light from a window shows texture."
+    ],
+    "constraint": "Only your hands may appear in the photo.",
+    "theme": "Hands at Work",
+    "tags": [
+      "indoor",
+      "motion",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f2-042",
+    "title": "Peeling a Vegetable",
+    "oneLiner": "Show your hands mid-peel over a bowl or board.",
+    "details": "Start peeling a potato, carrot, or apple and photograph the motion paused or mid-strip. Include peel curls if they form. Keep the focus on fingers and tool, not your face.",
+    "tips": [
+      "Rest the phone against a jar for stability.",
+      "Shoot before the peel pile gets messy.",
+      "Focus on the blade edge and thumb grip."
+    ],
+    "constraint": null,
+    "theme": "Hands at Work",
+    "tags": [
+      "indoor",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f2-043",
+    "title": "Thread and Needle",
+    "oneLiner": "Capture your fingers guiding thread through a needle or fabric.",
+    "details": "Sit by a window with a simple mending task. Move in close on the pinch point where thread meets needle. The background should fall soft so the tiny action reads clearly.",
+    "tips": [
+      "Use macro mode if available for sharp thread.",
+      "Choose contrasting thread and fabric colors.",
+      "Brace your elbows on the table for steadiness."
+    ],
+    "constraint": "No zoom allowed.",
+    "theme": "Hands at Work",
+    "tags": [
+      "indoor",
+      "macro",
+      "light"
+    ]
+  },
+  {
+    "id": "f2-044",
+    "title": "Washing Dishes Motion",
+    "oneLiner": "Photograph your hands under running water with a sponge or dish.",
+    "details": "At the sink, catch the moment water sheets over a plate or glass. Your hands should feel active, not posed. Bubbles and splashes add life if they stay in focus.",
+    "tips": [
+      "Increase shutter speed if your phone allows.",
+      "Shoot from above the sink for clarity.",
+      "Keep the tap flow gentle to control splash."
+    ],
+    "constraint": "Capture motion without blur on the hands.",
+    "theme": "Hands at Work",
+    "tags": [
+      "indoor",
+      "motion",
+      "light"
+    ]
+  },
+  {
+    "id": "f2-045",
+    "title": "Folding Laundry Stack",
+    "oneLiner": "Show your hands smoothing a folded shirt or towel on a table.",
+    "details": "Mid-fold, pause with palms flat on fabric and shoot downward or from the side. Creases and alignment matter more than the brand of clothing. Stay cropped tight on hands and textile.",
+    "tips": [
+      "Choose a plain tabletop background.",
+      "Align folds parallel to the frame edge.",
+      "Use even daylight to show fabric texture."
+    ],
+    "constraint": null,
+    "theme": "Hands at Work",
+    "tags": [
+      "indoor",
+      "still-life",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f2-046",
+    "title": "Writing a Postcard",
+    "oneLiner": "Photograph your hand holding a pen over paper without readable private text.",
+    "details": "Begin a note or list and shoot from above as your hand moves. Blur or angle away any sensitive words. The pen tip and finger grip should be the sharpest elements.",
+    "tips": [
+      "Use burst mode while you write slowly.",
+      "Keep shadows from your phone off the page.",
+      "Choose a pen with a visible cap or clip."
+    ],
+    "constraint": "No legible words in the final image.",
+    "theme": "Hands at Work",
+    "tags": [
+      "indoor",
+      "still-life",
+      "light"
+    ]
+  },
+  {
+    "id": "f2-047",
+    "title": "Potting a Houseplant",
+    "oneLiner": "Capture your hands pressing soil around a plant on a table or patio.",
+    "details": "Repot or tidy a houseplant at a comfortable seated height. Show fingers tucking soil while leaves stay softly blurred. Work on your own balcony or table—no need for a garden plot.",
+    "tips": [
+      "Cover the table with newspaper for easy cleanup.",
+      "Focus on soil texture at the pot rim.",
+      "Shoot before your hands get too dirty for the phone."
+    ],
+    "constraint": "Shoot from above the pot only.",
+    "theme": "Hands at Work",
+    "tags": [
+      "outdoor",
+      "nature",
+      "macro"
+    ]
+  },
+  {
+    "id": "f2-048",
+    "title": "Opening a Jar Lid",
+    "oneLiner": "Show the grip of your hands twisting a jar lid on a counter.",
+    "details": "Choose a ordinary pantry jar and photograph the tension in your fingers and wrist. The jar label can appear but need not be readable. Keep the action honest—mid-twist works best.",
+    "tips": [
+      "Place the jar on a nonslip mat.",
+      "Shoot from counter height at a forty-five-degree angle.",
+      "Use continuous shooting for the strongest grip."
+    ],
+    "constraint": null,
+    "theme": "Hands at Work",
+    "tags": [
+      "indoor",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f2-049",
+    "title": "Rain Trails on Glass",
+    "oneLiner": "Photograph rain streaks on a windowpane from inside your home.",
+    "details": "Wait for droplets to run vertically and choose a section where background blur stays soft. The glass texture should feel layered—water on glass on world. Do not open the window in heavy weather.",
+    "tips": [
+      "Focus on droplets, not the distant view.",
+      "Avoid reflections of lamps behind you.",
+      "Increase exposure slightly for gray days."
+    ],
+    "constraint": "Shoot through glass only; stay indoors.",
+    "theme": "Windows and Doors",
+    "tags": [
+      "indoor",
+      "light",
+      "nature"
+    ]
+  },
+  {
+    "id": "f2-050",
+    "title": "Curtain Gap Light",
+    "oneLiner": "Frame the bright slit of daylight between partly drawn curtains.",
+    "details": "Close curtains until a narrow beam cuts through. Include fabric folds on one side and glowing window on the other. The slit itself should feel like the subject.",
+    "tips": [
+      "Expose for the bright gap to deepen room shadow.",
+      "Use a steady two-handed grip.",
+      "Try vertical orientation to emphasize the beam."
+    ],
+    "constraint": null,
+    "theme": "Windows and Doors",
+    "tags": [
+      "indoor",
+      "light",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f2-051",
+    "title": "Door Handle Portrait",
+    "oneLiner": "Photograph an interior door handle at an angle that shows wear and shine.",
+    "details": "Pick the handle you use daily and move close enough to see metal scratches or polish. Include part of the door panel for context but keep the handle dominant. Afternoon side light helps model the shape.",
+    "tips": [
+      "Wipe fingerprints if you want a cleaner look.",
+      "Avoid showing keys with readable codes.",
+      "Try a low angle looking slightly upward."
+    ],
+    "constraint": "Fill at least half the frame with the handle.",
+    "theme": "Windows and Doors",
+    "tags": [
+      "indoor",
+      "light",
+      "macro"
+    ]
+  },
+  {
+    "id": "f2-052",
+    "title": "Blinds and Shadow Bars",
+    "oneLiner": "Capture striped shadows cast by blinds across a wall or floor.",
+    "details": "Adjust blinds so parallel bars of light and dark repeat across a surface. Move until the stripes lead into the frame rather than cutting it awkwardly. The pattern should feel rhythmic and calm.",
+    "tips": [
+      "Shoot when sun angle makes crisp bars.",
+      "Include a corner for depth if it helps.",
+      "Convert to monochrome if colors clash."
+    ],
+    "constraint": "Use black and white only.",
+    "theme": "Windows and Doors",
+    "tags": [
+      "indoor",
+      "light",
+      "monochrome"
+    ]
+  },
+  {
+    "id": "f2-053",
+    "title": "Welcome Mat at the Threshold",
+    "oneLiner": "From your doorstep, photograph the mat just outside your entry door.",
+    "details": "Open the door safely and shoot downward at the mat and threshold. Include a slice of door frame if it anchors the scene. Stay on your own porch or landing—no need to step into public space.",
+    "tips": [
+      "Shoot in daylight for even color.",
+      "Keep your feet out of frame.",
+      "Hold the phone steady for sharp text on the mat."
+    ],
+    "constraint": null,
+    "theme": "Windows and Doors",
+    "tags": [
+      "outdoor",
+      "urban",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f2-054",
+    "title": "Frosted Bathroom Window",
+    "oneLiner": "Photograph diffused light through a frosted or textured bathroom window.",
+    "details": "Close the door for privacy and frame the glowing panel. Notice how objects outside become soft ghosts. The glass itself is the canvas—keep fixtures minimal in frame.",
+    "tips": [
+      "Turn off harsh overhead bulbs.",
+      "Do not include reflections of yourself.",
+      "Tap focus on the glass texture."
+    ],
+    "constraint": "No recognizable outdoor subjects.",
+    "theme": "Windows and Doors",
+    "tags": [
+      "indoor",
+      "light",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f2-055",
+    "title": "Key in the Lock",
+    "oneLiner": "Show your key partly turned in an entry lock from the outside.",
+    "details": "At your own front door, insert the key and pause before turning fully. Frame the cylinder, key bow, and a hint of door paint. Stay aware of surroundings and do not block shared hallways.",
+    "tips": [
+      "Shoot in shade to avoid metallic glare.",
+      "Crop tight on lock hardware.",
+      "Check that no address numbers are readable."
+    ],
+    "constraint": "Shoot from outside the door only.",
+    "theme": "Windows and Doors",
+    "tags": [
+      "outdoor",
+      "urban",
+      "macro"
+    ]
+  },
+  {
+    "id": "f3-001",
+    "title": "Staircase Steps as Lines",
+    "oneLiner": "Find a staircase and frame it so the steps draw clean diagonal lines through your shot.",
+    "details": "Look for stairs indoors or out where each tread repeats at a steady angle. Stand at the bottom or side so the steps lead the eye upward or across the frame. Plain daylight is enough; you are hunting shape, not drama.",
+    "tips": [
+      "Align your phone parallel to the step edges for the cleanest lines.",
+      "Include a handrail or wall at one edge to anchor the geometry."
+    ],
+    "constraint": "Shoot from the lowest step only.",
+    "theme": "Geometry Hunt",
+    "tags": [
+      "indoor",
+      "minimal",
+      "urban"
+    ]
+  },
+  {
+    "id": "f3-002",
+    "title": "Window Grid Portrait",
+    "oneLiner": "Photograph a building facade where windows form a repeating rectangular grid.",
+    "details": "Walk until you find a wall of evenly spaced windows or glass panels. Fill most of the frame with the pattern and keep the lines level. Overcast or bright sun both work because you are after repetition, not golden light.",
+    "tips": [
+      "Tap to focus on the glass, then slightly underexpose to keep reflections crisp.",
+      "Crop tight so the grid fills the frame edge to edge."
+    ],
+    "constraint": null,
+    "theme": "Geometry Hunt",
+    "tags": [
+      "outdoor",
+      "urban",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f3-003",
+    "title": "Circle in a Square Room",
+    "oneLiner": "Spot a circular object inside a square or rectangular space and make both shapes obvious.",
+    "details": "A clock on a wall, a plate on a table, or a round mirror in a hallway all count. Place the circle where it contrasts with straight edges nearby. Step back enough to show the room geometry around it.",
+    "tips": [
+      "Center the circle for a calm, graphic look.",
+      "Use portrait orientation if the room height helps the square feel."
+    ],
+    "constraint": "Include at least three straight edges in the frame.",
+    "theme": "Geometry Hunt",
+    "tags": [
+      "indoor",
+      "still-life",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f3-004",
+    "title": "Shadow Triangle Hunt",
+    "oneLiner": "Find a triangular shadow cast by everyday furniture or architecture in plain daylight.",
+    "details": "Open blinds, a chair leg, or an awning edge can all cut sharp triangles on a floor or wall. Move slowly and watch how the shape changes as you shift position. You want one clear triangle as the hero of the frame.",
+    "tips": [
+      "Increase contrast slightly in your editor if the shadow feels faint.",
+      "Place the triangle on a rule-of-thirds intersection."
+    ],
+    "constraint": null,
+    "theme": "Geometry Hunt",
+    "tags": [
+      "indoor",
+      "light"
+    ]
+  },
+  {
+    "id": "f3-005",
+    "title": "Parallel Parking Lines",
+    "oneLiner": "Frame painted parking lines or lane stripes so they run parallel from foreground to background.",
+    "details": "An empty lot or quiet side street is ideal. Crouch low so the lines stretch toward a vanishing point. You are photographing the lines themselves, not traffic or moving cars.",
+    "tips": [
+      "Keep the camera level with the ground for strong perspective.",
+      "Wait for the lot to be empty of vehicles in your frame."
+    ],
+    "constraint": "No vehicles visible in the shot.",
+    "theme": "Geometry Hunt",
+    "tags": [
+      "outdoor",
+      "urban",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f3-006",
+    "title": "Shelf Stack Symmetry",
+    "oneLiner": "Arrange or find stacked boxes, books, or cans that mirror each other across a shelf.",
+    "details": "Your kitchen, closet, or a store aisle can supply neat stacks. Stand square to the shelf so left and right feel balanced. Look for repeated heights and gaps that echo each other.",
+    "tips": [
+      "Shoot straight on to avoid skewed rectangles.",
+      "Remove one distracting item if it breaks the symmetry."
+    ],
+    "constraint": null,
+    "theme": "Geometry Hunt",
+    "tags": [
+      "indoor",
+      "still-life",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f3-007",
+    "title": "Corner Where Two Walls Meet",
+    "oneLiner": "Make a sharp interior or exterior corner the subject, with both walls equally visible.",
+    "details": "Stand close to where two flat surfaces meet at a right angle. Include the seam running through the frame. Plain wall colors or brick texture both work; the corner itself is the geometry.",
+    "tips": [
+      "Hold the phone so the vertical corner line stays truly vertical.",
+      "Step back if you need both walls to appear the same width."
+    ],
+    "constraint": "Shoot within arm's length of the corner.",
+    "theme": "Geometry Hunt",
+    "tags": [
+      "indoor",
+      "minimal",
+      "urban"
+    ]
+  },
+  {
+    "id": "f3-008",
+    "title": "Tile Diamond Repeat",
+    "oneLiner": "Fill the frame with floor or wall tiles whose grout lines form a repeating diamond or grid.",
+    "details": "Bathrooms, kitchens, and subway stations often hide strong patterns underfoot. Hold the phone flat above a floor section or straight at a tiled wall. Even lighting keeps the pattern readable.",
+    "tips": [
+      "Use grid lines on your camera to keep grout lines parallel to the edges.",
+      "Fill the entire frame with pattern; no floor edge needed."
+    ],
+    "constraint": null,
+    "theme": "Geometry Hunt",
+    "tags": [
+      "indoor",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f3-009",
+    "title": "Empty Crosswalk at Rest",
+    "oneLiner": "Capture a pedestrian crossing with no one on it, stripes leading across quiet pavement.",
+    "details": "Find a crosswalk on a calm block where you can stand safely on the sidewalk. Frame the white stripes against the darker road surface from an angle. The crossing should feel paused, not busy.",
+    "tips": [
+      "Shoot from the curb, never standing in the roadway.",
+      "Include a corner of the sidewalk to ground the scene."
+    ],
+    "constraint": "No people anywhere in the frame.",
+    "theme": "Quiet Streets",
+    "tags": [
+      "outdoor",
+      "urban",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f3-010",
+    "title": "Closed Shopfront Story",
+    "oneLiner": "Photograph a shuttered or quiet shop window that tells a small story through display and signage.",
+    "details": "Walk a commercial street until a closed or slow storefront catches your eye. Frame the window, awning, and door without including passersby. Read the scene like a still from a slow morning.",
+    "tips": [
+      "Stand slightly off-center to avoid your reflection in the glass.",
+      "Tap on the window text so lettering stays sharp."
+    ],
+    "constraint": null,
+    "theme": "Quiet Streets",
+    "tags": [
+      "outdoor",
+      "urban",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f3-011",
+    "title": "Park Bench Facing Away",
+    "oneLiner": "Find an empty bench on a quiet street or park path and shoot it from behind.",
+    "details": "The bench back becomes a simple silhouette against pavement or grass. Wait until the seat is unoccupied. Include a hint of the path or fence ahead to suggest solitude.",
+    "tips": [
+      "Crouch slightly so the bench back fills more of the frame.",
+      "Keep backgrounds soft by stepping closer to the bench."
+    ],
+    "constraint": "Bench must be empty.",
+    "theme": "Quiet Streets",
+    "tags": [
+      "outdoor",
+      "minimal",
+      "nature"
+    ]
+  },
+  {
+    "id": "f3-012",
+    "title": "Alley Perspective Line",
+    "oneLiner": "Shoot down a narrow alley or service lane where walls funnel toward a distant vanishing point.",
+    "details": "Choose an alley free of clutter and activity. Stand at one entrance and let the parallel walls guide the eye forward. Midday light is fine; you want depth and quiet, not moody weather.",
+    "tips": [
+      "Hold the phone at chest height for a natural corridor view.",
+      "Expose for the mid-tones so both walls retain texture."
+    ],
+    "constraint": "No people or vehicles in the alley.",
+    "theme": "Quiet Streets",
+    "tags": [
+      "outdoor",
+      "urban"
+    ]
+  },
+  {
+    "id": "f3-013",
+    "title": "Street Through Glass",
+    "oneLiner": "From indoors, photograph the quiet street outside through a window, keeping the glass layer visible.",
+    "details": "Stand inside a cafe, lobby, or your home near a street-facing window. Include a trace of frame, sill, or reflection so the view feels layered. Choose a moment when the sidewalk is calm.",
+    "tips": [
+      "Tap focus on the outdoor scene, then check if reflections add interest.",
+      "Clean one small patch of glass if smudges distract."
+    ],
+    "constraint": null,
+    "theme": "Quiet Streets",
+    "tags": [
+      "indoor",
+      "urban",
+      "light"
+    ]
+  },
+  {
+    "id": "f3-014",
+    "title": "Bike Rack Still Life",
+    "oneLiner": "Frame an empty bicycle rack on a sidewalk as a sculptural street object.",
+    "details": "Many racks form loops or grids that look abstract when nobody is parked. Shoot from the side or above on the sidewalk. Keep the background simple so the metal shape dominates.",
+    "tips": [
+      "Look for repeating loops that rhyme with pavement lines.",
+      "Plain daylight keeps metal edges crisp without harsh drama."
+    ],
+    "constraint": "No bicycles attached to the rack.",
+    "theme": "Quiet Streets",
+    "tags": [
+      "outdoor",
+      "urban",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f3-015",
+    "title": "Empty Path Ahead",
+    "oneLiner": "Photograph a quiet path stretching empty into the distance.",
+    "details": "Find a stretch of sidewalk, trail, or alley with no one on it. Let the path’s lines pull the eye toward the far end. An empty frame can feel calmer than any subject.",
+    "tips": [
+      "Crouch slightly to make the path feel longer.",
+      "Center the vanishing point for symmetry."
+    ],
+    "constraint": "No people anywhere in the frame.",
+    "theme": "Quiet Streets",
+    "tags": [
+      "outdoor",
+      "urban",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f3-016",
+    "title": "Mailbox Row Rhythm",
+    "oneLiner": "Line up a sequence of mailboxes or door numbers along a hushed residential sidewalk.",
+    "details": "Walk a quiet block and find repeating mailbox shapes or numbered doors. Frame them in a row receding along the fence or wall. The rhythm of identical objects creates calm order.",
+    "tips": [
+      "Shoot along the row at a slight angle for depth.",
+      "Keep your shadow out of the frame by shifting sideways."
+    ],
+    "constraint": null,
+    "theme": "Quiet Streets",
+    "tags": [
+      "outdoor",
+      "urban",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f3-017",
+    "title": "Single Leaf on Concrete",
+    "oneLiner": "Place or find one fallen leaf on plain pavement and make it the clear focal point.",
+    "details": "A sidewalk, patio, or driveway provides the neutral backdrop. Choose a leaf with an interesting edge or color against gray stone. Fill most of the frame with empty surface so the leaf feels discovered.",
+    "tips": [
+      "Shoot from directly above for a graphic look.",
+      "Tap to focus on the leaf veins for extra detail."
+    ],
+    "constraint": "Only one leaf in the frame.",
+    "theme": "Green Neighbors",
+    "tags": [
+      "outdoor",
+      "nature",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f3-018",
+    "title": "Houseplant Window Light",
+    "oneLiner": "Photograph a houseplant on a windowsill with daylight wrapping its leaves.",
+    "details": "Set or find a pot near a window in your home. Let soft daylight outline the leaves without needing direct sun. Show both plant and sill so the indoor setting reads clearly.",
+    "tips": [
+      "Expose for the leaves so the window does not blow out completely.",
+      "Try shooting through leaves at a slight angle for depth."
+    ],
+    "constraint": null,
+    "theme": "Green Neighbors",
+    "tags": [
+      "indoor",
+      "light",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f3-019",
+    "title": "Moss in a Brick Crack",
+    "oneLiner": "Find green moss or a tiny weed growing from a crack in brick or stone outdoors.",
+    "details": "Old walls, garden paths, and steps often host small green tenants. Move close enough to see texture in the moss and mortar. This is a portrait of persistence in a narrow space.",
+    "tips": [
+      "Use macro mode if your phone offers it.",
+      "Shield direct glare with your body if the wall is shiny."
+    ],
+    "constraint": "Fill at least half the frame with the crack detail.",
+    "theme": "Green Neighbors",
+    "tags": [
+      "outdoor",
+      "macro",
+      "nature"
+    ]
+  },
+  {
+    "id": "f3-020",
+    "title": "Herb Cluster on a Counter",
+    "oneLiner": "Group a few kitchen herbs or greens on a counter and shoot them like a tiny garden.",
+    "details": "Basil, parsley, or even grocery lettuce can stand in. Arrange pots or cut sprigs on a plain surface near a window. Keep the background uncluttered so the green reads fresh.",
+    "tips": [
+      "Spritz leaves lightly with water for subtle shine.",
+      "Shoot at table height, not overhead, for intimacy."
+    ],
+    "constraint": null,
+    "theme": "Green Neighbors",
+    "tags": [
+      "indoor",
+      "still-life",
+      "macro"
+    ]
+  },
+  {
+    "id": "f3-021",
+    "title": "Tree Trunk Texture Study",
+    "oneLiner": "Move close to a tree trunk outdoors and fill the frame with bark pattern and color.",
+    "details": "Pick any accessible tree in a yard or park. Trace the ridges, lichen, and splits with your camera. You are not photographing the whole tree, just its skin up close.",
+    "tips": [
+      "Avoid wide-angle distortion by stepping back and using a mild zoom.",
+      "Look for a patch where light grazes the bark sideways."
+    ],
+    "constraint": "No sky visible in the shot.",
+    "theme": "Green Neighbors",
+    "tags": [
+      "outdoor",
+      "nature",
+      "macro"
+    ]
+  },
+  {
+    "id": "f3-022",
+    "title": "Succulent From Above",
+    "oneLiner": "Photograph a succulent or small potted plant from directly overhead to reveal radial symmetry.",
+    "details": "A desk succulent or windowsill cactus works perfectly indoors. Hold the phone parallel to the pot rim so leaves form circles and spirals. Even indoor lighting is enough for this graphic study.",
+    "tips": [
+      "Use a plain mat or plate under the pot to simplify the background.",
+      "Tap the center rosette for sharp focus."
+    ],
+    "constraint": null,
+    "theme": "Green Neighbors",
+    "tags": [
+      "indoor",
+      "minimal",
+      "macro"
+    ]
+  },
+  {
+    "id": "f3-023",
+    "title": "Ivy on a Garden Wall",
+    "oneLiner": "Frame climbing ivy or vines where they meet a wall corner outdoors.",
+    "details": "Find a boundary wall or fence with green growth. Show how leaves overlap brick or wood. Step back slightly so the wall geometry and vine flow share the frame.",
+    "tips": [
+      "Shoot in open shade if leaves look too shiny in direct sun.",
+      "Include the corner where vine meets masonry for structure."
+    ],
+    "constraint": "Show both wall and vine in equal measure.",
+    "theme": "Green Neighbors",
+    "tags": [
+      "outdoor",
+      "nature",
+      "urban"
+    ]
+  },
+  {
+    "id": "f3-024",
+    "title": "Sprout in a Recycled Pot",
+    "oneLiner": "Capture a small seedling or cutting in a simple cup or jar on a sunny indoor ledge.",
+    "details": "Reuse a yogurt cup or glass with a young plant or rooted cutting. Place it where daylight falls from one side. The story is small-scale gardening at home, not a perfect greenhouse.",
+    "tips": [
+      "Darken the background behind the sprout for separation.",
+      "Include the container label or soil line for context."
+    ],
+    "constraint": null,
+    "theme": "Green Neighbors",
+    "tags": [
+      "indoor",
+      "still-life",
+      "light"
+    ]
+  },
+  {
+    "id": "f3-025",
+    "title": "Cloud Shape Catalog",
+    "oneLiner": "Point your camera upward and photograph one distinct cloud shape against open sky.",
+    "details": "Any daytime sky with visible clouds will do. Isolate a single puff, streak, or layer rather than a busy panorama. Keep buildings and trees out if you can so the cloud floats cleanly.",
+    "tips": [
+      "Underexpose slightly to preserve blue depth around white cloud.",
+      "Use burst mode if the cloud is slowly changing shape."
+    ],
+    "constraint": "One dominant cloud only.",
+    "theme": "Sky Diary",
+    "tags": [
+      "outdoor",
+      "minimal",
+      "nature"
+    ]
+  },
+  {
+    "id": "f3-026",
+    "title": "Sky Slice Through Blinds",
+    "oneLiner": "Shoot the sky in bands as seen through partially closed indoor window blinds.",
+    "details": "Tilt blinds so horizontal gaps reveal bright sky outside. Include the slats as dark stripes framing light. You are diary-entry sky watching without leaving the room.",
+    "tips": [
+      "Focus on the nearest slat edge to keep lines sharp.",
+      "Try different blind angles until the sky bands feel balanced."
+    ],
+    "constraint": null,
+    "theme": "Sky Diary",
+    "tags": [
+      "indoor",
+      "light",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f3-027",
+    "title": "Contrail Crossing Blue",
+    "oneLiner": "Photograph a single airplane contrail cutting across an otherwise clear blue sky.",
+    "details": "Look up on any fair day for a thin white line arcing overhead. Rotate the phone so the trail crosses the frame diagonally. No special timing needed beyond noticing the line before it fades.",
+    "tips": [
+      "Avoid including buildings unless they anchor scale nicely.",
+      "Tap the sky to prevent the trail from overexposing."
+    ],
+    "constraint": "No buildings in the lower third.",
+    "theme": "Sky Diary",
+    "tags": [
+      "outdoor",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f3-028",
+    "title": "Moon in Daylight Sky",
+    "oneLiner": "Find the moon visible during daylight and capture it small against pale blue.",
+    "details": "The moon often hangs faintly in afternoon or morning sky. Zoom modestly if your phone allows, but keep noise acceptable. A bare tree branch can frame it without dominating.",
+    "tips": [
+      "Lower exposure until the moon disk shows detail.",
+      "Steady your elbows on a railing or wall."
+    ],
+    "constraint": null,
+    "theme": "Sky Diary",
+    "tags": [
+      "outdoor",
+      "nature"
+    ]
+  },
+  {
+    "id": "f3-029",
+    "title": "Storm Cloud Edge",
+    "oneLiner": "Photograph the boundary where dark cloud mass meets lighter sky, even on a mild day.",
+    "details": "You do not need a storm overhead, just visible contrast between cloud layers. Frame the edge where tones shift. Stay safely on ground under cover if wind picks up.",
+    "tips": [
+      "Shoot upward from a porch or doorway if that feels safer.",
+      "Keep the horizon out for an abstract sky study."
+    ],
+    "constraint": "Stay under shelter if wind is strong.",
+    "theme": "Sky Diary",
+    "tags": [
+      "outdoor",
+      "light"
+    ]
+  },
+  {
+    "id": "f3-030",
+    "title": "Sky Reflected in Glass",
+    "oneLiner": "Capture sky color and clouds reflected in a building window or calm glass surface.",
+    "details": "Walk until a facade mirrors the sky like a second canvas. Angle yourself to reduce your own reflection. The photo should read as sky, with glass texture as a subtle clue.",
+    "tips": [
+      "Polarized sunglasses off your head help avoid odd reflections.",
+      "Step sideways until clouds align inside the pane."
+    ],
+    "constraint": null,
+    "theme": "Sky Diary",
+    "tags": [
+      "outdoor",
+      "urban",
+      "light"
+    ]
+  },
+  {
+    "id": "f3-031",
+    "title": "Sun Behind Thin Cloud",
+    "oneLiner": "Photograph the sun softened by a thin cloud veil, never staring directly at a bare disk.",
+    "details": "Wait until high cloud diffuses the sun into a glowing patch. Never aim at an unfiltered bright sun; safety comes first. The goal is gentle luminance, not a starburst.",
+    "tips": [
+      "Use cloud cover as your natural filter.",
+      "Hide the brightest core partly behind a chimney or treetop if needed."
+    ],
+    "constraint": "Do not photograph an unobscured direct sun.",
+    "theme": "Sky Diary",
+    "tags": [
+      "outdoor",
+      "light"
+    ]
+  },
+  {
+    "id": "f3-032",
+    "title": "Sky Gradient From a Window",
+    "oneLiner": "Frame a clean gradient from horizon to zenith through an open window indoors.",
+    "details": "Stand inside and compose the window so sky fills the opening. Include a sliver of frame for context. Midday gradients from pale horizon to deeper blue work beautifully.",
+    "tips": [
+      "Clean the window glass on the sky side first.",
+      "Hold the phone steady against the frame to reduce shake."
+    ],
+    "constraint": null,
+    "theme": "Sky Diary",
+    "tags": [
+      "indoor",
+      "minimal",
+      "light"
+    ]
+  },
+  {
+    "id": "f3-033",
+    "title": "Spinning Umbrella Blur",
+    "oneLiner": "Spin a closed umbrella or similar object and capture circular motion blur indoors or out.",
+    "details": "Hold the handle and rotate it while shooting a burst or using a slower shutter if available. The ribs should trace soft arcs. Plain background helps the blur read clearly.",
+    "tips": [
+      "Try Live Photo or motion mode if your phone supports it.",
+      "Keep your body still while only the object moves."
+    ],
+    "constraint": "Use a plain background with no clutter.",
+    "theme": "Motion Trails",
+    "tags": [
+      "indoor",
+      "motion",
+      "playful"
+    ]
+  },
+  {
+    "id": "f3-034",
+    "title": "Swing at the Park",
+    "oneLiner": "Photograph empty playground swings mid-sway, letting chains blur slightly against sky.",
+    "details": "Visit a quiet playground and gently push a swing yourself or wait for a breeze. Frame one seat against open sky or soft background. Stay off active play structures beyond what you need.",
+    "tips": [
+      "Burst mode catches the arc at different heights.",
+      "Focus on the seat; let chains streak."
+    ],
+    "constraint": "Playground must be empty of other people.",
+    "theme": "Motion Trails",
+    "tags": [
+      "outdoor",
+      "motion",
+      "playful"
+    ]
+  },
+  {
+    "id": "f3-035",
+    "title": "Escalator Step Flow",
+    "oneLiner": "From the landing, shoot a stopped escalator's ribbed steps as repeating motion lines.",
+    "details": "Use a stationary escalator in a mall or transit station when no one is on it. Angle down the slope so grooves draw the eye forward. You are suggesting movement through pattern, not riding.",
+    "tips": [
+      "Never step onto moving machinery for a photo.",
+      "Expose for the metal tones to keep ridges visible."
+    ],
+    "constraint": "Escalator must be stopped or you shoot from the landing only.",
+    "theme": "Motion Trails",
+    "tags": [
+      "indoor",
+      "urban",
+      "motion"
+    ]
+  },
+  {
+    "id": "f3-036",
+    "title": "Fan Blades as Smears",
+    "oneLiner": "Photograph a room fan or desk fan running so blades become soft circular smears.",
+    "details": "Turn on a household fan against a plain wall. Shoot straight on with automatic exposure; blur appears naturally. The guard grid can add an interesting foreground layer.",
+    "tips": [
+      "Do not stick fingers or objects through the guard.",
+      "Lower room lights slightly so blur stands out."
+    ],
+    "constraint": null,
+    "theme": "Motion Trails",
+    "tags": [
+      "indoor",
+      "motion",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f3-037",
+    "title": "Flag Flutter Freeze",
+    "oneLiner": "Capture a flag or banner outdoors on a breezy day, choosing either crisp fold or soft blur.",
+    "details": "Find any flag on a pole or fabric hung outside a shop. Decide whether to freeze fabric with fast shutter or show motion with burst shots. Plain sky or wall behind keeps attention on the cloth.",
+    "tips": [
+      "Shoot many frames; fabric peaks at random moments.",
+      "Step back so the full flag fits without cutting the pole awkwardly."
+    ],
+    "constraint": "Take ten shots and keep the most dynamic one.",
+    "theme": "Motion Trails",
+    "tags": [
+      "outdoor",
+      "motion"
+    ]
+  },
+  {
+    "id": "f3-038",
+    "title": "Pouring Water Stream",
+    "oneLiner": "Pour water from a pitcher into a glass indoors and capture the flowing stream mid-pour.",
+    "details": "Set up at a sink or table with a clear glass and simple backdrop. Pour steadily while firing burst mode. You are tracing liquid motion in a controlled, safe setting.",
+    "tips": [
+      "Backlight from a window helps the stream glow.",
+      "Use a towel below; mess is part of the process."
+    ],
+    "constraint": null,
+    "theme": "Motion Trails",
+    "tags": [
+      "indoor",
+      "motion",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f3-039",
+    "title": "Self Spinning Background",
+    "oneLiner": "Stand in one spot outdoors and pan your phone slowly while a fixed object stays centered.",
+    "details": "Choose a lamppost, sign, or tree as your anchor. Rotate your body so the background streaks while the anchor stays sharp if you track it. Practice twice to get a smooth arc.",
+    "tips": [
+      "Start the pan before you press shutter.",
+      "Keep feet planted to avoid dizziness."
+    ],
+    "constraint": "Anchor object stays dead center.",
+    "theme": "Motion Trails",
+    "tags": [
+      "outdoor",
+      "motion",
+      "playful"
+    ]
+  },
+  {
+    "id": "f3-040",
+    "title": "Drawer Slide Sequence",
+    "oneLiner": "Pull a drawer or cabinet open while shooting so contents blur horizontally across the frame.",
+    "details": "Use a kitchen or desk drawer with visible items inside. Pull smoothly with one hand while recording a Live Photo or short burst with the other. The motion trail tells a small domestic story.",
+    "tips": [
+      "Empty fragile items first if they might tumble.",
+      "Stand square to the drawer face for clean horizontal blur."
+    ],
+    "constraint": "One hand opens, one hand shoots.",
+    "theme": "Motion Trails",
+    "tags": [
+      "indoor",
+      "motion",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f3-041",
+    "title": "Knit Sweater Weave",
+    "oneLiner": "Fill the frame with the repeating weave of a knit sweater, blanket, or scarf.",
+    "details": "Lay fabric flat on a bed or drape it over a chair near window light. Move close until stitches form a wild texture field. Any color works; pattern is the star.",
+    "tips": [
+      "Rake light sideways to pop each loop.",
+      "Avoid wide-angle at extreme close range to reduce distortion."
+    ],
+    "constraint": null,
+    "theme": "Wild Patterns",
+    "tags": [
+      "indoor",
+      "macro",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f3-042",
+    "title": "Peeling Paint Layers",
+    "oneLiner": "Find chipped or peeling paint on wood or metal and photograph the layered edges abstractly.",
+    "details": "Old doors, benches, and garden furniture often show curled paint flakes. Move close until the frame feels like terrain maps. You are not documenting damage, just celebrating texture.",
+    "tips": [
+      "Soft open shade keeps highlights from clipping.",
+      "Rotate the phone until cracks run diagonally."
+    ],
+    "constraint": "Fill the entire frame with texture; no context edges.",
+    "theme": "Wild Patterns",
+    "tags": [
+      "outdoor",
+      "macro",
+      "urban"
+    ]
+  },
+  {
+    "id": "f3-043",
+    "title": "Citrus Slice Mandala",
+    "oneLiner": "Arrange citrus slices or other cut fruit in a circular pattern on a plain plate.",
+    "details": "Cut oranges, lemons, or limes and place them radiating from center. Shoot from above on a counter. Juice stains on the plate can add honest kitchen character.",
+    "tips": [
+      "Blot excess juice so slices stay defined.",
+      "Use a white plate for maximum color pop."
+    ],
+    "constraint": null,
+    "theme": "Wild Patterns",
+    "tags": [
+      "indoor",
+      "still-life",
+      "playful"
+    ]
+  },
+  {
+    "id": "f3-044",
+    "title": "Grate and Shadow Grid",
+    "oneLiner": "Photograph a metal grate, vent, or sieve so its holes cast a tight dot pattern.",
+    "details": "Hold or prop the grate where daylight passes through onto a surface, or shoot the grate itself filling the frame. The repeating holes become an abstract field. Kitchen and garage both supply props.",
+    "tips": [
+      "Move closer until circles nearly touch edge to edge.",
+      "Keep the camera parallel to the grate plane."
+    ],
+    "constraint": "Pattern must cover at least ninety percent of the frame.",
+    "theme": "Wild Patterns",
+    "tags": [
+      "indoor",
+      "light",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f3-045",
+    "title": "Book Page Edge Forest",
+    "oneLiner": "Stack old books and shoot their page edges so they look like a striped paper forest.",
+    "details": "Choose books of different thicknesses and align them on a shelf or table. Photograph from the side where pages form vertical lines. Slight color variation between books adds rhythm.",
+    "tips": [
+      "Use a narrow depth by staying close to the nearest book.",
+      "Dust is fine; it adds authenticity."
+    ],
+    "constraint": null,
+    "theme": "Wild Patterns",
+    "tags": [
+      "indoor",
+      "still-life",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f3-046",
+    "title": "Oil on Water Swirls",
+    "oneLiner": "Float a drop of cooking oil in a shallow dish of water and photograph the rainbow swirls.",
+    "details": "Use a white bowl, a little water, and a tiny oil splash under window light. Swirl gently with a spoon handle. Abstract color bands appear instantly without any special gear.",
+    "tips": [
+      "Shoot straight down before the oil separates too much.",
+      "A drop of dish soap changes patterns; experiment once."
+    ],
+    "constraint": "Use only kitchen-safe materials.",
+    "theme": "Wild Patterns",
+    "tags": [
+      "indoor",
+      "macro",
+      "playful"
+    ]
+  },
+  {
+    "id": "f3-047",
+    "title": "Fence Shadow Lattice",
+    "oneLiner": "Capture the repeating shadow of a fence or railing cast on ground or wall in daylight.",
+    "details": "Any picket fence, balcony rail, or gate can paint stripes on a surface. Walk along until the shadow falls on clean pavement or siding. The pattern is the subject, not the fence itself.",
+    "tips": [
+      "Midday sun makes short, graphic shadows.",
+      "Keep your feet out of the shadow grid."
+    ],
+    "constraint": null,
+    "theme": "Wild Patterns",
+    "tags": [
+      "outdoor",
+      "light",
+      "urban"
+    ]
+  },
+  {
+    "id": "f3-048",
+    "title": "Bubble Wrap Landscape",
+    "oneLiner": "Turn bubble wrap or packing material into an alien terrain by shooting it extremely close.",
+    "details": "Reuse packaging from a recent delivery. Stretch or flatten a section under soft indoor light. Each dome becomes a hill in a miniature world.",
+    "tips": [
+      "Side light makes domes look spherical.",
+      "Deflate a few bubbles with a pin for variety if you like."
+    ],
+    "constraint": "No recognizable objects beyond the wrap.",
+    "theme": "Wild Patterns",
+    "tags": [
+      "indoor",
+      "macro",
+      "playful"
+    ]
+  },
+  {
+    "id": "f3-049",
+    "title": "Ceiling Fixture Portrait",
+    "oneLiner": "Look straight up at a ceiling light, fan, or medallion and make it the symmetrical hero.",
+    "details": "Indoors, stand beneath a ceiling feature and compose it centered. Include a ring of ceiling for context. Even flat ceiling paint can frame a pendant nicely.",
+    "tips": [
+      "Turn the fixture on only if it does not glare harshly.",
+      "Use ultrawide sparingly to avoid bending straight lines."
+    ],
+    "constraint": null,
+    "theme": "Looking Up",
+    "tags": [
+      "indoor",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f3-050",
+    "title": "Tree Canopy Tunnel",
+    "oneLiner": "Stand under a tree outdoors and photograph branches framing a patch of sky above.",
+    "details": "Move to the trunk and point upward so limbs radiate outward. Leaves can be dense or sparse; either reads as a natural cathedral. Avoid stepping into streets or uneven ground.",
+    "tips": [
+      "Rotate until one bright sky hole sits near center.",
+      "Lock exposure on the sky to silhouette branches."
+    ],
+    "constraint": "Include the trunk edge in one corner.",
+    "theme": "Looking Up",
+    "tags": [
+      "outdoor",
+      "nature"
+    ]
+  },
+  {
+    "id": "f3-051",
+    "title": "Building Crown From Below",
+    "oneLiner": "Shoot upward at a building top so edges and cornices converge toward the sky.",
+    "details": "Stand safely on the sidewalk at the base of an interesting facade. Tilt up until ornament, windows, or upper edge meet sky. You are celebrating architecture from a worm's-eye view.",
+    "tips": [
+      "Keep vertical lines as upright as your lens allows.",
+      "Step back across the street if the building feels too tall in frame."
+    ],
+    "constraint": null,
+    "theme": "Looking Up",
+    "tags": [
+      "outdoor",
+      "urban"
+    ]
+  },
+  {
+    "id": "f3-052",
+    "title": "Skylight Rectangle Glow",
+    "oneLiner": "Photograph an indoor skylight or ceiling window from below as a bright floating rectangle.",
+    "details": "Find a mall, atrium, or home skylight and stand beneath it. Frame the glass bright against surrounding ceiling. Cloudy or clear day both work; the shape matters more than weather.",
+    "tips": [
+      "Tap the bright pane to manage highlight clipping.",
+      "Include ceiling beams if they point toward the skylight."
+    ],
+    "constraint": "Camera must point within thirty degrees of straight up.",
+    "theme": "Looking Up",
+    "tags": [
+      "indoor",
+      "light",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f3-053",
+    "title": "Chandelier Crystal Rain",
+    "oneLiner": "Look up at a chandelier or hanging light fixture and catch glints on glass or metal parts.",
+    "details": "Hotels, lobbies, and dining rooms often have pendant lights worth a upward glance. Move until prisms scatter small highlights. Shoot handheld with steady elbows.",
+    "tips": [
+      "Slightly lower exposure preserves sparkle detail.",
+      "Fill the frame mostly with the fixture, not the ceiling."
+    ],
+    "constraint": null,
+    "theme": "Looking Up",
+    "tags": [
+      "indoor",
+      "light",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f3-054",
+    "title": "Power Lines Against Sky",
+    "oneLiner": "Frame utility wires or cables crossing open sky from a safe sidewalk vantage.",
+    "details": "Look up along a quiet street for lines slicing the blue. Let them diagonally divide the frame. You are not near the poles; stay on the ground at a distance.",
+    "tips": [
+      "Include a sliver of building edge if it anchors the scene.",
+      "Watch for birds perched on lines as a bonus accent."
+    ],
+    "constraint": "Stay on ground level; do not climb poles.",
+    "theme": "Looking Up",
+    "tags": [
+      "outdoor",
+      "urban",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f3-055",
+    "title": "Stairwell Skywell",
+    "oneLiner": "Photograph a multi-story stairwell or atrium opening upward toward a bright top floor.",
+    "details": "Many apartment and office stairs reveal stacked landings leading to a skylight or ceiling. Stand on a lower landing safely and shoot up the well. Railings form repeating frames as they climb.",
+    "tips": [
+      "Hold the railing with one hand for stability, not for climbing over.",
+      "Center the opening so landings spiral symmetrically if possible."
+    ],
+    "constraint": null,
+    "theme": "Looking Up",
+    "tags": [
+      "indoor",
+      "urban",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f4-001",
+    "title": "Kitchen Shadows in Mono",
+    "oneLiner": "Turn your kitchen into a black-and-white study of light and deep shadow.",
+    "details": "Set your phone to monochrome or convert after shooting. Look for strong side light from a window or lamp cutting across counters, utensils, or a mug. Frame so the brightest area draws the eye and the shadows hold detail. Move slowly and shoot several angles before the light shifts.",
+    "tips": [
+      "Expose for the highlights and let shadows go deep.",
+      "Use a plain background so shapes read clearly.",
+      "Tap to focus on the edge where light meets dark."
+    ],
+    "constraint": "Include only one main subject in the frame.",
+    "theme": "Black and White",
+    "tags": [
+      "indoor",
+      "light",
+      "minimal",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f4-002",
+    "title": "Window Light Still Life",
+    "oneLiner": "Place one ordinary object in window light and photograph it in black and white.",
+    "details": "Choose something simple—a bowl, book, or bottle—and set it where soft daylight falls across it. Shoot in monochrome or desaturate later. Watch how the light wraps the form and leaves a gentle gradient on the surface behind it.",
+    "tips": [
+      "Turn off overhead lights to keep the mood soft.",
+      "Shoot with the window to your side, not behind the object.",
+      "Move closer to simplify the background."
+    ],
+    "constraint": "Use natural window light only—no flash.",
+    "theme": "Black and White",
+    "tags": [
+      "indoor",
+      "light",
+      "still-life",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f4-003",
+    "title": "Bark Texture Study",
+    "oneLiner": "Find tree bark and fill the frame with its rough monochrome texture.",
+    "details": "Walk to the nearest tree and move in until bark pattern dominates the image. Shoot in black and white to emphasize ridges, cracks, and tonal variation. Keep the frame tight so it feels abstract rather than like a landscape snapshot.",
+    "tips": [
+      "Hold the phone steady and tap to focus on mid-bark.",
+      "Try a slight angle instead of shooting flat-on.",
+      "Look for a zone where light and shadow cross the texture."
+    ],
+    "constraint": null,
+    "theme": "Black and White",
+    "tags": [
+      "outdoor",
+      "nature",
+      "macro",
+      "monochrome"
+    ]
+  },
+  {
+    "id": "f4-004",
+    "title": "Stripes and Lines",
+    "oneLiner": "Hunt for repeating lines indoors and compose them as a bold black-and-white graphic.",
+    "details": "Blinds, stair rails, tile grout, or stacked books can become strong linear patterns. Convert to monochrome and align the lines diagonally or vertically for tension. Step back or move closer until the pattern fills the frame without clutter.",
+    "tips": [
+      "Keep the horizon level if lines are horizontal.",
+      "Eliminate color distractions by shooting in mono mode.",
+      "Try shooting from a low angle to lengthen the lines."
+    ],
+    "constraint": "No curved shapes—straight lines only.",
+    "theme": "Black and White",
+    "tags": [
+      "indoor",
+      "minimal",
+      "monochrome"
+    ]
+  },
+  {
+    "id": "f4-005",
+    "title": "Mug and Spoon Portrait",
+    "oneLiner": "Pair a mug with a spoon and treat them like a small black-and-white portrait.",
+    "details": "Set a mug and spoon on a plain surface near a light source. Shoot in monochrome and arrange the spoon so it leads the eye toward the mug handle or rim. Keep the background simple so the two shapes feel intentional.",
+    "tips": [
+      "Place the spoon at an angle for visual energy.",
+      "Use a cloth or napkin to control reflections on metal.",
+      "Shoot from slightly above table height."
+    ],
+    "constraint": "Both objects must touch the same surface.",
+    "theme": "Black and White",
+    "tags": [
+      "indoor",
+      "still-life",
+      "minimal",
+      "monochrome"
+    ]
+  },
+  {
+    "id": "f4-006",
+    "title": "Urban Geometry Up Close",
+    "oneLiner": "Find building edges and frames that read as sharp black-and-white shapes.",
+    "details": "Look up or along a wall for corners, windows, or railings that form clean geometry. Shoot in monochrome to flatten color noise and highlight contrast between stone, glass, and sky. Fill the frame with structure rather than a wide street scene.",
+    "tips": [
+      "Avoid including people or identifiable faces.",
+      "Expose for bright sky or facade depending on your story.",
+      "Use grid lines to align vertical edges."
+    ],
+    "constraint": null,
+    "theme": "Black and White",
+    "tags": [
+      "outdoor",
+      "urban",
+      "minimal",
+      "monochrome"
+    ]
+  },
+  {
+    "id": "f4-007",
+    "title": "Fabric Folds in Gray",
+    "oneLiner": "Drape a towel or shirt and photograph the soft folds as a grayscale sculpture.",
+    "details": "Lay or hang fabric where light can rake across it. Shoot in black and white and move around until the folds create a rhythm of light and dark bands. The goal is to make everyday cloth feel like carved stone.",
+    "tips": [
+      "Use side light from a lamp or window.",
+      "Avoid busy prints—solid colors convert best.",
+      "Get close enough that seams disappear."
+    ],
+    "constraint": "Fill at least eighty percent of the frame with fabric.",
+    "theme": "Black and White",
+    "tags": [
+      "indoor",
+      "light",
+      "still-life",
+      "monochrome"
+    ]
+  },
+  {
+    "id": "f4-008",
+    "title": "Cloud Tones Above",
+    "oneLiner": "Point your camera at the sky and capture a full range of gray cloud tones.",
+    "details": "On an overcast or partly cloudy day, shoot upward so clouds fill the frame. Use monochrome mode to study how bright highlights fade into mid-gray and deep shadow. Keep trees or buildings out of the shot so the sky is the entire subject.",
+    "tips": [
+      "Tap the sky to set exposure, then recompose.",
+      "Shoot a few frames as clouds drift.",
+      "Hold the phone steady to keep edges crisp."
+    ],
+    "constraint": "No ground or buildings in frame.",
+    "theme": "Black and White",
+    "tags": [
+      "outdoor",
+      "nature",
+      "minimal",
+      "monochrome"
+    ]
+  },
+  {
+    "id": "f4-009",
+    "title": "Salt Crystal Close-Up",
+    "oneLiner": "Pour a pinch of salt and explore its tiny crystal landscape with your phone.",
+    "details": "Scatter salt on a dark plate or counter and move in as close as your phone allows. Crop tighter afterward if needed. Look for glittering facets and irregular peaks that feel like a miniature mountain range.",
+    "tips": [
+      "Use bright side light to make crystals sparkle.",
+      "Tap focus on the sharpest grains in front.",
+      "A dark background makes white salt pop."
+    ],
+    "constraint": "Shoot from no farther than six inches away.",
+    "theme": "Tiny Worlds",
+    "tags": [
+      "indoor",
+      "macro",
+      "minimal",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f4-010",
+    "title": "Button on Fabric",
+    "oneLiner": "Make a single shirt button look like a monument in a cloth landscape.",
+    "details": "Button up a shirt or jacket and photograph one button surrounded by fabric weave. Get close, then crop so threads look like fields and the button like a round building. Keep the scene still and evenly lit.",
+    "tips": [
+      "Use indirect daylight or a soft lamp.",
+      "Align the button slightly off-center.",
+      "Hold breath briefly when tapping the shutter."
+    ],
+    "constraint": null,
+    "theme": "Tiny Worlds",
+    "tags": [
+      "indoor",
+      "macro",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f4-011",
+    "title": "Fork Tine Forest",
+    "oneLiner": "Turn fork tines into a strange metal forest seen from ground level.",
+    "details": "Lay a fork on its side and shoot along the tines toward the tips. Move in close so the spaces between tines feel like alleys or trees. A plain surface behind the fork keeps the tiny world believable.",
+    "tips": [
+      "Place a sheet of paper behind for a clean backdrop.",
+      "Shoot from table height, not overhead.",
+      "Wipe the fork to avoid greasy smudges in macro."
+    ],
+    "constraint": "Show only the fork—no food in frame.",
+    "theme": "Tiny Worlds",
+    "tags": [
+      "indoor",
+      "macro",
+      "still-life",
+      "playful"
+    ]
+  },
+  {
+    "id": "f4-012",
+    "title": "Pencil Tip Horizon",
+    "oneLiner": "Fill the frame with a sharpened pencil tip like a lone peak on the horizon.",
+    "details": "Hold or prop a pencil so the tip points upward and fill most of the frame with wood grain and graphite. Crop after shooting if the tip feels too small. The wood body can become sky and the tip a sharp mountain.",
+    "tips": [
+      "Use a neutral background behind the pencil.",
+      "Tap focus precisely on the graphite point.",
+      "Try rotating the pencil for different leading lines."
+    ],
+    "constraint": "The pencil tip must touch the top third of the frame.",
+    "theme": "Tiny Worlds",
+    "tags": [
+      "indoor",
+      "macro",
+      "minimal",
+      "playful"
+    ]
+  },
+  {
+    "id": "f4-013",
+    "title": "Droplets on a Leaf",
+    "oneLiner": "Find water droplets on a houseplant leaf and treat each bead as a tiny world.",
+    "details": "Mist a plant lightly or wait after watering, then move close to a leaf with visible droplets. Shoot so one bead is sharp while others blur softly. The curve of the leaf can feel like rolling hills beneath glass spheres.",
+    "tips": [
+      "Backlight droplets with a window for sparkle.",
+      "Hold the phone with both hands for stability.",
+      "Shoot many frames—focus is tricky up close."
+    ],
+    "constraint": null,
+    "theme": "Tiny Worlds",
+    "tags": [
+      "indoor",
+      "macro",
+      "nature",
+      "light"
+    ]
+  },
+  {
+    "id": "f4-014",
+    "title": "Coin Stack Canyon",
+    "oneLiner": "Stack a few coins and photograph them like a canyon wall of metal.",
+    "details": "Stack three to six coins and shoot from the side at coin height. Crop tight so rims and dates feel monumental. A dark surface below can read as shadowed ground in your miniature scene.",
+    "tips": [
+      "Use coins of one size for cleaner lines.",
+      "Soft window light shows engraved detail.",
+      "Prop the stack against a book if it wobbles."
+    ],
+    "constraint": "Use at least three coins in the stack.",
+    "theme": "Tiny Worlds",
+    "tags": [
+      "indoor",
+      "macro",
+      "still-life",
+      "playful"
+    ]
+  },
+  {
+    "id": "f4-015",
+    "title": "Spice Label Texture",
+    "oneLiner": "Move in on a spice jar label until the print becomes an abstract tiny landscape.",
+    "details": "Choose any jar from your kitchen and photograph the label as close as possible. Let letters blur into color blocks and texture. Rotate the jar to find a patch of type or pattern that feels like terrain on a map.",
+    "tips": [
+      "Avoid glare by tilting the jar slightly.",
+      "Wipe the glass before shooting.",
+      "Crop square afterward for a graphic look."
+    ],
+    "constraint": "No readable full words—abstract crop only.",
+    "theme": "Tiny Worlds",
+    "tags": [
+      "indoor",
+      "macro",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f4-016",
+    "title": "Desk Pebble Planet",
+    "oneLiner": "Place one small pebble or stone on your desk and make it look planet-sized.",
+    "details": "Use a pebble, marble, or small rock from a drawer or plant pot. Set it on a plain surface and shoot from pebble height with a wide empty background. Crop so the stone dominates and the desk fades into space.",
+    "tips": [
+      "Use side light to show surface pits and shine.",
+      "Blur the background by moving closer to the stone.",
+      "Try a dark desk mat for a space-like feel."
+    ],
+    "constraint": null,
+    "theme": "Tiny Worlds",
+    "tags": [
+      "indoor",
+      "macro",
+      "minimal",
+      "playful"
+    ]
+  },
+  {
+    "id": "f4-017",
+    "title": "Keys on the Counter",
+    "oneLiner": "Lay your keys out and tell a small story about where your day might go.",
+    "details": "Empty your pocket or bag and arrange your keys on a clean surface. Shoot from above or at a slight angle so rings, tags, and wear marks are visible. You do not need every key—just an honest slice of what you carry.",
+    "tips": [
+      "Wipe the surface to avoid crumbs in frame.",
+      "Overlap keys slightly for depth.",
+      "Use window light for soft shadows."
+    ],
+    "constraint": "Include your key ring or fob in the shot.",
+    "theme": "My Daily Carry",
+    "tags": [
+      "indoor",
+      "still-life",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f4-018",
+    "title": "Wallet Flat Lay",
+    "oneLiner": "Open your wallet or card holder and photograph what you reach for daily.",
+    "details": "Spread cards, cash, or transit passes in a tidy flat lay. Keep numbers and personal details turned away or out of frame. The photo should feel like a map of your routines, not a document dump.",
+    "tips": [
+      "Shoot overhead with parallel edges to the frame.",
+      "Group items by color or size.",
+      "Leave a little empty space for breathing room."
+    ],
+    "constraint": "No visible full card numbers or names.",
+    "theme": "My Daily Carry",
+    "tags": [
+      "indoor",
+      "still-life",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f4-019",
+    "title": "Phone and Earbuds",
+    "oneLiner": "Pair your phone with earbuds and capture the tools you use to tune in.",
+    "details": "Place your phone and earbuds together on a table or desk. Show cable tangle or neat coil—your choice tells the mood. Frame them as companions rather than a product shot, with everyday clutter cropped out.",
+    "tips": [
+      "Clean the screen before shooting.",
+      "Try a diagonal layout for energy.",
+      "Expose for the screen if it is on."
+    ],
+    "constraint": null,
+    "theme": "My Daily Carry",
+    "tags": [
+      "indoor",
+      "still-life",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f4-020",
+    "title": "Pen Meets Notebook",
+    "oneLiner": "Photograph the pen and notebook you actually carry or keep nearby.",
+    "details": "Open the notebook to a blank or lightly used page and rest your pen on it. Shoot from above or over the shoulder angle. Leave a hint of handwriting if you like, but no private information needs to appear.",
+    "tips": [
+      "Align the pen pointing into the frame.",
+      "Use soft light to avoid harsh page glare.",
+      "Crop tight on the corner of the page."
+    ],
+    "constraint": "Both pen and notebook must appear together.",
+    "theme": "My Daily Carry",
+    "tags": [
+      "indoor",
+      "still-life",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f4-021",
+    "title": "Pocket Miscellany",
+    "oneLiner": "Gather the small odds and ends from your bag and arrange them in one frame.",
+    "details": "Think mints, lip balm, tissues, hair ties, or a spare battery—ordinary items only. Lay them out on a flat surface and shoot so each object reads clearly. The fun is in how random pieces become a portrait of your habits.",
+    "tips": [
+      "Odd numbers of items often look more natural.",
+      "Keep similar sizes separated for clarity.",
+      "Shoot from directly above for a catalog feel."
+    ],
+    "constraint": "At least four different object types in frame.",
+    "theme": "My Daily Carry",
+    "tags": [
+      "indoor",
+      "still-life",
+      "playful"
+    ]
+  },
+  {
+    "id": "f4-022",
+    "title": "Sunglasses Resting",
+    "oneLiner": "Photograph your sunglasses where you usually toss them at day's end.",
+    "details": "Place sunglasses on a table, book, or bag near a window. Capture reflections in the lenses without showing your face—aim at ceiling or wall instead. The frame should feel casual, like a paused moment.",
+    "tips": [
+      "Wipe lenses to control smudges.",
+      "Shoot slightly off-angle to reduce self-reflection.",
+      "Use folded arms to create leading lines."
+    ],
+    "constraint": "No faces visible in lens reflections.",
+    "theme": "My Daily Carry",
+    "tags": [
+      "indoor",
+      "light",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f4-023",
+    "title": "Sanitizer and Tissue",
+    "oneLiner": "Document the small hygiene items you keep within reach every day.",
+    "details": "Set hand sanitizer, tissues, or wipes together on a clean surface. Keep labels generic in frame if you prefer privacy. Shoot simply—the story is preparedness tucked into ordinary life.",
+    "tips": [
+      "Group bottles upright with caps visible.",
+      "Use neutral background colors.",
+      "Soft light keeps plastic from blowing out."
+    ],
+    "constraint": null,
+    "theme": "My Daily Carry",
+    "tags": [
+      "indoor",
+      "still-life",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f4-024",
+    "title": "Change and Receipt",
+    "oneLiner": "Spread loose change beside a crumpled receipt from your pocket or bag.",
+    "details": "Lay coins and a folded receipt on a flat surface. Turn the receipt so store names are hidden if you wish. The contrast between shiny metal and soft paper tells a quiet everyday tale.",
+    "tips": [
+      "Mix coin sizes for visual rhythm.",
+      "Leave one corner of the receipt curled.",
+      "Shoot close so texture shows."
+    ],
+    "constraint": "Include at least three coins and one receipt.",
+    "theme": "My Daily Carry",
+    "tags": [
+      "indoor",
+      "still-life",
+      "playful"
+    ]
+  },
+  {
+    "id": "f4-025",
+    "title": "Hot Meets Cold",
+    "oneLiner": "Place something warm beside something cold and capture both in one frame.",
+    "details": "Try a steaming mug next to a cold glass of water, or warm hands near a chilled can from the fridge. Shoot quickly while steam is visible if you use heat. The contrast should read clearly without staging anything elaborate.",
+    "tips": [
+      "Backlight steam against a dark background.",
+      "Condensation on the cold item adds story.",
+      "Keep the setup on a stable table."
+    ],
+    "constraint": "Both temperature cues must be visible at once.",
+    "theme": "Opposites",
+    "tags": [
+      "indoor",
+      "still-life",
+      "playful",
+      "light"
+    ]
+  },
+  {
+    "id": "f4-026",
+    "title": "Rough Versus Smooth",
+    "oneLiner": "Find two textures—one rough, one smooth—and split them in a single composition.",
+    "details": "Pair items like sandpaper and glass, bark and metal, or towel and phone screen. Arrange so each texture occupies roughly half the frame. Move close enough that touchable detail is obvious.",
+    "tips": [
+      "Use side light to exaggerate rough texture.",
+      "Keep colors simple so texture carries the idea.",
+      "Align the boundary on a third line."
+    ],
+    "constraint": null,
+    "theme": "Opposites",
+    "tags": [
+      "indoor",
+      "macro",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f4-027",
+    "title": "Big Beside Small",
+    "oneLiner": "Put a large everyday object next to a tiny one and play with scale.",
+    "details": "Try a mug beside a coin, or a shoe beside a sock. Place them on the same surface so size contrast is honest. Shoot from an angle that keeps both fully visible and clearly different in scale.",
+    "tips": [
+      "Leave space between objects so they do not merge.",
+      "Eye-level often reads scale best.",
+      "Use a plain background to avoid confusion."
+    ],
+    "constraint": "One object must be at least four times larger.",
+    "theme": "Opposites",
+    "tags": [
+      "indoor",
+      "still-life",
+      "playful"
+    ]
+  },
+  {
+    "id": "f4-028",
+    "title": "Light Against Dark",
+    "oneLiner": "Compose one brightly lit object against a deeply shadowed background.",
+    "details": "Place a light-colored item in a beam from a window or lamp and let the surroundings fall dark. Expose for the bright subject and let shadows go black if needed. The opposite tones should feel deliberate, not accidental.",
+    "tips": [
+      "Close curtains behind the subject to darken the room.",
+      "Use a white or pale object for maximum contrast.",
+      "Tap exposure on the lit subject before recomposing."
+    ],
+    "constraint": "Half the frame or more must read as shadow.",
+    "theme": "Opposites",
+    "tags": [
+      "indoor",
+      "light",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f4-029",
+    "title": "Old Next to New",
+    "oneLiner": "Pair something worn with something fresh and let the contrast tell the story.",
+    "details": "Match an aged book with a new one, a scuffed shoe with a clean one, or a faded towel with a bright one. Keep both items in sharp focus and similar size in frame. The wear should be visible without needing words.",
+    "tips": [
+      "Place newer item on the side you read first.",
+      "Use even light so wear shows in detail.",
+      "Avoid logos that dominate the story."
+    ],
+    "constraint": null,
+    "theme": "Opposites",
+    "tags": [
+      "indoor",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f4-030",
+    "title": "Full Versus Empty",
+    "oneLiner": "Photograph a full container beside an empty one of the same kind.",
+    "details": "Use two glasses, bowls, or bottles—one filled with water, snacks, or coins, one bare. Align them side by side on a flat surface. The emptiness should feel as intentional as the fullness.",
+    "tips": [
+      "Matching pairs make the idea instant.",
+      "Shoot straight-on for a clear comparison.",
+      "Fill only one—do not cheat with hidden supports."
+    ],
+    "constraint": "Both containers must be the same shape and size.",
+    "theme": "Opposites",
+    "tags": [
+      "indoor",
+      "still-life",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f4-031",
+    "title": "Soft and Hard",
+    "oneLiner": "Combine something soft with something hard in one playful still life.",
+    "details": "Try a pillow against a wooden block, a sponge on a plate, or a stuffed item near a phone. Let materials contrast through texture and edge sharpness. Keep the setup safe and on a stable surface.",
+    "tips": [
+      "Rumple soft items so they look touchable.",
+      "Side light reveals texture on both surfaces.",
+      "Center the pairing or use rule of thirds."
+    ],
+    "constraint": "Touch both materials in setup—no purely digital contrast.",
+    "theme": "Opposites",
+    "tags": [
+      "indoor",
+      "still-life",
+      "playful"
+    ]
+  },
+  {
+    "id": "f4-032",
+    "title": "Order Versus Chaos",
+    "oneLiner": "Split the frame between neat rows and a messy pile of the same stuff.",
+    "details": "Use coins, pens, or buttons—line half in tidy rows and heap the rest loosely. Shoot from above so the split reads instantly. The opposites should share the same objects so the joke lands.",
+    "tips": [
+      "Use a contrasting background under the messy side.",
+      "Keep the dividing line roughly vertical or horizontal.",
+      "Fill the frame edge to edge."
+    ],
+    "constraint": null,
+    "theme": "Opposites",
+    "tags": [
+      "indoor",
+      "still-life",
+      "playful",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f4-033",
+    "title": "One Bold Letter",
+    "oneLiner": "Find a single large letter in your home and make it the whole subject.",
+    "details": "Look on cereal boxes, book covers, posters, or appliance labels. Crop tight so one letter dominates. Background clutter should fall away so the shape of the character matters more than the word.",
+    "tips": [
+      "Rotate the phone for vertical letters.",
+      "Tap focus on the ink edge.",
+      "Watch for glare on glossy packaging."
+    ],
+    "constraint": "Only one letter visible—no full words.",
+    "theme": "Letters and Numbers",
+    "tags": [
+      "indoor",
+      "minimal",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f4-034",
+    "title": "Calendar Date Detail",
+    "oneLiner": "Photograph today's date on a wall calendar, planner, or phone widget.",
+    "details": "Open a paper calendar or planner to today, or screenshot and print is not needed—use paper you already have. Frame the numeral of today's date large in the image. Surrounding grid lines can add graphic structure.",
+    "tips": [
+      "Shoot parallel to the page to avoid skew.",
+      "Use soft light to keep paper flat-toned.",
+      "Crop square on the date cell if it helps."
+    ],
+    "constraint": null,
+    "theme": "Letters and Numbers",
+    "tags": [
+      "indoor",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f4-035",
+    "title": "Book Spine Type",
+    "oneLiner": "Stack or line up book spines and celebrate the typography on their edges.",
+    "details": "Pull a few books from a shelf and arrange spines facing the camera. Mix colors and font styles if you like. Move close enough that one title or author name is legible while others blur softly.",
+    "tips": [
+      "Align spines vertically for a clean grid.",
+      "Use window light to avoid shiny glare.",
+      "Vary heights for a staggered skyline effect."
+    ],
+    "constraint": "At least three book spines must appear.",
+    "theme": "Letters and Numbers",
+    "tags": [
+      "indoor",
+      "still-life",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f4-036",
+    "title": "Keyboard Key Portrait",
+    "oneLiner": "Move close on one keyboard key until its letter feels oversized.",
+    "details": "Choose a key with meaning to you—initial, favorite shortcut, or the escape key. Photograph it at an angle so surrounding keys fall out of focus. The single character should feel like signage in a city.",
+    "tips": [
+      "Wipe keys to remove dust specks.",
+      "Use desk lamp raking light for texture.",
+      "Avoid showing passwords on sticky notes nearby."
+    ],
+    "constraint": "One key sharp—all others blurred or cropped out.",
+    "theme": "Letters and Numbers",
+    "tags": [
+      "indoor",
+      "macro",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f4-037",
+    "title": "Clock Face Numbers",
+    "oneLiner": "Photograph a clock and let one numeral or marker anchor the frame.",
+    "details": "Use a wall clock, watch face, or stove timer. Crop so a single number or tick mark is prominent while the rest curve away. Hands may appear but need not show the exact time unless you want them to.",
+    "tips": [
+      "Shoot straight-on to limit distortion.",
+      "Mind reflections on glass watch crystals.",
+      "Convert to monochrome if color distracts."
+    ],
+    "constraint": null,
+    "theme": "Letters and Numbers",
+    "tags": [
+      "indoor",
+      "minimal",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f4-038",
+    "title": "Nutrition Label Digits",
+    "oneLiner": "Crop into a food label until a cluster of numbers becomes abstract art.",
+    "details": "Grab any packaged food from the pantry and move close on the nutrition panel. Let serving sizes and percentages fill the frame as shapes. You are hunting for graphic rhythm in mundane data.",
+    "tips": [
+      "Flatten the package to reduce wrinkles.",
+      "Align rows horizontally for calm composition.",
+      "Hide bar codes if you prefer privacy."
+    ],
+    "constraint": "Numbers must occupy most of the frame.",
+    "theme": "Letters and Numbers",
+    "tags": [
+      "indoor",
+      "macro",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f4-039",
+    "title": "Magazine Letter Cutout",
+    "oneLiner": "Find a bold letter in a magazine page or mailer and isolate it tightly.",
+    "details": "Flip through junk mail or a magazine until a large initial or drop cap catches your eye. Photograph the page flat with even light and crop to the letter alone. Tear-out is optional—shooting the page is enough.",
+    "tips": [
+      "Press the page flat with book weights.",
+      "Shoot overhead to keep proportions true.",
+      "Boost contrast slightly if ink looks muddy."
+    ],
+    "constraint": "Letter must fill at least half the frame.",
+    "theme": "Letters and Numbers",
+    "tags": [
+      "indoor",
+      "minimal",
+      "playful"
+    ]
+  },
+  {
+    "id": "f4-040",
+    "title": "Page Number Corner",
+    "oneLiner": "Open any book to a page and feature its printed page number prominently.",
+    "details": "Choose a book and compose so the page numeral sits on a third line with text softly blurred around it. The number can be Arabic or Roman—whatever you find. Keep the shot about typography, not the story on the page.",
+    "tips": [
+      "Curve the book gently to flatten the numeral area.",
+      "Use indirect light to avoid yellow glare.",
+      "Vertical or horizontal framing both work."
+    ],
+    "constraint": null,
+    "theme": "Letters and Numbers",
+    "tags": [
+      "indoor",
+      "still-life",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f4-041",
+    "title": "Reading Nook Glow",
+    "oneLiner": "Capture the coziest spot where you sit with a book or tablet.",
+    "details": "Frame your chair, cushion, or corner with a blanket and side table visible. Include a lamp or window glow but no need to stage new props. The feeling should invite someone to sit down immediately.",
+    "tips": [
+      "Warm white balance sells the cozy mood.",
+      "Include one personal object, not ten.",
+      "Shoot at seated eye height."
+    ],
+    "constraint": "Show where someone would sit—leave that space visible.",
+    "theme": "Cozy Corners",
+    "tags": [
+      "indoor",
+      "light",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f4-042",
+    "title": "Blanket and Pillow Stack",
+    "oneLiner": "Arrange a blanket and pillow so the pile looks irresistibly soft.",
+    "details": "Fold or drape a blanket over a pillow on a couch or bed edge. Shoot close enough to see fabric texture and loose folds. Keep the palette calm—this is about comfort, not decoration catalog perfection.",
+    "tips": [
+      "Fluff the pillow so corners look plush.",
+      "Use side light to sculpt folds.",
+      "Crop out busy patterns elsewhere in the room."
+    ],
+    "constraint": null,
+    "theme": "Cozy Corners",
+    "tags": [
+      "indoor",
+      "still-life",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f4-043",
+    "title": "Lamp Pool of Light",
+    "oneLiner": "Photograph a table lamp casting a warm pool of light in an otherwise dim corner.",
+    "details": "Turn off overhead lights and let one lamp define the scene. Include the base, shade, and the lit surface beside it. Let surrounding shadows fall soft so the corner feels sheltered and quiet.",
+    "tips": [
+      "Expose for the lit area, not the whole room.",
+      "Avoid showing the bare bulb directly.",
+      "Include a book or mug in the pool of light if you like."
+    ],
+    "constraint": "Only one light source in the room.",
+    "theme": "Cozy Corners",
+    "tags": [
+      "indoor",
+      "light",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f4-044",
+    "title": "Mug on Side Table",
+    "oneLiner": "Place a warm drink on a side table and shoot your favorite cozy still life.",
+    "details": "Set a mug on a table near a couch or bed with a coaster, book, or remote nearby if it fits your space. Steam is a bonus, not required. Frame tightly so the table feels like a little island of calm.",
+    "tips": [
+      "Shoot before the drink cools if you want steam.",
+      "Keep backgrounds soft and uncluttered.",
+      "Try a slightly low angle toward the mug."
+    ],
+    "constraint": "The mug must sit on a table, not in hand.",
+    "theme": "Cozy Corners",
+    "tags": [
+      "indoor",
+      "still-life",
+      "light"
+    ]
+  },
+  {
+    "id": "f4-045",
+    "title": "Slippers by the Chair",
+    "oneLiner": "Photograph slippers or socks waiting where you kick them off at home.",
+    "details": "Place footwear where you naturally leave them—by a chair, bed, or rug. Shoot from standing height looking down or from floor level looking across. The scene should feel lived-in, not styled for a magazine.",
+    "tips": [
+      "Pair items slightly askew for authenticity.",
+      "Include a bit of rug or floor texture.",
+      "Soft morning light works beautifully here."
+    ],
+    "constraint": null,
+    "theme": "Cozy Corners",
+    "tags": [
+      "indoor",
+      "still-life",
+      "playful"
+    ]
+  },
+  {
+    "id": "f4-046",
+    "title": "Shelf With a Plant",
+    "oneLiner": "Frame a shelf where books and a houseplant share the same cozy ledge.",
+    "details": "Choose one shelf or windowsill with a plant and a few books or trinkets. Balance the plant on a third and let leaves soften hard edges. Keep the shot about quiet domestic order, not a full room tour.",
+    "tips": [
+      "Dust the shelf lip before shooting.",
+      "Use window side light on leaves.",
+      "Vertical phone orientation suits tall plants."
+    ],
+    "constraint": "Include at least one book and one plant.",
+    "theme": "Cozy Corners",
+    "tags": [
+      "indoor",
+      "nature",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f4-047",
+    "title": "Window Seat Pause",
+    "oneLiner": "Shoot the view from a window seat or sill with cushion and glass in frame.",
+    "details": "Compose so the cushion or ledge occupies the foreground and the window glass leads outward. Weather outside does not matter—overcast, sun, or night all work. The cozy part is the seat; the world outside is secondary.",
+    "tips": [
+      "Clean smudges on the glass you include.",
+      "Expose for the interior so outside may blow out.",
+      "Include a folded blanket if you have one."
+    ],
+    "constraint": "Foreground must show fabric or cushion texture.",
+    "theme": "Cozy Corners",
+    "tags": [
+      "indoor",
+      "light",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f4-048",
+    "title": "Candle and Closed Book",
+    "oneLiner": "Set an unlit candle beside a closed book for a calm evening tableau.",
+    "details": "Arrange a candle and book on a tray or table—no need to light the candle. Add a pen or reading glasses if they are already nearby. Shoot warm and close so the scene feels like a breath before bedtime.",
+    "tips": [
+      "Unlit candles are safer and still read cozy.",
+      "Match book and candle heights for balance.",
+      "Use lamp light, not harsh overhead flash."
+    ],
+    "constraint": "Do not light the candle—photograph it unlit.",
+    "theme": "Cozy Corners",
+    "tags": [
+      "indoor",
+      "still-life",
+      "light",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f4-049",
+    "title": "Ceiling Light Halo",
+    "oneLiner": "Stand beneath a ceiling fixture and shoot upward into its glow.",
+    "details": "Find a pendant, flush mount, or fan light indoors and point the camera straight up. Include the ceiling radius around the fixture for context. Watch exposure so the bulb does not blow out entirely unless you want a star burst.",
+    "tips": [
+      "Hold the phone steady with both hands.",
+      "Try slightly off-center composition.",
+      "Clean the fixture if dust webs show."
+    ],
+    "constraint": "Camera must point within thirty degrees of straight up.",
+    "theme": "From Below",
+    "tags": [
+      "indoor",
+      "light",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f4-050",
+    "title": "Houseplant From Ground",
+    "oneLiner": "Lay the phone low and photograph a houseplant as if you were an ant looking up.",
+    "details": "Place your phone on the floor or a low stool aimed up through the leaves toward light. Trunks, stems, and leaf silhouettes should tower overhead. A window or lamp behind the plant adds drama.",
+    "tips": [
+      "Use pro mode or tap focus on nearest leaves.",
+      "Wipe the floor area so it is not in sharp detail.",
+      "Shoot portrait orientation for height."
+    ],
+    "constraint": null,
+    "theme": "From Below",
+    "tags": [
+      "indoor",
+      "nature",
+      "light"
+    ]
+  },
+  {
+    "id": "f4-051",
+    "title": "Under the Table View",
+    "oneLiner": "Slide low and shoot upward at a table or desk from underneath its edge.",
+    "details": "Kneel or place the phone on the floor near a table and aim up at the underside and top surface. Legs, books, or a mug rim can silhouette against the ceiling. Keep the angle clearly from below, not eye level.",
+    "tips": [
+      "Use a self-timer to avoid awkward bending.",
+      "Include at least two table legs for structure.",
+      "Expose for the brighter ceiling."
+    ],
+    "constraint": "Camera height must be below the table surface.",
+    "theme": "From Below",
+    "tags": [
+      "indoor",
+      "playful",
+      "still-life"
+    ]
+  },
+  {
+    "id": "f4-052",
+    "title": "Staircase Underside",
+    "oneLiner": "From the bottom step, shoot upward along the railing and climbing treads.",
+    "details": "Stand on the lowest step and point the camera up the stairwell. Lines of treads and banisters should converge toward the top landing. Include a slice of ceiling or upper wall to sell the height.",
+    "tips": [
+      "Keep verticals straight with grid lines.",
+      "Shoot when the stairwell is empty of people.",
+      "Use available house lights—no flash needed."
+    ],
+    "constraint": "Start from the lowest step you can safely reach.",
+    "theme": "From Below",
+    "tags": [
+      "indoor",
+      "minimal",
+      "urban"
+    ]
+  },
+  {
+    "id": "f4-053",
+    "title": "Tree Canopy Cathedral",
+    "oneLiner": "Lie or crouch beneath a tree and shoot up through branches toward the sky.",
+    "details": "Find any accessible tree and aim upward so trunk and branches frame the sky. Leaves can be dense or sparse—both work. The trunk should anchor a corner while branches radiate outward like a vault.",
+    "tips": [
+      "Use burst mode if wind moves leaves.",
+      "Polarized look is optional—just avoid shooting into sun glare.",
+      "Include only sky and tree—no buildings required."
+    ],
+    "constraint": null,
+    "theme": "From Below",
+    "tags": [
+      "outdoor",
+      "nature",
+      "light"
+    ]
+  },
+  {
+    "id": "f4-054",
+    "title": "Tower From the Sidewalk",
+    "oneLiner": "Stand at the base of a building and shoot straight up along its facade.",
+    "details": "Choose any multistory building you can view from a public sidewalk. Point upward so walls, windows, and edges converge. Keep faces out of the frame entirely.",
+    "tips": [
+      "Center the corner for strong leading lines.",
+      "Watch for security rules on private courtyards.",
+      "Expose for the building, not the sky hole."
+    ],
+    "constraint": "Building lines must converge toward the top of frame.",
+    "theme": "From Below",
+    "tags": [
+      "outdoor",
+      "urban",
+      "minimal"
+    ]
+  },
+  {
+    "id": "f4-055",
+    "title": "Sky Between Buildings",
+    "oneLiner": "Frame a slice of sky sandwiched between upper walls or building tops.",
+    "details": "From street or yard level, aim up until walls or upper stories border the sky on both sides. The sky becomes a bright ribbon and the architecture feels towering. Clouds or clear blue both suit the prompt.",
+    "tips": [
+      "Rotate phone for a vertical sky strip.",
+      "Keep wires minimal if possible.",
+      "Step back if walls do not align—perspective helps."
+    ],
+    "constraint": "Sky must be bordered by architecture on at least two sides.",
+    "theme": "From Below",
+    "tags": [
+      "outdoor",
+      "urban",
+      "light"
+    ]
+  }
+]
