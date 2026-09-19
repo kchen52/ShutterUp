@@ -7,7 +7,6 @@ import androidx.lifecycle.viewModelScope
 import app.shutterup.capture.CaptureFileStore
 import app.shutterup.capture.CaptureMetadataReader
 import app.shutterup.capture.ThumbnailWriter
-import app.shutterup.capture.VideoClipExporter
 import app.shutterup.data.notifications.NotificationHelper
 import app.shutterup.domain.ai.GeneratePromptUseCase
 import app.shutterup.domain.capture.CaptureDateValidator
@@ -16,7 +15,6 @@ import app.shutterup.domain.capture.CompleteCaptureResult
 import app.shutterup.domain.capture.CompleteCaptureUseCase
 import app.shutterup.domain.capture.RemainingToday
 import app.shutterup.domain.capture.SkipDayUseCase
-import app.shutterup.domain.capture.VideoClipRules
 import app.shutterup.domain.model.DayPrompt
 import app.shutterup.domain.model.Entry
 import app.shutterup.domain.model.MediaKind
@@ -40,10 +38,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/** One-shot request for the system camera or picker. */
+/** One-shot request for the system camera. */
 data class CaptureLaunch(
     val uri: Uri,
-    val kind: MediaKind,
     val nonce: Long,
 )
 
@@ -57,18 +54,10 @@ data class CompletionNav(
 
 data class PendingCapture(
     val path: String,
-    val kind: MediaKind,
-    val durationMs: Long?,
     val capturedAtEpoch: Long,
     val width: Int,
     val height: Int,
     val imported: Boolean,
-)
-
-data class TrimUi(
-    val startMs: Long,
-    val endMs: Long,
-    val durationMs: Long,
 )
 
 data class PromptDetailUiState(
@@ -79,9 +68,9 @@ data class PromptDetailUiState(
     val streak: StreakState = StreakState(0, 0, 0, null),
     val snackbar: String? = null,
     val showSkipDialog: Boolean = false,
+    val showStorageDialog: Boolean = false,
+    val offerGallery: Boolean = false,
     val pending: PendingCapture? = null,
-    val trim: TrimUi? = null,
-    val trimming: Boolean = false,
     val launch: CaptureLaunch? = null,
     val pickGallery: Boolean = false,
     val completion: CompletionNav? = null,
@@ -90,7 +79,8 @@ data class PromptDetailUiState(
 )
 
 /**
- * Loads the day's prompt and entries, launches capture, trims video, and persists.
+ * Loads the day's prompt, launches [android.provider.MediaStore.ACTION_IMAGE_CAPTURE],
+ * and persists one still (SPEC §1.2 / §4.2).
  */
 @HiltViewModel
 class PromptDetailViewModel @Inject constructor(
@@ -105,7 +95,6 @@ class PromptDetailViewModel @Inject constructor(
     private val files: CaptureFileStore,
     private val metadata: CaptureMetadataReader,
     private val thumbs: ThumbnailWriter,
-    private val trimmer: VideoClipExporter,
     private val notifications: NotificationHelper,
     private val widgetUpdater: TodayWidgetUpdater,
     private val clock: Clock,
@@ -156,14 +145,31 @@ class PromptDetailViewModel @Inject constructor(
         }
     }
 
-    /** Launch a still capture when under the per-day cap. */
+    /** Launch a still capture when under the per-day cap (retake replaces). */
     fun requestStill() {
-        requestCapture(MediaKind.PHOTO)
-    }
-
-    /** Launch a video capture (15 s camera limit; 10 s save rule). */
-    fun requestVideo() {
-        requestCapture(MediaKind.VIDEO)
+        if (!_state.value.isToday) return
+        viewModelScope.launch {
+            val count = entries.countForDate(date)
+            if (count > CaptureLimits.MAX_ENTRIES_PER_DAY) {
+                _state.update { it.copy(snackbar = COPY_CAP) }
+                return@launch
+            }
+            val file = files.createPending("jpg")
+            launchNonce += 1
+            _state.update {
+                it.copy(
+                    launch = CaptureLaunch(files.uriFor(file), launchNonce),
+                    pending = PendingCapture(
+                        path = file.absolutePath,
+                        capturedAtEpoch = clock.instant().toEpochMilli(),
+                        width = 0,
+                        height = 0,
+                        imported = false,
+                    ),
+                    showStorageDialog = false,
+                )
+            }
+        }
     }
 
     fun consumeLaunch() {
@@ -180,6 +186,19 @@ class PromptDetailViewModel @Inject constructor(
 
     fun consumeCompletion() {
         _state.update { it.copy(completion = null) }
+    }
+
+    fun chooseFromGallery() {
+        _state.update { it.copy(pickGallery = true) }
+    }
+
+    fun dismissStorageDialog() {
+        _state.update { it.copy(showStorageDialog = false) }
+    }
+
+    fun retryStorage() {
+        val pending = _state.value.pending ?: return
+        viewModelScope.launch { persist(pending) }
     }
 
     fun onSkipClicked() {
@@ -209,22 +228,29 @@ class PromptDetailViewModel @Inject constructor(
 
     fun onCameraReturned(success: Boolean) {
         val pendingPath = _state.value.pending?.path
-        val kind = _state.value.pending?.kind ?: MediaKind.PHOTO
         if (!success) {
             cameraFailures++
             pendingPath?.let { files.deleteQuietly(File(it)) }
             _state.update { it.copy(pending = null, launch = null) }
             if (cameraFailures >= 2) {
-                _state.update { it.copy(pickGallery = true) }
+                _state.update { it.copy(offerGallery = true) }
             }
             return
         }
         val file = pendingPath?.let(::File)
         if (file == null || !file.exists() || file.length() == 0L) {
-            _state.update { it.copy(snackbar = COPY_EMPTY, pending = null, launch = null) }
+            cameraFailures++
+            file?.let(files::deleteQuietly)
+            _state.update { it.copy(pending = null, launch = null) }
+            if (cameraFailures >= 2) {
+                _state.update { it.copy(offerGallery = true) }
+            } else {
+                requestStill()
+            }
             return
         }
-        ingestFile(file, kind, imported = false)
+        cameraFailures = 0
+        ingestFile(file, imported = false, pickerUri = null)
     }
 
     fun onGalleryPicked(uri: Uri?) {
@@ -234,116 +260,21 @@ class PromptDetailViewModel @Inject constructor(
             val dest = files.createPending("jpg")
             if (!files.copyFrom(uri, dest)) {
                 files.deleteQuietly(dest)
-                _state.update { it.copy(snackbar = COPY_EMPTY) }
+                _state.update { it.copy(showStorageDialog = true) }
                 return@launch
             }
-            ingestFile(dest, MediaKind.PHOTO, imported = true)
+            ingestFile(dest, imported = true, pickerUri = uri)
         }
     }
 
-    fun updateTrim(startMs: Long, endMs: Long) {
-        val trim = _state.value.trim ?: return
-        val window = VideoClipRules.clampWindow(startMs, endMs, trim.durationMs)
-        _state.update { it.copy(trim = trim.copy(startMs = window.startMs, endMs = window.endMs)) }
-    }
-
-    fun confirmTrim() {
-        val pending = _state.value.pending ?: return
-        val trim = _state.value.trim ?: return
-        if (!VideoClipRules.isSaveable(trim.endMs - trim.startMs)) {
-            _state.update { it.copy(snackbar = COPY_NEED_TRIM) }
-            return
-        }
-        viewModelScope.launch {
-            _state.update { it.copy(trimming = true) }
-            val source = File(pending.path)
-            val out = files.createPending("mp4")
-            val result = trimmer.clip(files.uriFor(source), out, trim.startMs, trim.endMs)
-            _state.update { it.copy(trimming = false) }
-            result.fold(
-                onSuccess = { file ->
-                    files.deleteQuietly(source)
-                    val meta = metadata.read(file, clock.instant())
-                    _state.update {
-                        it.copy(
-                            pending = pending.copy(
-                                path = file.absolutePath,
-                                durationMs = meta.durationMs ?: (trim.endMs - trim.startMs),
-                                width = meta.width,
-                                height = meta.height,
-                            ),
-                            trim = null,
-                        )
-                    }
-                },
-                onFailure = {
-                    files.deleteQuietly(out)
-                    _state.update { it.copy(snackbar = COPY_TRIM_FAIL) }
-                },
-            )
-        }
-    }
-
-    fun retakePending() {
-        _state.value.pending?.path?.let { files.deleteQuietly(File(it)) }
-        _state.update { it.copy(pending = null, trim = null) }
-    }
-
-    fun confirmPending() {
-        val pending = _state.value.pending ?: return
-        if (pending.kind == MediaKind.VIDEO) {
-            val duration = pending.durationMs ?: 0L
-            if (!VideoClipRules.isSaveable(duration)) {
-                val window = VideoClipRules.clampWindow(0, duration, duration)
-                _state.update {
-                    it.copy(
-                        trim = TrimUi(window.startMs, window.endMs, duration),
-                        snackbar = COPY_NEED_TRIM,
-                    )
-                }
-                return
-            }
-        }
-        viewModelScope.launch {
-            persist(pending)
-        }
-    }
-
-    fun viewInGallery() {
-        _state.update { it.copy(snackbar = COPY_GALLERY_STUB) }
-    }
-
-    private fun requestCapture(kind: MediaKind) {
-        if (!_state.value.isToday) return
-        viewModelScope.launch {
-            if (entries.countForDate(date) >= CaptureLimits.MAX_ENTRIES_PER_DAY) {
-                _state.update { it.copy(snackbar = COPY_CAP) }
-                return@launch
-            }
-            val ext = if (kind == MediaKind.VIDEO) "mp4" else "jpg"
-            val file = files.createPending(ext)
-            launchNonce += 1
-            _state.update {
-                it.copy(
-                    launch = CaptureLaunch(files.uriFor(file), kind, launchNonce),
-                    pending = PendingCapture(
-                        path = file.absolutePath,
-                        kind = kind,
-                        durationMs = null,
-                        capturedAtEpoch = clock.instant().toEpochMilli(),
-                        width = 0,
-                        height = 0,
-                        imported = false,
-                    ),
-                )
-            }
-        }
-    }
-
-    private fun ingestFile(file: File, kind: MediaKind, imported: Boolean) {
+    private fun ingestFile(file: File, imported: Boolean, pickerUri: Uri?) {
         viewModelScope.launch {
             val today = LocalDate.now(clock.withZone(zone))
-            val meta = metadata.read(file, clock.instant())
+            val meta = if (pickerUri != null) {
+                metadata.readPicked(pickerUri, file, clock.instant())
+            } else {
+                metadata.read(file, clock.instant())
+            }
             if (!CaptureDateValidator.isCapturedToday(meta.capturedAt, today, zone) || date != today) {
                 files.deleteQuietly(file)
                 _state.update {
@@ -351,51 +282,39 @@ class PromptDetailViewModel @Inject constructor(
                         snackbar = COPY_NOT_TODAY,
                         pending = null,
                         launch = null,
-                        trim = null,
                     )
                 }
                 return@launch
             }
             val pending = PendingCapture(
                 path = file.absolutePath,
-                kind = kind,
-                durationMs = meta.durationMs,
                 capturedAtEpoch = meta.capturedAt.toEpochMilli(),
                 width = meta.width,
                 height = meta.height,
                 imported = imported,
             )
-            val needsTrim = kind == MediaKind.VIDEO &&
-                !VideoClipRules.isSaveable(meta.durationMs ?: 0L)
-            val trim = if (needsTrim) {
-                val duration = meta.durationMs ?: 0L
-                val window = VideoClipRules.clampWindow(0, minOf(duration, VideoClipRules.maxSavedDurationMs), duration)
-                TrimUi(window.startMs, window.endMs, duration)
-            } else {
-                null
-            }
-            _state.update { it.copy(pending = pending, launch = null, trim = trim) }
+            _state.update { it.copy(pending = pending, launch = null) }
+            persist(pending)
         }
     }
 
     private suspend fun persist(pending: PendingCapture) {
         val prompt = _state.value.prompt ?: return
-        val index = entries.countForDate(date) + 1
-        if (index > CaptureLimits.MAX_ENTRIES_PER_DAY) {
-            _state.update { it.copy(snackbar = COPY_CAP) }
+        val count = entries.countForDate(date)
+        if (count > CaptureLimits.MAX_ENTRIES_PER_DAY) {
+            _state.update { it.copy(snackbar = COPY_CAP, showStorageDialog = false) }
             return
         }
         val source = File(pending.path)
-        val ext = if (pending.kind == MediaKind.VIDEO) "mp4" else "jpg"
-        val dest = files.destinationFile(date, prompt.theme, index, ext)
+        val dest = files.destinationFile(date, prompt.theme, 1, "jpg")
         try {
             source.copyTo(dest, overwrite = true)
         } catch (_: Exception) {
-            _state.update { it.copy(snackbar = COPY_STORAGE) }
+            _state.update { it.copy(showStorageDialog = true) }
             return
         }
-        val thumb = files.thumbFile(date, index)
-        thumbs.write(dest, thumb, pending.kind == MediaKind.VIDEO)
+        val thumb = files.thumbFile(date, 1)
+        thumbs.write(dest, thumb)
         val entry = Entry(
             date = date,
             mediaUri = files.uriFor(dest).toString(),
@@ -406,18 +325,18 @@ class PromptDetailViewModel @Inject constructor(
             note = null,
             importedFromGallery = pending.imported,
             createdAt = clock.instant(),
-            mediaKind = pending.kind,
+            mediaKind = MediaKind.PHOTO,
         )
         when (val result = completeCapture(entry)) {
             CompleteCaptureResult.CapReached -> {
                 files.deleteQuietly(dest)
                 files.deleteQuietly(thumb)
-                _state.update { it.copy(snackbar = COPY_CAP) }
+                _state.update { it.copy(snackbar = COPY_CAP, showStorageDialog = false) }
             }
             CompleteCaptureResult.NotToday -> {
                 files.deleteQuietly(dest)
                 files.deleteQuietly(thumb)
-                _state.update { it.copy(snackbar = COPY_NOT_TODAY) }
+                _state.update { it.copy(snackbar = COPY_NOT_TODAY, showStorageDialog = false) }
             }
             CompleteCaptureResult.MissingPrompt -> {
                 files.deleteQuietly(dest)
@@ -430,7 +349,8 @@ class PromptDetailViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         pending = null,
-                        trim = null,
+                        offerGallery = false,
+                        showStorageDialog = false,
                         completion = CompletionNav(
                             dateIso = date.toString(),
                             newBadges = result.newlyUnlocked.joinToString(",") { a -> a.id },
@@ -444,12 +364,12 @@ class PromptDetailViewModel @Inject constructor(
     }
 
     companion object {
-        const val COPY_NOT_TODAY = "Only photos taken today count"
-        const val COPY_CAP = "Three captures is the most for one day."
-        const val COPY_TRIM_FAIL = "The clip could not be trimmed. Nothing was saved."
-        const val COPY_NEED_TRIM = "Trim the clip to 10 seconds."
-        const val COPY_EMPTY = "That capture was empty. Nothing was saved."
-        const val COPY_STORAGE = "Not enough storage to save."
-        const val COPY_GALLERY_STUB = "VIEW IN GALLERY"
+        const val COPY_NOT_TODAY = "That one's from another day — only today's photos count."
+        const val COPY_CAP = "Today already has a photo."
+        const val COPY_GALLERY_CARD =
+            "Camera didn't return a photo. You can pick one you took today instead."
+        const val COPY_STORAGE_BODY = "Today's capture isn't completed."
+        const val COPY_TRY_AGAIN = "Try again"
+        const val COPY_CHOOSE_GALLERY = "Choose from Gallery"
     }
 }

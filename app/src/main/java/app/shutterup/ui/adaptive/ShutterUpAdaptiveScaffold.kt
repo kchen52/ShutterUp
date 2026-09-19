@@ -2,13 +2,21 @@ package app.shutterup.ui.adaptive
 
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.WindowAdaptiveInfo
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -18,36 +26,11 @@ import androidx.window.core.layout.WindowSizeClass
 import app.shutterup.ui.theme.ShutterUpTheme
 
 /**
- * Adaptive app chrome: bottom bar on compact width, navigation rail on medium
- * width, permanent drawer on expanded width (`material3-adaptive-navigation-suite`).
+ * Adaptive app chrome: bottom bar on compact width, [NavigationRail] on
+ * medium and expanded width. Never a drawer (DESIGN.md §3).
  *
- * Worker A wires this **around** the nav host without this module importing
- * navigation:
- *
- * ```
- * var selected by remember { mutableStateOf(ShutterUpDestination.Home) }
- * ShutterUpAdaptiveScaffold(
- *     selected = selected,
- *     callbacks = ShutterUpTabCallbacks(
- *         onHome = { selected = ShutterUpDestination.Home; nav.navigate(HOME) },
- *         onCalendar = { selected = ShutterUpDestination.Calendar; nav.navigate(CALENDAR) },
- *         onFeed = { selected = ShutterUpDestination.Feed; nav.navigate(FEED) },
- *         onBadges = { selected = ShutterUpDestination.Badges; nav.navigate(BADGES) },
- *         onSettings = { selected = ShutterUpDestination.Settings; nav.navigate(SETTINGS) },
- *     ),
- * ) {
- *     ShutterUpNavGraph(navController, todayIso)
- * }
- * ```
- *
- * Hide the suite on Prompt Detail / Completion by not wrapping those routes, or
- * pass [layoutType] = [NavigationSuiteType.None].
- *
- * @param selected which tab is highlighted (independent of the current back stack).
- * @param callbacks tab clicks; must not capture a NavController inside this file.
- * @param layoutType optional override (screenshot tests / custom hosts). Null
- *   derives the type from [currentWindowAdaptiveInfo].
- * @param content screen body (typically the NavHost).
+ * Compact bar: Today · Calendar · Feed · Badges.
+ * Rail: the same four, plus Settings pinned at the bottom.
  */
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
@@ -60,31 +43,85 @@ fun ShutterUpAdaptiveScaffold(
 ) {
     val adaptiveInfo = currentWindowAdaptiveInfo()
     val resolvedType = layoutType ?: shutterUpNavigationSuiteType(adaptiveInfo)
-    NavigationSuiteScaffold(
-        modifier = modifier,
-        layoutType = resolvedType,
-        navigationSuiteItems = {
-            ShutterUpDestination.entries.forEach { destination ->
-                item(
-                    selected = destination == selected,
-                    onClick = { callbacks.onSelect(destination) },
-                    icon = {
-                        Icon(
-                            imageVector = destination.icon,
-                            contentDescription = destination.label,
-                        )
-                    },
-                    label = { Text(destination.label) },
-                )
+    when (resolvedType) {
+        NavigationSuiteType.None -> Box(modifier = modifier.fillMaxSize()) { content() }
+        NavigationSuiteType.NavigationBar -> {
+            Scaffold(
+                modifier = modifier,
+                bottomBar = {
+                    NavigationBar {
+                        ShutterUpDestination.entries.filter { it.primaryTab }.forEach { destination ->
+                            val isSelected = destination == selected
+                            NavigationBarItem(
+                                selected = isSelected,
+                                onClick = { callbacks.onSelect(destination) },
+                                icon = {
+                                    Icon(
+                                        imageVector = destination.icon(isSelected),
+                                        contentDescription = destination.label,
+                                    )
+                                },
+                                label = { Text(destination.label) },
+                            )
+                        }
+                    }
+                },
+            ) { padding ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding),
+                ) {
+                    content()
+                }
             }
-        },
-        content = content,
-    )
+        }
+        else -> {
+            Row(modifier = modifier.fillMaxSize()) {
+                NavigationRail(modifier = Modifier.fillMaxHeight()) {
+                    ShutterUpDestination.entries.filter { it.primaryTab }.forEach { destination ->
+                        val isSelected = destination == selected
+                        NavigationRailItem(
+                            selected = isSelected,
+                            onClick = { callbacks.onSelect(destination) },
+                            icon = {
+                                Icon(
+                                    imageVector = destination.icon(isSelected),
+                                    contentDescription = destination.label,
+                                )
+                            },
+                            label = { Text(destination.label) },
+                        )
+                    }
+                    Spacer(Modifier.weight(1f))
+                    val settingsSelected = selected == ShutterUpDestination.Settings
+                    NavigationRailItem(
+                        selected = settingsSelected,
+                        onClick = callbacks.onSettings,
+                        icon = {
+                            Icon(
+                                imageVector = ShutterUpDestination.Settings.icon(settingsSelected),
+                                contentDescription = ShutterUpDestination.Settings.label,
+                            )
+                        },
+                        label = { Text(ShutterUpDestination.Settings.label) },
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxSize(),
+                ) {
+                    content()
+                }
+            }
+        }
+    }
 }
 
 /**
- * Compact width → [NavigationSuiteType.NavigationBar], medium →
- * [NavigationSuiteType.NavigationRail], expanded → [NavigationSuiteType.NavigationDrawer].
+ * Compact width → [NavigationSuiteType.NavigationBar]; medium and expanded →
+ * [NavigationSuiteType.NavigationRail]. Drawer is never the default.
  */
 fun shutterUpNavigationSuiteType(adaptiveInfo: WindowAdaptiveInfo): NavigationSuiteType =
     shutterUpNavigationSuiteType(adaptiveInfo.windowSizeClass.minWidthDp)
@@ -93,9 +130,7 @@ fun shutterUpNavigationSuiteType(adaptiveInfo: WindowAdaptiveInfo): NavigationSu
 fun shutterUpNavigationSuiteType(minWidthDp: Int): NavigationSuiteType = when {
     minWidthDp < WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND ->
         NavigationSuiteType.NavigationBar
-    minWidthDp < WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND ->
-        NavigationSuiteType.NavigationRail
-    else -> NavigationSuiteType.NavigationDrawer
+    else -> NavigationSuiteType.NavigationRail
 }
 
 @Preview(name = "Compact light", widthDp = 400, heightDp = 800)
@@ -112,7 +147,7 @@ private fun ScaffoldPreviewExpandedLight() {
     ShutterUpTheme(darkTheme = false) {
         SampleScaffold(
             selected = ShutterUpDestination.Settings,
-            layoutType = NavigationSuiteType.NavigationDrawer,
+            layoutType = NavigationSuiteType.NavigationRail,
         )
     }
 }
@@ -123,7 +158,7 @@ private fun ScaffoldPreviewExpandedDark() {
     ShutterUpTheme(darkTheme = true) {
         SampleScaffold(
             selected = ShutterUpDestination.Settings,
-            layoutType = NavigationSuiteType.NavigationDrawer,
+            layoutType = NavigationSuiteType.NavigationRail,
         )
     }
 }

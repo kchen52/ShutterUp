@@ -25,5 +25,12 @@ object OnboardingCopy {
 
     const val PREFS_HEADLINE = "When, and what to look for"
     const val NOTIFY_TIME_LABEL = "Notification time"
+    const val THEME_FOCUS_PLACEHOLDER = "Leave blank and I'll surprise you"
     const val GET_FIRST_PROMPT = "Get my first prompt"
+
+    const val AI_HEADLINE = "On-device AI"
+    const val AI_PREPARING = "Preparing on-device AI"
+    const val AI_UNAVAILABLE =
+        "On-device AI isn't available on this phone right now. ShutterUp is using its built-in prompt library."
+    const val AI_READY = "Ready"
 }

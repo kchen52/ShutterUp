@@ -71,13 +71,16 @@ object SettingsCopy {
 
     const val LICENCES_BODY = "Fraunces is licensed under the SIL Open Font License."
 
-    /** PRIVACY.md stub, shown on the About row. */
-    val PRIVACY_BODY = """
-        Everything stays on your phone. ShutterUp has no internet access.
+    const val STORAGE_USED = "Storage used"
+    const val DEBUG_FORCE_ROLLOVER = "Force day rollover"
+    const val DEBUG_SEED = "Seed 60 days of history"
+    const val DEBUG_RESET = "Reset all data"
 
-        - No accounts, no cloud sync, no analytics, no crash reporting.
-        - Your photos live in your Gallery (`Pictures/ShutterUp/`); the app's database
-          and settings participate in Android Auto Backup like any other app data.
-        - The on-device AI (Gemini Nano) runs entirely on your phone.
-    """.trimIndent()
+    /** PRIVACY.md stub, shown in a dialog without markdown. */
+    val PRIVACY_BODY =
+        "Everything stays on your phone. ShutterUp has no internet access. " +
+            "No accounts, no cloud sync, no analytics, no crash reporting. " +
+            "Your photos live in your Gallery (Pictures/ShutterUp). " +
+            "The app's database and settings participate in Android Auto Backup like any other app data. " +
+            "The on-device AI (Gemini Nano) runs entirely on your phone."
 }

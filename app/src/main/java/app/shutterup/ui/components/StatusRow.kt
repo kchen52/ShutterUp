@@ -96,24 +96,26 @@ fun StreakStatus(
                 style = MaterialTheme.typography.labelMedium,
             )
         }
-        Row(
-            modifier = Modifier
-                .weight(1f)
-                .clearAndSetSemantics { },
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-            Icon(
-                imageVector = SnowflakeIcon,
-                contentDescription = null,
-                modifier = Modifier.size(20.dp),
-                tint = MaterialTheme.colorScheme.tertiary,
-            )
-            Text(
-                text = freezes.toString(),
-                color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.labelMedium,
-            )
+        if (freezes > 0) {
+            Row(
+                modifier = Modifier
+                    .weight(1f)
+                    .clearAndSetSemantics { },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                Icon(
+                    imageVector = SnowflakeIcon,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.tertiary,
+                )
+                Text(
+                    text = freezes.toString(),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.labelMedium,
+                )
+            }
         }
         MonthRing(
             completed = monthCompleted,

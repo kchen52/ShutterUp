@@ -32,7 +32,7 @@ data class CompletionUiState(
 )
 
 /**
- * Completion: note, streak, newly unlocked badges, share/stay/retake.
+ * Completion: note, streak, newly unlocked badges, Done / Retake.
  */
 @HiltViewModel
 class CompletionViewModel @Inject constructor(

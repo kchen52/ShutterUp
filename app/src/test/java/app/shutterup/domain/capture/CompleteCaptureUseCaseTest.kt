@@ -31,16 +31,28 @@ class CompleteCaptureUseCaseTest {
     private val clock = Clock.fixed(today.atTime(12, 0).toInstant(zone), zone)
 
     @Test
-    fun fourthEntryIsBlocked() = runTest {
+    fun secondEntryReplacesTheFirst() = runTest {
         val entries = FakeEntries(
-            MutableList(3) { i ->
+            mutableListOf(sampleEntry(today).copy(id = 1L, mediaUri = "file://old")),
+        )
+        val useCase = useCase(entries = entries)
+        val result = useCase(sampleEntry(today).copy(id = 0, mediaUri = "file://new"))
+        assertTrue(result is CompleteCaptureResult.Saved)
+        assertEquals(1, entries.countForDate(today))
+        assertEquals("file://new", entries.listAll().single().mediaUri)
+    }
+
+    @Test
+    fun extraRowsBeyondCapAreBlocked() = runTest {
+        val entries = FakeEntries(
+            MutableList(2) { i ->
                 sampleEntry(today).copy(id = i + 1L, mediaUri = "file://$i")
             },
         )
         val useCase = useCase(entries = entries)
         val result = useCase(sampleEntry(today).copy(id = 0, mediaUri = "file://new"))
         assertEquals(CompleteCaptureResult.CapReached, result)
-        assertEquals(3, entries.countForDate(today))
+        assertEquals(2, entries.countForDate(today))
     }
 
     @Test

@@ -23,6 +23,13 @@ data class TodayWidgetState(
 ) {
     val kicker: String = "$weekday · $theme".uppercase(Locale.US)
 
+    /** Compact 2×2 kicker so the theme survives (DESIGN §8). */
+    val shortKicker: String
+        get() {
+            val day = weekday.take(3).uppercase(Locale.US)
+            return "$day · ${theme.uppercase(Locale.US)}"
+        }
+
     val streakLabel: String = if (streakDays == 1) "1 day" else "$streakDays days"
 
     companion object {

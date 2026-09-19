@@ -28,7 +28,7 @@ import javax.inject.Singleton
  * Deep-link contract consumed by [MainActivity] (parsing lands in a later milestone):
  * - Content tap: `shutterup://day/<ISO-date>`
  * - Shoot action: `shutterup://day/<ISO-date>?autoLaunchCamera=true`
- * - Reroll action: `shutterup://day/<ISO-date>?autoLaunchCamera=true&reroll=true`
+ * - Reroll action: `shutterup://day/<ISO-date>?reroll=true`
  *
  * Actions target [MainActivity] only (no broadcast trampolines).
  *
@@ -79,7 +79,7 @@ class NotificationHelper @Inject constructor(
             .addAction(R.drawable.ic_stat_shoot, ACTION_SHOOT, shootIntent)
         if (rerollAvailable) {
             val rerollIntent = activityIntent(
-                Uri.parse("$SCHEME://$HOST/$iso?autoLaunchCamera=true&reroll=true"),
+                Uri.parse("$SCHEME://$HOST/$iso?reroll=true"),
                 REQUEST_REROLL,
             )
             builder.addAction(R.drawable.ic_stat_shoot, ACTION_REROLL, rerollIntent)

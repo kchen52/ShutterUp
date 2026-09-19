@@ -14,7 +14,7 @@ import javax.inject.Singleton
 
 /**
  * App-private capture files under [Context.getExternalFilesDir] pictures.
- * Shared-library / MediaStore writes are deferred until the user explicitly shares.
+ * Camera output is a pending [FileProvider] URI (SPEC §2 / §4.2).
  */
 @Singleton
 class CaptureFileStore @Inject constructor(
@@ -34,13 +34,13 @@ class CaptureFileStore @Inject constructor(
     /** Directory for 400 px thumbnails. */
     fun thumbsDir(): File = File(context.filesDir, "thumbs").also { it.mkdirs() }
 
-    /** Creates a pending still or video file for [FileProvider]. */
-    fun createPending(extension: String): File {
-        val ext = extension.trimStart('.')
+    /** Creates a pending still file for [FileProvider]. */
+    fun createPending(extension: String = "jpg"): File {
+        val ext = extension.trimStart('.').ifBlank { "jpg" }
         return File(pendingDir(), "${UUID.randomUUID()}.$ext")
     }
 
-    /** Final name `yyyy-MM-dd_theme-slug_n.ext` in the private pictures directory. */
+    /** Final name via [MediaNaming] in the private pictures directory. */
     fun destinationFile(date: LocalDate, theme: String, index: Int, extension: String): File =
         File(picturesDir, MediaNaming.fileName(date, theme, index, extension))
 

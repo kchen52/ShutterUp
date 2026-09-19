@@ -26,7 +26,7 @@ class AdaptiveScaffoldScreenshotTest {
             ShutterUpTheme(darkTheme = false) {
                 SampleScaffold(
                     selected = ShutterUpDestination.Settings,
-                    layoutType = NavigationSuiteType.NavigationDrawer,
+                    layoutType = NavigationSuiteType.NavigationRail,
                 )
             }
         }
@@ -39,7 +39,7 @@ class AdaptiveScaffoldScreenshotTest {
             ShutterUpTheme(darkTheme = true) {
                 SampleScaffold(
                     selected = ShutterUpDestination.Settings,
-                    layoutType = NavigationSuiteType.NavigationDrawer,
+                    layoutType = NavigationSuiteType.NavigationRail,
                 )
             }
         }

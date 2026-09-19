@@ -21,6 +21,7 @@ class TodayWidgetStateTest {
             thumbPath = null,
         )
         assertEquals("SATURDAY · REFLECTIONS", state.kicker)
+        assertEquals("SAT · REFLECTIONS", state.shortKicker)
         assertEquals("Don't rotate the photo afterwards.", state.constraint)
         assertEquals("14 days", state.streakLabel)
         assertEquals("Find the sky in a puddle", state.title)

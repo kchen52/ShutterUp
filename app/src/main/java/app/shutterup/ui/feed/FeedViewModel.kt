@@ -7,6 +7,7 @@ import app.shutterup.domain.model.DayStatus
 import app.shutterup.domain.model.Entry
 import app.shutterup.domain.repository.DayPromptRepository
 import app.shutterup.domain.repository.EntryRepository
+import app.shutterup.ui.calendar.spokenDate
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -24,6 +25,7 @@ data class FeedCardUi(
     val title: String,
     val theme: String,
     val kicker: String,
+    val spokenDescription: String,
     val thumbPath: String?,
     val aspectRatio: Float,
 )
@@ -104,6 +106,7 @@ internal fun DayPrompt.toFeedCard(entry: Entry?): FeedCardUi {
         title = title,
         theme = theme,
         kicker = feedKicker(date, theme),
+        spokenDescription = "${spokenDate(date)}, completed",
         thumbPath = entry?.thumbPath?.takeIf { it.isNotBlank() },
         aspectRatio = ratio.coerceIn(0.4f, 2.2f),
     )

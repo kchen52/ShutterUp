@@ -35,9 +35,9 @@ import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
-import androidx.glance.layout.width
 import androidx.glance.text.FontFamily
 import androidx.glance.text.Text
+import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import app.shutterup.MainActivity
 import app.shutterup.navigation.DeepLinks
@@ -79,17 +79,17 @@ private fun TodayGlanceContent(state: TodayWidgetState, medium: Boolean) {
             .padding(if (medium) 12.dp else 10.dp)
             .clickable(actionStartActivity(viewIntent(context, detail))),
     ) {
-        if (state.completed && medium) {
-            CompletedGlance(state)
+        if (state.completed) {
+            CompletedGlance(state, medium)
         } else {
             Column(modifier = GlanceModifier.fillMaxSize()) {
                 Text(
-                    text = state.kicker,
+                    text = if (medium) state.kicker else state.shortKicker,
                     style = TextStyle(
                         color = GlanceTheme.colors.onSurfaceVariant,
                         fontSize = 10.sp,
                     ),
-                    maxLines = 1,
+                    maxLines = if (medium) 1 else 2,
                 )
                 Spacer(GlanceModifier.height(4.dp))
                 Text(
@@ -104,7 +104,7 @@ private fun TodayGlanceContent(state: TodayWidgetState, medium: Boolean) {
                 if (medium && !state.paused) {
                     Spacer(GlanceModifier.height(4.dp))
                     Text(
-                        text = state.constraint ?: state.oneLiner,
+                        text = state.oneLiner,
                         style = TextStyle(
                             color = GlanceTheme.colors.onSurface,
                             fontSize = 14.sp,
@@ -112,19 +112,11 @@ private fun TodayGlanceContent(state: TodayWidgetState, medium: Boolean) {
                         maxLines = 2,
                     )
                     Spacer(GlanceModifier.height(8.dp))
-                    Row(
-                        modifier = GlanceModifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
+                    Box(
+                        modifier = GlanceModifier
+                            .fillMaxWidth(),
+                        contentAlignment = Alignment.CenterEnd,
                     ) {
-                        Text(
-                            text = state.streakLabel,
-                            style = TextStyle(
-                                color = GlanceTheme.colors.onSurfaceVariant,
-                                fontSize = 12.sp,
-                            ),
-                            maxLines = 1,
-                        )
-                        Spacer(GlanceModifier.width(8.dp))
                         Box(
                             modifier = GlanceModifier
                                 .cornerRadius(50.dp)
@@ -148,21 +140,20 @@ private fun TodayGlanceContent(state: TodayWidgetState, medium: Boolean) {
 }
 
 @Composable
-private fun CompletedGlance(state: TodayWidgetState) {
+private fun CompletedGlance(state: TodayWidgetState, medium: Boolean) {
     Column(modifier = GlanceModifier.fillMaxSize()) {
         Row(
             modifier = GlanceModifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = state.kicker,
+                text = if (medium) state.kicker else state.shortKicker,
                 style = TextStyle(
                     color = GlanceTheme.colors.onSurfaceVariant,
                     fontSize = 10.sp,
                 ),
-                maxLines = 1,
+                maxLines = if (medium) 1 else 2,
             )
-            Spacer(GlanceModifier.width(8.dp))
             Box(
                 modifier = GlanceModifier
                     .cornerRadius(50.dp)
@@ -170,27 +161,30 @@ private fun CompletedGlance(state: TodayWidgetState) {
                     .padding(horizontal = 8.dp, vertical = 4.dp),
             ) {
                 Text(
-                    text = "Done",
+                    text = "✓",
                     style = TextStyle(
                         color = GlanceTheme.colors.onPrimaryContainer,
-                        fontSize = 11.sp,
+                        fontSize = 12.sp,
+                        textAlign = TextAlign.Center,
                     ),
                 )
             }
         }
-        Spacer(GlanceModifier.height(8.dp))
-        val path = state.thumbPath
-        if (!path.isNullOrEmpty() && File(path).isFile) {
-            val bitmap = BitmapFactory.decodeFile(path)
-            if (bitmap != null) {
-                Image(
-                    provider = ImageProvider(bitmap),
-                    contentDescription = state.title,
-                    modifier = GlanceModifier
-                        .fillMaxWidth()
-                        .height(72.dp)
-                        .cornerRadius(16.dp),
-                )
+        if (medium) {
+            Spacer(GlanceModifier.height(8.dp))
+            val path = state.thumbPath
+            if (!path.isNullOrEmpty() && File(path).isFile) {
+                val bitmap = BitmapFactory.decodeFile(path)
+                if (bitmap != null) {
+                    Image(
+                        provider = ImageProvider(bitmap),
+                        contentDescription = state.title,
+                        modifier = GlanceModifier
+                            .fillMaxWidth()
+                            .height(72.dp)
+                            .cornerRadius(16.dp),
+                    )
+                }
             }
         }
     }

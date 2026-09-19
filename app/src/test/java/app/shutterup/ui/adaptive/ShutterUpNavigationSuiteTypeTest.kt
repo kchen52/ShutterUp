@@ -28,9 +28,9 @@ class ShutterUpNavigationSuiteTypeTest {
     }
 
     @Test
-    fun expandedWidthUsesDrawer() {
+    fun expandedWidthUsesRail() {
         assertEquals(
-            NavigationSuiteType.NavigationDrawer,
+            NavigationSuiteType.NavigationRail,
             shutterUpNavigationSuiteType(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND),
         )
     }

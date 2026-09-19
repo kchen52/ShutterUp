@@ -5,18 +5,32 @@ import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import android.os.Environment
+import android.provider.MediaStore
+import android.text.format.Formatter
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.shutterup.data.ai.NanoPromptGenerator
+import app.shutterup.data.local.ShutterUpDatabase
 import app.shutterup.domain.ai.Availability
 import app.shutterup.domain.ai.PromptGenerator
+import app.shutterup.domain.model.DayPrompt
+import app.shutterup.domain.model.DayStatus
+import app.shutterup.domain.model.PromptSourceRef
+import app.shutterup.domain.model.StreakState
+import app.shutterup.domain.repository.DayPromptRepository
 import app.shutterup.domain.repository.GamificationRepository
 import app.shutterup.domain.repository.PreferencesRepository
+import app.shutterup.domain.rollover.DayRolloverUseCase
 import app.shutterup.widget.TodayWidgetUpdater
 import app.shutterup.work.NotificationScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import java.time.Clock
+import java.time.Instant
+import java.time.LocalDate
 import java.time.LocalTime
+import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Named
 import kotlinx.coroutines.Dispatchers
@@ -24,6 +38,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -44,6 +59,7 @@ data class SettingsUiState(
     val showDebug: Boolean = false,
     val debugUseFakeAi: Boolean = false,
     val showBatteryHint: Boolean = false,
+    val storageUsed: String = "0 B",
 ) {
     val preciseTimingStatus: String =
         if (exactAlarmAllowed) SettingsCopy.PRECISE_ALLOWED else SettingsCopy.PRECISE_NEEDS_PERMISSION
@@ -74,13 +90,19 @@ class SettingsViewModel @Inject constructor(
     private val widgetUpdater: TodayWidgetUpdater,
     @Named("primaryGenerator") private val generator: PromptGenerator,
     private val nano: NanoPromptGenerator,
-    gamification: GamificationRepository,
+    private val gamification: GamificationRepository,
+    private val prompts: DayPromptRepository,
+    private val rollover: DayRolloverUseCase,
+    private val database: ShutterUpDatabase,
+    private val clock: Clock,
+    private val zone: ZoneId,
     @ApplicationContext private val appContext: Context,
 ) : ViewModel() {
 
     private val ai = MutableStateFlow(
         AiSlice(SettingsCopy.AI_UNAVAILABLE_STATUS, SettingsCopy.AI_UNAVAILABLE),
     )
+    private val storageUsed = MutableStateFlow("0 B")
 
     val state: StateFlow<SettingsUiState> = combine(
         combine(
@@ -94,7 +116,8 @@ class SettingsViewModel @Inject constructor(
         },
         gamification.observeStreak(),
         ai,
-    ) { prefs, streak, aiSlice ->
+        storageUsed,
+    ) { prefs, streak, aiSlice, storage ->
         SettingsUiState(
             notifyTime = prefs.notifyTime,
             preciseTiming = prefs.precise,
@@ -108,6 +131,7 @@ class SettingsViewModel @Inject constructor(
             showDebug = isDebuggable(appContext),
             debugUseFakeAi = prefs.fakeAi,
             showBatteryHint = isBatteryRestricted(appContext),
+            storageUsed = storage,
         )
     }.stateIn(
         viewModelScope,
@@ -132,6 +156,7 @@ class SettingsViewModel @Inject constructor(
                 supporting = aiSupporting(availability),
             )
         }
+        refreshStorage()
     }
 
     /** Hour/minute from the time picker; reschedules the daily worker (SPEC §8.2). */
@@ -168,6 +193,70 @@ class SettingsViewModel @Inject constructor(
     fun setDebugUseFakeAi(useFake: Boolean) {
         viewModelScope.launch {
             preferences.setDebugUseFakeAi(useFake)
+        }
+    }
+
+    fun forceDayRollover() {
+        viewModelScope.launch {
+            val today = LocalDate.now(clock.withZone(zone))
+            val paused = preferences.observePaused().first()
+            rollover.rollover(today.plusDays(1), paused)
+        }
+    }
+
+    fun seedSixtyDays() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val today = LocalDate.now(clock.withZone(zone))
+            val cycle = listOf(
+                DayStatus.COMPLETED,
+                DayStatus.COMPLETED,
+                DayStatus.SKIPPED,
+                DayStatus.MISSED,
+                DayStatus.COMPLETED_NO_PHOTO,
+                DayStatus.PAUSED,
+                DayStatus.COMPLETED,
+            )
+            for (offset in 59 downTo 0) {
+                val date = today.minusDays(offset.toLong())
+                val status = if (offset == 0) DayStatus.PENDING else cycle[offset % cycle.size]
+                val frozen = (status == DayStatus.SKIPPED || status == DayStatus.MISSED) && offset % 4 == 0
+                prompts.upsert(
+                    DayPrompt(
+                        date = date,
+                        title = "Find the sky in a puddle",
+                        oneLiner = "Turn the world upside down using any reflective surface you pass today.",
+                        details = "Look down, not up.",
+                        constraint = "Don't rotate the photo afterwards.",
+                        theme = if (offset % 3 == 0) "Quiet hours" else "Reflections",
+                        tips = emptyList(),
+                        source = PromptSourceRef.LIBRARY,
+                        libraryId = "seed-$offset",
+                        modelName = null,
+                        generatedAt = Instant.parse("2026-01-01T08:00:00Z"),
+                        status = status,
+                        frozen = frozen,
+                        rerollUsed = false,
+                    ),
+                )
+            }
+            gamification.updateStreak(
+                StreakState(current = 3, longest = 12, freezes = 1, lastProcessedDate = today),
+            )
+            refreshStorage()
+        }
+    }
+
+    fun resetAllData() {
+        viewModelScope.launch(Dispatchers.IO) {
+            database.clearAllTables()
+            gamification.updateStreak(StreakState(0, 0, 0, null))
+            refreshStorage()
+        }
+    }
+
+    private fun refreshStorage() {
+        viewModelScope.launch(Dispatchers.IO) {
+            storageUsed.value = Formatter.formatShortFileSize(appContext, storageUsedBytes(appContext))
         }
     }
 
@@ -213,4 +302,27 @@ private fun isBatteryRestricted(context: Context): Boolean {
     if (activityManager?.isBackgroundRestricted == true) return true
     val usage = context.getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager ?: return false
     return usage.appStandbyBucket >= UsageStatsManager.STANDBY_BUCKET_RESTRICTED
+}
+
+internal fun storageUsedBytes(context: Context): Long {
+    var total = 0L
+    context.filesDir.walkTopDown().forEach { file ->
+        if (file.isFile) total += file.length()
+    }
+    val resolver = context.contentResolver
+    resolver.query(
+        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+        arrayOf(MediaStore.Images.Media.SIZE),
+        "${MediaStore.Images.Media.RELATIVE_PATH} LIKE ?",
+        arrayOf("%${Environment.DIRECTORY_PICTURES}/ShutterUp%"),
+        null,
+    )?.use { cursor ->
+        val sizeIndex = cursor.getColumnIndex(MediaStore.Images.Media.SIZE)
+        if (sizeIndex >= 0) {
+            while (cursor.moveToNext()) {
+                total += cursor.getLong(sizeIndex)
+            }
+        }
+    }
+    return total
 }

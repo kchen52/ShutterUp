@@ -3,8 +3,8 @@ package app.shutterup.capture
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.media.MediaMetadataRetriever
 import android.net.Uri
+import android.provider.MediaStore
 import androidx.exifinterface.media.ExifInterface
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
@@ -16,15 +16,14 @@ import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/** EXIF / container metadata for a capture file. Bytes are never re-encoded. */
+/** EXIF / MediaStore metadata for a still. Bytes are never re-encoded. */
 data class CaptureMetadata(
     val capturedAt: Instant,
     val width: Int,
     val height: Int,
-    val durationMs: Long?,
 )
 
-/** Reads capture time, size, and optional duration from a private file. */
+/** Reads capture time and size from a private JPEG (SPEC §4.3 date gate). */
 @Singleton
 class CaptureMetadataReader @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -33,10 +32,16 @@ class CaptureMetadataReader @Inject constructor(
     private val exifDate: DateTimeFormatter =
         DateTimeFormatter.ofPattern("yyyy:MM:dd HH:mm:ss")
 
-    fun read(file: File, fallback: Instant): CaptureMetadata {
-        val isVideo = file.extension.equals("mp4", ignoreCase = true) ||
-            file.extension.equals("3gp", ignoreCase = true)
-        return if (isVideo) readVideo(file, fallback) else readImage(file, fallback)
+    fun read(file: File, fallback: Instant): CaptureMetadata = readImage(file, fallback)
+
+    /**
+     * Picker photos: prefer [MediaStore.Images.Media.DATE_TAKEN], then EXIF
+     * `DateTimeOriginal`, then [fallback].
+     */
+    fun readPicked(uri: Uri, file: File, fallback: Instant): CaptureMetadata {
+        val image = readImage(file, fallback)
+        val taken = queryDateTaken(uri)
+        return if (taken != null) image.copy(capturedAt = taken) else image
     }
 
     private fun readImage(file: File, fallback: Instant): CaptureMetadata {
@@ -47,31 +52,24 @@ class CaptureMetadataReader @Inject constructor(
             capturedAt = capturedAt,
             width = bounds.outWidth.coerceAtLeast(0),
             height = bounds.outHeight.coerceAtLeast(0),
-            durationMs = null,
         )
     }
 
-    private fun readVideo(file: File, fallback: Instant): CaptureMetadata {
-        val retriever = MediaMetadataRetriever()
+    private fun queryDateTaken(uri: Uri): Instant? {
         return try {
-            retriever.setDataSource(file.absolutePath)
-            val width = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)
-                ?.toIntOrNull() ?: 0
-            val height = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)
-                ?.toIntOrNull() ?: 0
-            val duration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
-                ?.toLongOrNull()
-            val dated = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DATE)
-            CaptureMetadata(
-                capturedAt = parseRetrieverDate(dated) ?: fallback,
-                width = width,
-                height = height,
-                durationMs = duration,
-            )
-        } catch (_: RuntimeException) {
-            CaptureMetadata(fallback, 0, 0, null)
-        } finally {
-            retriever.release()
+            context.contentResolver.query(
+                uri,
+                arrayOf(MediaStore.Images.Media.DATE_TAKEN),
+                null,
+                null,
+                null,
+            )?.use { cursor ->
+                if (!cursor.moveToFirst()) return null
+                val taken = cursor.getLong(0)
+                if (taken > 0L) Instant.ofEpochMilli(taken) else null
+            }
+        } catch (_: Exception) {
+            null
         }
     }
 
@@ -86,20 +84,6 @@ class CaptureMetadataReader @Inject constructor(
             null
         }
     }
-
-    private fun parseRetrieverDate(raw: String?): Instant? {
-        if (raw.isNullOrBlank()) return null
-        return try {
-            Instant.parse(raw)
-        } catch (_: Exception) {
-            null
-        }
-    }
-
-    fun openUri(uri: Uri): File? {
-        if (uri.scheme == "file") return uri.path?.let(::File)
-        return null
-    }
 }
 
 /**
@@ -107,13 +91,9 @@ class CaptureMetadataReader @Inject constructor(
  */
 @Singleton
 class ThumbnailWriter @Inject constructor() {
-    fun write(source: File, destination: File, isVideo: Boolean): Boolean {
+    fun write(source: File, destination: File): Boolean {
         destination.parentFile?.mkdirs()
-        val bitmap = if (isVideo) {
-            frameFromVideo(source)
-        } else {
-            decodeScaled(source)
-        } ?: return false
+        val bitmap = decodeScaled(source) ?: return false
         return FileOutputStream(destination).use { out ->
             bitmap.compress(Bitmap.CompressFormat.JPEG, 80, out)
         }
@@ -127,19 +107,6 @@ class ThumbnailWriter @Inject constructor() {
         val opts = BitmapFactory.Options().apply { inSampleSize = sample }
         val raw = BitmapFactory.decodeFile(source.absolutePath, opts) ?: return null
         return scaleToLongest(raw, 400)
-    }
-
-    private fun frameFromVideo(source: File): Bitmap? {
-        val retriever = MediaMetadataRetriever()
-        return try {
-            retriever.setDataSource(source.absolutePath)
-            val frame = retriever.frameAtTime ?: return null
-            scaleToLongest(frame, 400)
-        } catch (_: RuntimeException) {
-            null
-        } finally {
-            retriever.release()
-        }
     }
 
     private fun scaleToLongest(source: Bitmap, longest: Int): Bitmap {

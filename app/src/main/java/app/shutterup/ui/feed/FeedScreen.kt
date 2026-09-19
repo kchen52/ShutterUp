@@ -43,29 +43,28 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.shutterup.ui.components.Kicker
 import app.shutterup.ui.components.ThemeChip
+import app.shutterup.ui.theme.ProvideThemeTint
 import app.shutterup.ui.theme.ShutterUpTheme
 import app.shutterup.ui.theme.themeTint
 import coil3.compose.AsyncImage
 import java.time.LocalDate
+import java.util.Locale
 
 /**
  * Chronological completed-days feed. Navigation is callback-only so the
  * nav graph can wire routes without this screen holding a [androidx.navigation.NavController].
  *
  * @param onOpenDay ISO-8601 local date of the tapped completed day.
- * @param onOpenThemes opens the Themes browser (DESIGN §3: Themes is reached from Feed).
  */
 @Composable
 fun FeedRoute(
     onOpenDay: (String) -> Unit,
-    onOpenThemes: () -> Unit = {},
     viewModel: FeedViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     FeedScreen(
         state = state,
         onOpenDay = onOpenDay,
-        onOpenThemes = onOpenThemes,
         onSelectTheme = viewModel::selectTheme,
     )
 }
@@ -75,7 +74,6 @@ fun FeedRoute(
 fun FeedScreen(
     state: FeedUiState,
     onOpenDay: (String) -> Unit,
-    onOpenThemes: () -> Unit = {},
     onSelectTheme: (String?) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
@@ -84,7 +82,7 @@ fun FeedScreen(
         modifier = modifier.nestedScroll(scroll.nestedScrollConnection),
         topBar = {
             LargeTopAppBar(
-                title = { Text("Feed", style = MaterialTheme.typography.headlineSmall) },
+                title = { Text("Feed", style = MaterialTheme.typography.headlineMedium) },
                 scrollBehavior = scroll,
             )
         },
@@ -108,7 +106,6 @@ fun FeedScreen(
                         themes = state.themes,
                         selectedTheme = state.selectedTheme,
                         onSelectTheme = onSelectTheme,
-                        onOpenThemes = onOpenThemes,
                     )
                 }
                 if (state.items.isEmpty()) {
@@ -133,33 +130,27 @@ private fun FeedFilterRow(
     themes: List<String>,
     selectedTheme: String?,
     onSelectTheme: (String?) -> Unit,
-    onOpenThemes: () -> Unit,
 ) {
+    val dark = isSystemInDarkTheme()
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         item {
-            ThemeChip(
-                label = "All",
-                selected = selectedTheme == null,
-                onClick = { onSelectTheme(null) },
-            )
+            ProvideThemeTint(theme = "All", darkTheme = dark) {
+                ThemeChip(
+                    label = "ALL",
+                    selected = selectedTheme == null,
+                    onClick = { onSelectTheme(null) },
+                )
+            }
         }
         items(themes) { theme ->
-            val dark = isSystemInDarkTheme()
             ThemeChip(
-                label = theme,
+                label = theme.uppercase(Locale.ENGLISH),
                 selected = selectedTheme == theme,
                 tint = themeTint(theme, MaterialTheme.colorScheme, dark),
                 onClick = { onSelectTheme(theme) },
-            )
-        }
-        item {
-            ThemeChip(
-                label = "Themes",
-                selected = false,
-                onClick = onOpenThemes,
             )
         }
     }
@@ -178,7 +169,7 @@ fun HistoryCard(
         modifier = modifier
             .fillMaxWidth()
             .semantics {
-                contentDescription = "${card.dateIso}, completed, ${card.theme}"
+                contentDescription = card.spokenDescription
             },
         shape = RoundedCornerShape(16.dp),
         color = MaterialTheme.colorScheme.surface,
@@ -208,6 +199,8 @@ fun HistoryCard(
             Text(
                 text = card.title,
                 style = MaterialTheme.typography.titleLarge,
+                maxLines = 3,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                 modifier = Modifier.padding(start = 4.dp, top = 4.dp, end = 4.dp, bottom = 4.dp),
             )
         }
@@ -245,6 +238,7 @@ internal fun sampleFeedState(): FeedUiState = FeedUiState(
             title = "Find the sky in a puddle",
             theme = "Reflections",
             kicker = feedKicker(LocalDate.of(2026, 9, 19), "Reflections"),
+            spokenDescription = "19 September, completed",
             thumbPath = null,
             aspectRatio = 3f / 4f,
         ),
@@ -253,6 +247,7 @@ internal fun sampleFeedState(): FeedUiState = FeedUiState(
             title = "Kitchen still life after dark",
             theme = "Quiet hours",
             kicker = feedKicker(LocalDate.of(2026, 9, 12), "Quiet hours"),
+            spokenDescription = "12 September, completed",
             thumbPath = null,
             aspectRatio = 4f / 5f,
         ),

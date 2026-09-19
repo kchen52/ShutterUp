@@ -36,6 +36,7 @@ interface EntryDao {
     @Query("SELECT COUNT(*) FROM entries")
     suspend fun count(): Int
 
+    /** App-level cap is [app.shutterup.domain.capture.CaptureLimits.MAX_ENTRIES_PER_DAY] (1). */
     @Query("SELECT COUNT(*) FROM entries WHERE date = :date")
     suspend fun countForDate(date: LocalDate): Int
 

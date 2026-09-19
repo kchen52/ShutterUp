@@ -2,7 +2,7 @@ package app.shutterup.ui.day
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,8 +17,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.BrokenImage
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -31,14 +36,20 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.shutterup.domain.model.DayStatus
@@ -50,15 +61,12 @@ import app.shutterup.ui.components.ConstraintCard
 import app.shutterup.ui.components.Kicker
 import app.shutterup.ui.components.LibraryTag
 import app.shutterup.ui.components.ShootButton
-import app.shutterup.ui.components.ThemeChip
-import app.shutterup.ui.detail.dateKicker
 import app.shutterup.ui.detail.samplePrompt
 import app.shutterup.ui.theme.ProvideThemeTint
 import app.shutterup.ui.theme.ShutterUpTheme
 import coil3.compose.AsyncImage
 import java.io.File
 import java.time.Instant
-import java.time.LocalDate
 
 /**
  * Single-day view. Shoot / Retake open Prompt Detail; delete keeps the day complete.
@@ -115,7 +123,12 @@ fun DayScreen(
                 TopAppBar(
                     title = {},
                     navigationIcon = {
-                        TextButton(onClick = onBack) { Text("Back") }
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                                contentDescription = "Back",
+                            )
+                        }
                     },
                 )
             },
@@ -128,11 +141,7 @@ fun DayScreen(
                         .padding(padding),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("Your first photo goes here.", style = MaterialTheme.typography.headlineMedium)
-                        Spacer(Modifier.height(8.dp))
-                        Text("Come back after today's prompt.", style = MaterialTheme.typography.bodyMedium)
-                    }
+                    Text("Nothing saved for this day.", style = MaterialTheme.typography.bodyLarge)
                 }
                 return@Scaffold
             }
@@ -142,13 +151,24 @@ fun DayScreen(
                     .padding(padding)
                     .verticalScroll(rememberScrollState()),
             ) {
-                PhotoHeader(entries = state.entries, originalMissing = state.originalMissing)
+                PhotoHeader(
+                    entries = state.entries,
+                    originalMissing = state.originalMissing ||
+                        prompt.status == DayStatus.COMPLETED_NO_PHOTO,
+                )
                 Column(
                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    Kicker(text = dateKicker(state.date))
-                    Kicker(text = "${statusLabel(prompt.status)} · ${prompt.theme}")
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Kicker(text = "${statusLabel(prompt.status)} · ${prompt.theme}")
+                        if (prompt.source == PromptSourceRef.LIBRARY) {
+                            LibraryTag()
+                        }
+                    }
                     if (state.badgeIds.isNotEmpty()) {
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             state.badgeIds.forEach { id ->
@@ -156,22 +176,14 @@ fun DayScreen(
                             }
                         }
                     }
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        ThemeChip(label = prompt.theme, selected = true, onClick = null)
-                        if (prompt.source == PromptSourceRef.LIBRARY) {
-                            LibraryTag()
-                        }
-                    }
                     Text(
                         text = prompt.title,
-                        style = MaterialTheme.typography.headlineSmall,
+                        style = MaterialTheme.typography.displaySmall,
                         maxLines = 3,
                         overflow = TextOverflow.Ellipsis,
                     )
                     Text(text = prompt.oneLiner, style = MaterialTheme.typography.bodyLarge)
+                    Kicker(text = "HOW TO APPROACH IT")
                     Text(text = prompt.details, style = MaterialTheme.typography.bodyMedium)
                     if (prompt.tips.isNotEmpty()) {
                         Kicker(text = "TIPS")
@@ -187,16 +199,14 @@ fun DayScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
-                    if (state.entries.isNotEmpty()) {
-                        OutlinedTextField(
-                            value = state.note,
-                            onValueChange = onNoteChange,
-                            modifier = Modifier.fillMaxWidth(),
-                            label = { Text("Add a note…") },
-                            minLines = 2,
-                            maxLines = 4,
-                        )
-                    }
+                    OutlinedTextField(
+                        value = state.note,
+                        onValueChange = onNoteChange,
+                        modifier = Modifier.fillMaxWidth(),
+                        placeholder = { Text("Add a note…") },
+                        minLines = 2,
+                        maxLines = 4,
+                    )
                     val canShoot = state.isToday && prompt.status == DayStatus.PENDING
                     val canRetake = state.isToday &&
                         (prompt.status == DayStatus.COMPLETED || prompt.status == DayStatus.COMPLETED_NO_PHOTO)
@@ -241,50 +251,91 @@ fun DayScreen(
 
 @Composable
 private fun PhotoHeader(entries: List<Entry>, originalMissing: Boolean) {
-    val first = entries.firstOrNull() ?: return
-    val file = File(first.thumbPath)
+    val first = entries.firstOrNull()
+    val file = first?.thumbPath?.let(::File)
+    val hasFile = file != null && file.exists()
+    var viewer by remember { mutableStateOf(false) }
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(max = 420.dp),
     ) {
-        if (file.exists()) {
+        if (hasFile && !originalMissing) {
             AsyncImage(
                 model = file,
                 contentDescription = "Day photo",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(max = 420.dp),
+                    .heightIn(max = 420.dp)
+                    .pointerInput(Unit) {
+                        detectTransformGestures { _, _, zoom, _ ->
+                            if (zoom > 1.02f) viewer = true
+                        }
+                    },
                 contentScale = ContentScale.Fit,
             )
         } else {
-            Box(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(220.dp)
-                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                    .border(
-                        1.dp,
-                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
-                        RoundedCornerShape(0.dp),
-                    ),
-            )
-        }
-        if (originalMissing) {
-            Surface(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(12.dp),
-                shape = RoundedCornerShape(50),
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
             ) {
-                Text(
-                    text = "Original missing",
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                    style = MaterialTheme.typography.labelSmall,
+                Icon(
+                    imageVector = Icons.Rounded.BrokenImage,
+                    contentDescription = "Original missing",
+                    modifier = Modifier.size(48.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                Surface(
+                    modifier = Modifier.padding(top = 12.dp),
+                    shape = RoundedCornerShape(50),
+                    color = MaterialTheme.colorScheme.surfaceContainerHighest,
+                ) {
+                    Text(
+                        text = "Original missing",
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                    )
+                }
             }
         }
+    }
+    if (viewer && hasFile) {
+        Dialog(
+            onDismissRequest = { viewer = false },
+            properties = DialogProperties(usePlatformDefaultWidth = false),
+        ) {
+            PinchZoomViewer(file = file!!, onDismiss = { viewer = false })
+        }
+    }
+}
+
+@Composable
+private fun PinchZoomViewer(file: File, onDismiss: () -> Unit) {
+    var scale by remember { mutableFloatStateOf(1f) }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.9f))
+            .pointerInput(Unit) {
+                detectTransformGestures { _, _, zoom, _ ->
+                    scale = (scale * zoom).coerceIn(1f, 5f)
+                    if (scale <= 1f && zoom < 1f) onDismiss()
+                }
+            },
+        contentAlignment = Alignment.Center,
+    ) {
+        AsyncImage(
+            model = file,
+            contentDescription = "Day photo",
+            modifier = Modifier
+                .fillMaxWidth()
+                .graphicsLayer { scaleX = scale; scaleY = scale },
+            contentScale = ContentScale.Fit,
+        )
     }
 }
 

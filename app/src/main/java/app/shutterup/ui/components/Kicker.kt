@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import app.shutterup.ui.theme.ShutterUpTheme
+import java.util.Locale
 
 @Composable
 fun Kicker(
@@ -16,7 +17,7 @@ fun Kicker(
     modifier: Modifier = Modifier,
 ) {
     Text(
-        text = text.uppercase(),
+        text = text.uppercase(Locale.ENGLISH),
         modifier = modifier,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 1.sp),
