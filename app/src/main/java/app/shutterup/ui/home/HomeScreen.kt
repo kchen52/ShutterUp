@@ -282,8 +282,7 @@ private fun TodayCard(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(20.dp)
-                    .padding(bottom = 48.dp),
+                    .padding(20.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 TodayKickerRow(prompt)
