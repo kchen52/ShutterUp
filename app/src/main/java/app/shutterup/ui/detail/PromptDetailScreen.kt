@@ -355,7 +355,7 @@ private fun PromptDetailPreviewFontScale() {
     }
 }
 
-@Preview(name = "Series font scale 2x", showBackground = true, widthDp = 360, heightDp = 1200, fontScale = 2f)
+@Preview(name = "Series font scale 2x", showBackground = true, widthDp = 360, heightDp = 1600, fontScale = 2f)
 @Composable
 private fun PromptDetailPreviewSeriesFontScale() {
     ShutterUpTheme(darkTheme = false) {

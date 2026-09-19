@@ -90,7 +90,7 @@ class PromptDetailScreenshotTest {
     }
 
     @Test
-    @Config(qualifiers = "w400dp-h1200dp", fontScale = 2f)
+    @Config(qualifiers = "w400dp-h1600dp", fontScale = 2f)
     fun promptDetailSeriesFontScale2() {
         composeRule.setContent {
             ShutterUpTheme(darkTheme = false) {
