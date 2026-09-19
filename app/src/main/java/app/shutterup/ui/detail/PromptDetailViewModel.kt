@@ -13,6 +13,7 @@ import app.shutterup.domain.capture.CaptureDateValidator
 import app.shutterup.domain.capture.CaptureLimits
 import app.shutterup.domain.capture.CompleteCaptureResult
 import app.shutterup.domain.capture.CompleteCaptureUseCase
+import app.shutterup.work.NotificationScheduler
 import app.shutterup.domain.capture.RemainingToday
 import app.shutterup.domain.capture.SkipDayUseCase
 import app.shutterup.domain.model.DayPrompt
@@ -97,6 +98,7 @@ class PromptDetailViewModel @Inject constructor(
     private val thumbs: ThumbnailWriter,
     private val notifications: NotificationHelper,
     private val widgetUpdater: TodayWidgetUpdater,
+    private val scheduler: NotificationScheduler,
     private val clock: Clock,
     private val zone: ZoneId,
 ) : ViewModel() {
@@ -346,6 +348,7 @@ class PromptDetailViewModel @Inject constructor(
                 files.deleteQuietly(source)
                 notifications.cancel(date)
                 widgetUpdater.refresh()
+                scheduler.scheduleTopUpNow()
                 _state.update {
                     it.copy(
                         pending = null,

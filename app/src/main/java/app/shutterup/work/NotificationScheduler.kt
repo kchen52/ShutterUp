@@ -103,6 +103,28 @@ class NotificationScheduler @Inject constructor(
         scheduleTopUp()
     }
 
+    /**
+     * Opportunistic buffer fill after a capture completes: one-time top-up
+     * without the charging constraint, so tomorrow's prompt generates while
+     * the user is on the Completion screen. KEEP: overlapping saves collapse
+     * into one run; the worker itself no-ops when the buffer is full.
+     */
+    fun scheduleTopUpNow() {
+        val request = OneTimeWorkRequestBuilder<BufferTopUpWorker>()
+            .setConstraints(
+                Constraints.Builder()
+                    .setRequiresBatteryNotLow(true)
+                    .build(),
+            )
+            .addTag(TOP_UP_NOW_NAME)
+            .build()
+        WorkManager.getInstance(context).enqueueUniqueWork(
+            TOP_UP_NOW_NAME,
+            ExistingWorkPolicy.KEEP,
+            request,
+        )
+    }
+
     private fun exactPendingIntent(create: Boolean): PendingIntent? {
         val intent = Intent(context, ExactAlarmReceiver::class.java).setAction(ExactAlarmReceiver.ACTION)
         val flags = PendingIntent.FLAG_IMMUTABLE or
@@ -133,6 +155,8 @@ class NotificationScheduler @Inject constructor(
         const val DAILY_WORK_NAME = "daily-prompt"
         const val DAILY_WORK_TAG = "daily-prompt"
         const val TOP_UP_WORK_NAME = "buffer-topup"
+        const val TOP_UP_NOW_NAME = "buffer-topup-now"
+        const val TOP_UP_NOW_TAG = "buffer-topup-now"
         const val EXACT_REQUEST_CODE = 7109
     }
 }
