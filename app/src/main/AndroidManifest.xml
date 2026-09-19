@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Core value prop; requested during onboarding (SPEC §11). -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Only for the opt-in "Precise timing" path, granted in Settings (SPEC §11).
+         Never USE_EXACT_ALARM: Play-restricted to alarm/calendar apps. -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <!-- Only used by the exact-alarm path's rescheduling (SPEC §8.2). -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- Deliberately absent: INTERNET (privacy guarantee), CAMERA (ACTION_IMAGE_CAPTURE
+         needs none), any storage permission (MediaStore + Photo Picker need none).
+         Two libraries declare INTERNET and are stripped here: androidx.profileinstaller
+         (baseline profiles; works offline) and
+         com.google.android.datatransport:transport-backend-cct (ML Kit telemetry;
+         best-effort, fails silently without network). Nano model download goes
+         through AICore via IPC, not this app's network. -->
+    <uses-permission
+        android:name="android.permission.INTERNET"
+        tools:node="remove" />
+
+    <application
+        android:name=".ShutterUpApplication"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.ShutterUp">
+        <activity
+            android:name=".MainActivity"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|density"
+            android:exported="true"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <!-- Notification tap / widget tap deep link: shutterup://day/<date> (SPEC §8.1). -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:host="day"
+                    android:scheme="shutterup" />
+            </intent-filter>
+        </activity>
+        <!-- Camera capture output (SPEC §9): private pending file handed to ACTION_IMAGE_CAPTURE. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/filepaths" />
+        </provider>
+    </application>
+
+</manifest>
