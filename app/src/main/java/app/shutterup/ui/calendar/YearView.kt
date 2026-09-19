@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -28,6 +28,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
@@ -39,6 +40,7 @@ import app.shutterup.domain.calendar.YearGrid
 import app.shutterup.domain.calendar.YearMonthBand
 import app.shutterup.ui.components.Kicker
 import app.shutterup.ui.theme.ShutterUpTheme
+import app.shutterup.ui.theme.themeAccent
 import app.shutterup.ui.theme.themeTint
 import java.time.format.TextStyle
 import java.util.Locale
@@ -135,14 +137,22 @@ private fun YearDayCell(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 10.dp)
+                .aspectRatio(1f)
                 .clip(YearCellShape)
                 .then(
                     when (cell.mark) {
                         YearCellMark.COMPLETED -> {
-                            val tint = cell.theme?.let { themeTint(it, scheme, darkTheme) }
-                                ?: scheme.surfaceContainerHigh
-                            Modifier.background(tint)
+                            val theme = cell.theme
+                            val fill = if (theme.isNullOrBlank()) {
+                                scheme.surfaceContainerHigh
+                            } else {
+                                lerp(
+                                    themeTint(theme, scheme, darkTheme),
+                                    themeAccent(theme, scheme),
+                                    if (darkTheme) 0.32f else 0.28f,
+                                )
+                            }
+                            Modifier.background(fill)
                         }
                         YearCellMark.PENDING_TODAY -> Modifier
                             .background(scheme.surface)
@@ -159,22 +169,20 @@ private fun YearDayCell(
                 YearCellMark.SKIPPED -> {
                     Box(
                         modifier = Modifier
-                            .padding(2.dp)
-                            .fillMaxWidth()
-                            .height(1.dp)
-                            .clip(YearCellShape)
+                            .fillMaxWidth(0.55f)
+                            .height(1.5.dp)
                             .background(scheme.outlineVariant),
                     )
                 }
                 YearCellMark.MISSED -> {
                     Box(
                         modifier = Modifier
-                            .size(4.dp)
+                            .size(3.dp)
                             .clip(CircleShape)
                             .background(scheme.outlineVariant),
                     )
                 }
-                else -> Spacer(Modifier.height(12.dp))
+                else -> Unit
             }
         }
     }

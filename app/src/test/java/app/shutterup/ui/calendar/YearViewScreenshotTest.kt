@@ -16,7 +16,7 @@ import org.robolectric.annotation.GraphicsMode
 
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(sdk = [35], qualifiers = "w400dp-h1400dp")
+@Config(sdk = [35], qualifiers = "w400dp-h1000dp")
 class YearViewScreenshotTest {
 
     @get:Rule
@@ -89,7 +89,7 @@ class YearViewScreenshotTest {
     }
 
     @Test
-    @Config(qualifiers = "w400dp-h1800dp")
+    @Config(qualifiers = "w400dp-h1400dp")
     fun yearFontScale2() {
         composeRule.setContent {
             ShutterUpTheme(darkTheme = false) {

@@ -307,9 +307,7 @@ fun CalendarScreen(
                 return@Column
             }
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .then(if (inYear) Modifier.weight(1f) else Modifier),
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 val p = yearProgress.floatValue
                 if (p < 1f || zooming) {
