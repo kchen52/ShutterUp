@@ -142,7 +142,7 @@ Compact:
 
 Rules:
 
-- The card's minimum height is 55 % of the viewport so the title has room; it never scrolls internally.
+- The pending / skipped / paused card wraps its content with the standard 20 dp inner padding so unused space sits below the card, not inside it. It never scrolls internally. When today is **COMPLETED**, the photo card still uses a 55 % viewport minimum so the image has room.
 - Status row: streak number in `headlineSmall` Fraunces, label in `labelMedium`. Freeze count uses the snowflake glyph in `tertiary`. Month ring is a 28 dp `CircularProgressIndicator` (track `outlineVariant`, progress `primary`) with `completed/eligible` beside it.
 - When today is **COMPLETED**: the card becomes the photo — full-bleed inside the card with a bottom scrim, kicker and title over it in `inverseOnSurface`, and the button row becomes `Add a note` / `Retake`.
 - When today is **SKIPPED**: the card keeps the kicker, shows the title struck through in `onSurfaceVariant`, and the body reads "Skipped — see you tomorrow." (`MISSED` only ever applies to past days, so it never appears on this card.)
@@ -432,7 +432,7 @@ In-app wordmark: "ShutterUp" in Fraunces 500, used only on Onboarding page 1 and
 
 - Inner screen is nearly square (~2184×1968). List-detail split **40/60** for Today, **45/55** for Calendar, so photos in the right pane stay large.
 - Never place the primary action across the hinge line. On the inner display the hinge falls near the horizontal centre; the Shoot button lives in the right pane's bottom-right, not centred on the screen.
-- Cover screen is tall and narrow (~21:9): the Today card's 55 % height rule assumes this; on the inner screen the card is capped at 420 dp tall.
+- Cover screen is tall and narrow (~21:9): the pending Today card wraps its content. The completed photo card still uses the 55 % height rule so the image has room; on the inner screen that photo card is capped at 420 dp tall.
 - Fold/unfold mid-Completion: the photo keeps its position on screen (state is preserved; no re-animation).
 - Tabletop posture (v1.1): photo on the top half, text and actions on the bottom half, 16 dp gap either side of the hinge.
 

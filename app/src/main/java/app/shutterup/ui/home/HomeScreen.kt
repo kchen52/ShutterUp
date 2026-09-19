@@ -49,6 +49,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -134,7 +135,7 @@ fun HomeScreen(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.surface),
         ) {
-            val cardMin = maxHeight * 0.55f
+            val completedPhotoMin = maxHeight * 0.55f
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -158,7 +159,7 @@ fun HomeScreen(
                 }
                 TodayCard(
                     state = state,
-                    minHeight = cardMin,
+                    completedPhotoMinHeight = completedPhotoMin,
                     listPane = listPane,
                     onShoot = onShoot,
                     onDetails = onDetails,
@@ -204,7 +205,7 @@ fun HomeScreen(
 @Composable
 private fun TodayCard(
     state: HomeUiState,
-    minHeight: androidx.compose.ui.unit.Dp,
+    completedPhotoMinHeight: Dp,
     listPane: Boolean,
     onShoot: () -> Unit,
     onDetails: () -> Unit,
@@ -215,9 +216,7 @@ private fun TodayCard(
     val prompt = state.prompt
     if (state.paused) {
         Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = minHeight),
+            modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(28.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
@@ -241,9 +240,7 @@ private fun TodayCard(
             else -> SettingsCopy.AI_UNAVAILABLE
         }
         Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = minHeight),
+            modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(28.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         ) {
@@ -258,16 +255,14 @@ private fun TodayCard(
             prompt = prompt,
             photoPath = state.recent.firstOrNull { it.date == state.today }?.thumbPath
                 ?: state.recent.firstOrNull { it.date == state.today }?.mediaUri,
-            minHeight = minHeight,
+            minHeight = completedPhotoMinHeight,
             onAddNote = onAddNote,
             onRetake = onRetake,
         )
         return
     }
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(min = minHeight),
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(containerColor = LocalThemeTint.current),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
@@ -339,7 +334,7 @@ private fun TodayKickerRow(prompt: DayPrompt) {
 private fun CompletedTodayCard(
     prompt: DayPrompt,
     photoPath: String?,
-    minHeight: androidx.compose.ui.unit.Dp,
+    minHeight: Dp,
     onAddNote: () -> Unit,
     onRetake: () -> Unit,
 ) {
