@@ -1,5 +1,6 @@
 package app.shutterup.domain.repository
 
+import java.time.LocalDate
 import java.time.LocalTime
 import kotlinx.coroutines.flow.Flow
 
@@ -17,4 +18,6 @@ interface PreferencesRepository {
     suspend fun setOnboardingComplete(complete: Boolean)
     fun observeDebugUseFakeAi(): Flow<Boolean>
     suspend fun setDebugUseFakeAi(useFake: Boolean)
+    fun observeLastNotifiedDate(): Flow<LocalDate?>
+    suspend fun setLastNotifiedDate(date: LocalDate?)
 }
