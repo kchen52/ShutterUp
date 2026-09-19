@@ -105,3 +105,25 @@ data class LibraryUsage(
     val libraryId: String,
     val usedOnDate: LocalDate,
 )
+
+/**
+ * One composed Monthly issue for a finished calendar month (SPEC §7.9, §10).
+ * [yearMonth] is ISO-8601 `yyyy-MM` and unique. Dismissing the Feed card
+ * sets [dismissedFromFeed]; the row itself is never deleted.
+ */
+data class MonthlyIssue(
+    val id: Long = 0,
+    val yearMonth: String,
+    val startDate: LocalDate,
+    val endDate: LocalDate,
+    val completedDayCount: Int,
+    val headline: String,
+    val body: String,
+    /** Theme used for the page tint. */
+    val dominantTheme: String,
+    val loudestThemes: List<String>,
+    val source: PromptSourceRef,
+    val generatedAt: Instant,
+    val dismissedFromFeed: Boolean = false,
+    val modelName: String? = null,
+)
