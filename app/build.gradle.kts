@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.roborazzi)
 }
 
 android {
@@ -144,6 +145,17 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     // Robolectric runs SDK-35 shadows (JDK 17 compatible); DAO behavior is SDK-independent.
     testImplementation(libs.robolectric)
+    // Screenshot tests (Roborazzi; record with recordRoborazziDebug, verified in CI)
+    testImplementation(libs.roborazzi)
+    testImplementation(libs.roborazzi.compose)
+    testImplementation(libs.roborazzi.junit.rule)
+    testImplementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.androidx.compose.ui.test.junit4)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
+}
+
+roborazzi {
+    outputDir.set(layout.projectDirectory.dir("src/test/screenshots"))
 }
 
 // The permission guard test reads the merged manifest (SPEC §15.1 ManifestGuardTest).
