@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
@@ -42,6 +43,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -63,6 +65,13 @@ import app.shutterup.ui.components.LibraryTag
 import app.shutterup.ui.components.NotificationPermissionCard
 import app.shutterup.ui.components.ShootButton
 import app.shutterup.ui.components.StreakStatus
+import app.shutterup.ui.components.TodayCardCamera
+import app.shutterup.ui.components.TodayCardCameraInsetBottom
+import app.shutterup.ui.components.TodayCardCameraInsetEnd
+import app.shutterup.ui.components.TodayCardCameraSize
+import app.shutterup.ui.components.TodayCardCameraSpillX
+import app.shutterup.ui.components.TodayCardCameraSpillY
+import app.shutterup.ui.components.TodayCardCameraTilt
 import app.shutterup.ui.detail.samplePrompt
 import app.shutterup.ui.settings.SettingsCopy
 import app.shutterup.ui.theme.LocalThemeTint
@@ -264,60 +273,73 @@ private fun TodayCard(
         )
         return
     }
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(min = minHeight),
-        shape = RoundedCornerShape(28.dp),
-        colors = CardDefaults.cardColors(containerColor = LocalThemeTint.current),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-    ) {
-        Column(
+    Box(modifier = Modifier.fillMaxWidth()) {
+        Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+                .padding(end = TodayCardCameraInsetEnd, bottom = TodayCardCameraInsetBottom)
+                .heightIn(min = minHeight),
+            shape = RoundedCornerShape(28.dp),
+            colors = CardDefaults.cardColors(containerColor = LocalThemeTint.current),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         ) {
-            TodayKickerRow(prompt)
-            val skipped = prompt.status == DayStatus.SKIPPED
-            Text(
-                text = prompt.title,
-                style = MaterialTheme.typography.displaySmall,
-                maxLines = 3,
-                overflow = TextOverflow.Ellipsis,
-                color = if (skipped) {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                } else {
-                    MaterialTheme.colorScheme.onSurface
-                },
-                textDecoration = if (skipped) TextDecoration.LineThrough else TextDecoration.None,
-            )
-            if (skipped) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp)
+                    .padding(bottom = 48.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                TodayKickerRow(prompt)
+                val skipped = prompt.status == DayStatus.SKIPPED
                 Text(
-                    text = "Skipped — see you tomorrow.",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    text = prompt.title,
+                    style = MaterialTheme.typography.displaySmall,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis,
+                    color = if (skipped) {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    } else {
+                        MaterialTheme.colorScheme.onSurface
+                    },
+                    textDecoration = if (skipped) TextDecoration.LineThrough else TextDecoration.None,
                 )
-            } else {
-                if (!listPane) {
+                if (skipped) {
                     Text(
-                        text = prompt.oneLiner,
+                        text = "Skipped — see you tomorrow.",
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
+                } else {
                     if (!listPane) {
-                        ShootButton(onClick = onShoot)
-                        Spacer(Modifier.weight(1f))
+                        Text(
+                            text = prompt.oneLiner,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     }
-                    TextButton(onClick = onDetails) { Text("Details →") }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        if (!listPane) {
+                            ShootButton(onClick = onShoot)
+                            Spacer(Modifier.weight(1f))
+                        }
+                        TextButton(onClick = onDetails) { Text("Details →") }
+                    }
                 }
             }
         }
+        // Sibling of the card so the outline can sit on the tinted surface
+        // and still spill past the 28 dp corner (Card would clip its children).
+        TodayCardCamera(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .offset(x = TodayCardCameraSpillX, y = TodayCardCameraSpillY)
+                .rotate(TodayCardCameraTilt)
+                .size(TodayCardCameraSize),
+        )
     }
 }
 

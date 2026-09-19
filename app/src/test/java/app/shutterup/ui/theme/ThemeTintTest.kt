@@ -88,6 +88,44 @@ class ThemeTintTest {
         themeTint("", darkColorScheme(), darkTheme = true)
     }
 
+    @Test
+    fun complementaryAccent_isOppositePrimaryHue() {
+        val primary = Color.hsl(hue = 30f, saturation = 0.40f, lightness = 0.40f)
+        val scheme = lightColorScheme(primary = primary)
+        val accent = complementaryAccent(scheme, darkTheme = false)
+        assertTrue(
+            "expected ~210°, got ${hueOf(accent)}",
+            hueDelta(hueOf(accent), 210f) <= 2f,
+        )
+    }
+
+    @Test
+    fun complementaryAccent_tracksPrimaryAcrossHues() {
+        for (hue in listOf(0f, 60f, 120f, 200f, 300f)) {
+            val scheme = lightColorScheme(
+                primary = Color.hsl(hue = hue, saturation = 0.45f, lightness = 0.40f),
+            )
+            val accent = complementaryAccent(scheme, darkTheme = false)
+            val expected = (hue + 180f) % 360f
+            assertTrue(
+                "primary $hue should complement to $expected, got ${hueOf(accent)}",
+                hueDelta(hueOf(accent), expected) <= 2f,
+            )
+        }
+    }
+
+    @Test
+    fun complementaryAccent_lightensInDarkTheme() {
+        val primary = Color.hsl(hue = 240f, saturation = 0.40f, lightness = 0.40f)
+        val scheme = darkColorScheme(primary = primary)
+        val light = complementaryAccent(scheme, darkTheme = false)
+        val dark = complementaryAccent(scheme, darkTheme = true)
+        assertTrue(
+            "dark-theme complement should be lighter than light-theme",
+            luminance(dark) > luminance(light),
+        )
+    }
+
     private fun rawHue(theme: String): Float =
         ((theme.lowercase().hashCode() and Int.MAX_VALUE) % 360).toFloat()
 
@@ -118,6 +156,9 @@ class ThemeTintTest {
         if (delta > 180f) delta = 360f - delta
         return delta
     }
+
+    private fun luminance(color: Color): Float =
+        0.2126f * color.red + 0.7152f * color.green + 0.0722f * color.blue
 
     private fun hueOf(color: Color): Float {
         val r = color.red
