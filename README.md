@@ -32,7 +32,7 @@ Dark-mode, large-font, and expanded-width (foldable) references live alongside t
 
 ## Tech stack
 
-Kotlin, Jetpack Compose (Material 3 + adaptive), Hilt, Room, DataStore, WorkManager/AlarmManager, Camera (system intents + FileProvider), ML Kit GenAI, Glance. Tests: JUnit4 + Robolectric + Roborazzi screenshot tests.
+Kotlin, Jetpack Compose (Material 3 + adaptive), Hilt, Room, DataStore, WorkManager/AlarmManager, Camera (system intents + FileProvider), ML Kit GenAI, Glance. Tests: JUnit4 + Robolectric + Roborazzi screenshot tests; instrumented Compose UI tests on the Fold 7 (`connectedDebugAndroidTest`).
 
 ## Building
 
@@ -43,6 +43,7 @@ Requirements: JDK 17 and the Android SDK (compile/target SDK 36).
 ./gradlew testDebugUnitTest      # unit + Robolectric tests
 ./gradlew verifyRoborazziDebug   # verify screenshot references
 ./gradlew lint
+./gradlew connectedDebugAndroidTest   # Compose UI tests on a plugged-in Fold 7 (SPEC §15.2)
 ```
 
 To update screenshots after an intentional UI change: `./gradlew recordRoborazziDebug`, then review the diff before committing.
