@@ -13,8 +13,9 @@ import androidx.room.TypeConverters
         StreakStateEntity::class,
         LibraryUsageEntity::class,
         SeriesEntity::class,
+        MonthlyIssueEntity::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = true,
 )
 @TypeConverters(ShutterUpConverters::class)
@@ -23,4 +24,5 @@ abstract class ShutterUpDatabase : RoomDatabase() {
     abstract fun entryDao(): EntryDao
     abstract fun gamificationDao(): GamificationDao
     abstract fun seriesDao(): SeriesDao
+    abstract fun monthlyIssueDao(): MonthlyIssueDao
 }

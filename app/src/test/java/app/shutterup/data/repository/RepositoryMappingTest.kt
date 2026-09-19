@@ -5,6 +5,7 @@ import app.shutterup.data.local.DayPromptEntity
 import app.shutterup.data.local.EntryEntity
 import app.shutterup.data.local.GamificationDao
 import app.shutterup.data.local.LibraryUsageEntity
+import app.shutterup.data.local.MonthlyIssueEntity
 import app.shutterup.data.local.SeriesEntity
 import app.shutterup.data.local.StreakStateEntity
 import app.shutterup.data.local.SupersededPromptEntity
@@ -194,6 +195,26 @@ class RepositoryMappingTest {
         val domain = entity.toDomain()
         assertEquals(LibraryUsage("p-9", date), domain)
         assertEquals(entity, domain.toEntity())
+    }
+
+    @Test
+    fun monthlyIssue_roundTrip() {
+        val entity = MonthlyIssueEntity(
+            id = 3,
+            yearMonth = "2026-09",
+            startDate = LocalDate.of(2026, 9, 1),
+            endDate = LocalDate.of(2026, 9, 30),
+            completedDayCount = 24,
+            headline = "Light and glass.",
+            body = "Twenty-four days, mostly reflections and looking up. You wrote on nine of them.",
+            dominantTheme = "Reflections",
+            loudestThemes = listOf("Reflections", "Looking up"),
+            source = PromptSourceRef.ON_DEVICE_AI,
+            generatedAt = instant,
+            dismissedFromFeed = false,
+            modelName = "nano-v2",
+        )
+        assertEquals(entity, entity.toDomain().toEntity())
     }
 
     @Test

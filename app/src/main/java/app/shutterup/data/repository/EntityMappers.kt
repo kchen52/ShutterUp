@@ -4,6 +4,7 @@ import app.shutterup.data.local.AchievementEntity
 import app.shutterup.data.local.DayPromptEntity
 import app.shutterup.data.local.EntryEntity
 import app.shutterup.data.local.LibraryUsageEntity
+import app.shutterup.data.local.MonthlyIssueEntity
 import app.shutterup.data.local.SeriesEntity
 import app.shutterup.data.local.StreakStateEntity
 import app.shutterup.data.local.SupersededPromptEntity
@@ -11,6 +12,7 @@ import app.shutterup.domain.model.Achievement
 import app.shutterup.domain.model.DayPrompt
 import app.shutterup.domain.model.Entry
 import app.shutterup.domain.model.LibraryUsage
+import app.shutterup.domain.model.MonthlyIssue
 import app.shutterup.domain.model.Series
 import app.shutterup.domain.model.StreakState
 import app.shutterup.domain.model.SupersededPrompt
@@ -69,6 +71,38 @@ internal fun Series.toEntity(): SeriesEntity = SeriesEntity(
     endDate = endDate,
     theme = theme,
     source = source,
+)
+
+internal fun MonthlyIssueEntity.toDomain(): MonthlyIssue = MonthlyIssue(
+    id = id,
+    yearMonth = yearMonth,
+    startDate = startDate,
+    endDate = endDate,
+    completedDayCount = completedDayCount,
+    headline = headline,
+    body = body,
+    dominantTheme = dominantTheme,
+    loudestThemes = loudestThemes,
+    source = source,
+    generatedAt = generatedAt,
+    dismissedFromFeed = dismissedFromFeed,
+    modelName = modelName,
+)
+
+internal fun MonthlyIssue.toEntity(): MonthlyIssueEntity = MonthlyIssueEntity(
+    id = id,
+    yearMonth = yearMonth,
+    startDate = startDate,
+    endDate = endDate,
+    completedDayCount = completedDayCount,
+    headline = headline,
+    body = body,
+    dominantTheme = dominantTheme,
+    loudestThemes = loudestThemes,
+    source = source,
+    generatedAt = generatedAt,
+    dismissedFromFeed = dismissedFromFeed,
+    modelName = modelName,
 )
 
 internal fun EntryEntity.toDomain(): Entry = Entry(

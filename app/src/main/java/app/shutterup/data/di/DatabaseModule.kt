@@ -7,6 +7,8 @@ import app.shutterup.data.local.EntryDao
 import app.shutterup.data.local.GamificationDao
 import app.shutterup.data.local.MIGRATION_1_2
 import app.shutterup.data.local.MIGRATION_2_3
+import app.shutterup.data.local.MIGRATION_3_4
+import app.shutterup.data.local.MonthlyIssueDao
 import app.shutterup.data.local.SeriesDao
 import app.shutterup.data.local.ShutterUpDatabase
 import dagger.Module
@@ -23,7 +25,7 @@ object DatabaseModule {
     @Singleton
     fun provideDatabase(@ApplicationContext ctx: Context): ShutterUpDatabase =
         Room.databaseBuilder(ctx, ShutterUpDatabase::class.java, "shutterup.db")
-            .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
             .build()
 
     @Provides
@@ -37,4 +39,7 @@ object DatabaseModule {
 
     @Provides
     fun provideSeriesDao(db: ShutterUpDatabase): SeriesDao = db.seriesDao()
+
+    @Provides
+    fun provideMonthlyIssueDao(db: ShutterUpDatabase): MonthlyIssueDao = db.monthlyIssueDao()
 }
