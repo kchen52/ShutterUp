@@ -26,7 +26,7 @@ import app.shutterup.ui.theme.complementaryAccent
  */
 val TodayCardCameraSpillX = 40.dp
 val TodayCardCameraSpillY = 44.dp
-val TodayCardCameraSize = 146.dp
+val TodayCardCameraSize = 128.dp
 const val TodayCardCameraTilt = -16f
 
 /**
