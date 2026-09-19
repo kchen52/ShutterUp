@@ -84,6 +84,25 @@ class SeriesProgressCalculatorTest {
     }
 
     @Test
+    fun detailKicker_dropsThemeWhenAlreadyInTitle() {
+        val progress = SeriesProgressCalculator.progress(series, emptyList(), start)
+        assertEquals("A Week of Hands · 1 OF 7", progress.detailKicker("Hands"))
+        assertEquals("A Week of Hands · 1 OF 7", progress.detailKicker("hands"))
+    }
+
+    @Test
+    fun detailKicker_appendsShortDistinctTheme() {
+        val progress = SeriesProgressCalculator.progress(series, emptyList(), start)
+        assertEquals("A Week of Hands · 1 OF 7 · Steam", progress.detailKicker("Steam"))
+    }
+
+    @Test
+    fun detailKicker_dropsLongThemeToStayOneLine() {
+        val progress = SeriesProgressCalculator.progress(series, emptyList(), start)
+        assertEquals("A Week of Hands · 1 OF 7", progress.detailKicker("Reflections"))
+    }
+
+    @Test
     fun completedNoPhotoCountsAsFilled() {
         val days = listOf(prompt(start, DayStatus.COMPLETED_NO_PHOTO))
         val progress = SeriesProgressCalculator.progress(series, days, start.plusDays(1))

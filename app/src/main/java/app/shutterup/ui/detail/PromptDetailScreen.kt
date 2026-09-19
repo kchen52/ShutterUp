@@ -208,20 +208,34 @@ fun PromptDetailScreen(
                     .padding(horizontal = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                state.seriesProgress?.let { progress ->
-                    Kicker(text = progress.kicker)
-                }
                 Kicker(text = dateKicker(state.date))
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Kicker(text = prompt.theme.uppercase(Locale.ENGLISH))
-                    if (prompt.source == PromptSourceRef.LIBRARY) {
-                        LibraryTag()
+                val series = state.seriesProgress
+                if (series != null) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Kicker(
+                            text = series.detailKicker(prompt.theme),
+                            modifier = Modifier.weight(1f, fill = false),
+                        )
+                        if (prompt.source == PromptSourceRef.LIBRARY) {
+                            LibraryTag()
+                        }
+                    }
+                    SeriesDots(dots = series.dots)
+                } else {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Kicker(text = prompt.theme.uppercase(Locale.ENGLISH))
+                        if (prompt.source == PromptSourceRef.LIBRARY) {
+                            LibraryTag()
+                        }
                     }
                 }
-                state.seriesProgress?.let { SeriesDots(dots = it.dots) }
                 if (state.debugSource && prompt.source == PromptSourceRef.ON_DEVICE_AI) {
                     Kicker(text = "${prompt.theme} · FROM NANO")
                 }
@@ -335,6 +349,24 @@ private fun PromptDetailPreviewFontScale() {
                     isToday = true,
                     debugSource = true,
                     offerGallery = true,
+                ),
+            )
+        }
+    }
+}
+
+@Preview(name = "Series font scale 2x", showBackground = true, widthDp = 360, heightDp = 1200, fontScale = 2f)
+@Composable
+private fun PromptDetailPreviewSeriesFontScale() {
+    ShutterUpTheme(darkTheme = false) {
+        Surface {
+            PromptDetailScreen(
+                state = PromptDetailUiState(
+                    date = samplePrompt().date,
+                    prompt = samplePrompt(),
+                    remainingLabel = "9 hours left today",
+                    isToday = true,
+                    seriesProgress = app.shutterup.ui.home.sampleSeriesProgress(),
                 ),
             )
         }

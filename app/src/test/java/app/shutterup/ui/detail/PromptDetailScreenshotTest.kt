@@ -88,4 +88,23 @@ class PromptDetailScreenshotTest {
         }
         composeRule.onRoot().captureRoboImage()
     }
+
+    @Test
+    @Config(qualifiers = "w400dp-h1200dp", fontScale = 2f)
+    fun promptDetailSeriesFontScale2() {
+        composeRule.setContent {
+            ShutterUpTheme(darkTheme = false) {
+                PromptDetailScreen(
+                    state = PromptDetailUiState(
+                        date = samplePrompt().date,
+                        prompt = samplePrompt(),
+                        remainingLabel = "9 hours left today",
+                        isToday = true,
+                        seriesProgress = app.shutterup.ui.home.sampleSeriesProgress(),
+                    ),
+                )
+            }
+        }
+        composeRule.onRoot().captureRoboImage()
+    }
 }

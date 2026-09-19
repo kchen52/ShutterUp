@@ -22,7 +22,23 @@ data class SeriesProgress(
     val dots: List<SeriesDot>,
 ) {
     val kicker: String = "$title · $index OF $length"
+
+    /**
+     * Prompt Detail kicker: series line takes the theme's slot.
+     * If [theme] is already in the title, drop it; otherwise append
+     * ` · theme` only when the line still fits one kicker at 200% font scale.
+     */
+    fun detailKicker(theme: String?): String {
+        val trimmed = theme?.trim().orEmpty()
+        if (trimmed.isEmpty()) return kicker
+        if (title.contains(trimmed, ignoreCase = true)) return kicker
+        val withTheme = "$kicker · $trimmed"
+        return if (withTheme.length <= MAX_DETAIL_KICKER_CHARS) withTheme else kicker
+    }
 }
+
+/** Longest one-line series kicker that still fits a compact row at 200% font scale. */
+internal const val MAX_DETAIL_KICKER_CHARS = 36
 
 object SeriesProgressCalculator {
     fun progress(

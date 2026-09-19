@@ -195,7 +195,15 @@ Compact:
 ```
 
 - Bottom bar is a `BottomAppBar`-like surface with Shoot as the filled action and Reroll / Skip as text buttons. Reroll disabled with "Rerolled" label once used.
-- When the day belongs to a series, the kicker block leads with the series name and `N OF 7`, then the date, then the theme; the same seven-dot row as Home sits under the theme row. Nothing else on this screen changes.
+- When the day belongs to a series, the date kicker stays first and the series line takes the theme's slot — two tight lines, same as today, so the Fraunces title is still the first thing the eye lands on:
+
+```
+│ TUESDAY 19 SEPTEMBER              │  date kicker, unchanged
+│ A WEEK OF HANDS · 3 OF 7  [tag]   │  series replaces theme; library tag inline
+│ ·· ○ ····                         │  seven-dot row, then the title
+```
+
+  If the series title already contains the theme (case-insensitive), drop the theme. Otherwise append ` · THEME` only when the line still fits the one-line kicker budget at 200% font scale; if it cannot fit, drop the theme. When Series is off, this screen is unchanged.
 - "N hours left" turns to "N minutes left" under an hour; never coloured.
 - Deep-linked with `autoLaunchCamera` → the camera launches immediately; this screen is what the user returns to if they cancel.
 
