@@ -36,4 +36,7 @@ class RoomDayPromptRepository @Inject constructor(
 
     override suspend fun recentDays(limit: Int): List<DayPrompt> =
         dao.recentDays(limit).map { it.toDomain() }
+
+    override suspend fun allDays(): List<DayPrompt> =
+        dao.allDays().map { it.toDomain() }
 }

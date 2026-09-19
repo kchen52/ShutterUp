@@ -5,6 +5,7 @@ import androidx.room.Room
 import app.shutterup.data.local.DayPromptDao
 import app.shutterup.data.local.EntryDao
 import app.shutterup.data.local.GamificationDao
+import app.shutterup.data.local.MIGRATION_1_2
 import app.shutterup.data.local.ShutterUpDatabase
 import dagger.Module
 import dagger.Provides
@@ -19,7 +20,9 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext ctx: Context): ShutterUpDatabase =
-        Room.databaseBuilder(ctx, ShutterUpDatabase::class.java, "shutterup.db").build()
+        Room.databaseBuilder(ctx, ShutterUpDatabase::class.java, "shutterup.db")
+            .addMigrations(MIGRATION_1_2)
+            .build()
 
     @Provides
     fun provideDayPromptDao(db: ShutterUpDatabase): DayPromptDao = db.dayPromptDao()

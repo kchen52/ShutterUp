@@ -90,6 +90,7 @@ class RepositoryMappingTest {
             note = null,
             importedFromGallery = false,
             createdAt = instant,
+            mediaKind = app.shutterup.domain.model.MediaKind.PHOTO,
         )
         val domain = entity.toDomain()
         assertNull(domain.note)
@@ -108,6 +109,7 @@ class RepositoryMappingTest {
             note = "Kept the steam.",
             importedFromGallery = true,
             createdAt = instant,
+            mediaKind = app.shutterup.domain.model.MediaKind.VIDEO,
         )
         assertEquals(entity, entity.toDomain().toEntity())
     }

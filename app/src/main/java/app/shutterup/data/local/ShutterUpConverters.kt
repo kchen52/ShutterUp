@@ -2,6 +2,7 @@ package app.shutterup.data.local
 
 import androidx.room.TypeConverter
 import app.shutterup.domain.model.DayStatus
+import app.shutterup.domain.model.MediaKind
 import app.shutterup.domain.model.PromptSourceRef
 import java.time.Instant
 import java.time.LocalDate
@@ -43,4 +44,10 @@ class ShutterUpConverters {
     @TypeConverter
     fun storageToStringList(value: String): List<String> =
         if (value.isEmpty()) emptyList() else value.split("\u001F")
+
+    @TypeConverter
+    fun mediaKindToName(value: MediaKind): String = value.name
+
+    @TypeConverter
+    fun nameToMediaKind(value: String): MediaKind = MediaKind.valueOf(value)
 }

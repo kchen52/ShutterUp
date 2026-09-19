@@ -21,4 +21,12 @@ object MediaNaming {
     fun displayName(date: LocalDate, theme: String): String {
         return "${date}_${slug(theme)}.jpg"
     }
+
+    /**
+     * App-private filename: `yyyy-MM-dd_theme-slug_n.ext` where [index] is 1-based.
+     */
+    fun fileName(date: LocalDate, theme: String, index: Int, extension: String): String {
+        val ext = extension.trimStart('.')
+        return "${date}_${slug(theme)}_$index.$ext"
+    }
 }

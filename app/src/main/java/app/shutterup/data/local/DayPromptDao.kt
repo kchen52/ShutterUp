@@ -30,6 +30,9 @@ interface DayPromptDao {
     @Query("SELECT * FROM day_prompts ORDER BY date DESC LIMIT :limit")
     suspend fun recentDays(limit: Int): List<DayPromptEntity>
 
+    @Query("SELECT * FROM day_prompts ORDER BY date ASC")
+    suspend fun allDays(): List<DayPromptEntity>
+
     @Insert
     suspend fun recordSuperseded(prompt: SupersededPromptEntity)
 }

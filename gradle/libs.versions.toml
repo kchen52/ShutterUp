@@ -35,6 +35,8 @@ coroutines = "1.10.2"
 junit4 = "4.13.2"
 robolectric = "4.16.1"
 roborazzi = "1.71.0"
+camerax = "1.4.2"
+media3 = "1.8.0"
 
 [libraries]
 # Compose (versions via BOM)
@@ -61,6 +63,7 @@ androidx-navigation-suite = { group = "androidx.compose.material3", name = "mate
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+androidx-room-testing = { group = "androidx.room", name = "room-testing", version.ref = "room" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 
 # Background work
@@ -72,6 +75,17 @@ hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.r
 androidx-hilt-work = { group = "androidx.hilt", name = "hilt-work", version.ref = "androidx-hilt" }
 androidx-hilt-compiler = { group = "androidx.hilt", name = "hilt-compiler", version.ref = "androidx-hilt" }
 androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "androidx-hilt" }
+
+# CameraX (in-app still/video encoding; files stay app-private)
+androidx-camera-core = { group = "androidx.camera", name = "camera-core", version.ref = "camerax" }
+androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "camerax" }
+androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camerax" }
+androidx-camera-video = { group = "androidx.camera", name = "camera-video", version.ref = "camerax" }
+
+# Media3 trim + preview
+androidx-media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3" }
+androidx-media3-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "media3" }
+androidx-media3-transformer = { group = "androidx.media3", name = "media3-transformer", version.ref = "media3" }
 
 # On-device AI (Gemini Nano via ML Kit GenAI Prompt API; SPEC §7.2)
 mlkit-genai-prompt = { group = "com.google.mlkit", name = "genai-prompt", version.ref = "mlkit-prompt" }

@@ -46,11 +46,13 @@ class EntryDaoTest {
 
         val entry = entry(date, note = "first")
         entryDao.upsert(entry)
-        assertEquals(entry, entryDao.observeEntry(date).first())
+        val stored = entryDao.observeEntry(date).first()
+        assertEquals("first", stored?.note)
+        assertEquals(date, stored?.date)
 
-        val updated = entry.copy(note = "edited")
+        val updated = stored!!.copy(note = "edited")
         entryDao.upsert(updated)
-        assertEquals(updated, entryDao.observeEntry(date).first())
+        assertEquals("edited", entryDao.observeEntry(date).first()?.note)
     }
 
     @Test
@@ -86,6 +88,16 @@ class EntryDaoTest {
     }
 
     @Test
+    fun countForDate_allowsThreeRowsOnSameDay() = runTest {
+        val date = LocalDate.of(2024, 6, 15)
+        repeat(3) { i ->
+            entryDao.upsert(entry(date, note = "n$i").copy(mediaUri = "content://$i"))
+        }
+        assertEquals(3, entryDao.countForDate(date))
+        assertEquals(3, entryDao.observeEntries(date).first().size)
+    }
+
+    @Test
     fun count_and_delete() = runTest {
         val keep = LocalDate.of(2024, 6, 10)
         val drop = LocalDate.of(2024, 6, 11)
@@ -113,6 +125,7 @@ class EntryDaoTest {
         note = note,
         importedFromGallery = false,
         createdAt = Instant.parse("2024-06-15T10:01:00Z"),
+        mediaKind = app.shutterup.domain.model.MediaKind.PHOTO,
     )
 
     private fun dayPrompt(date: LocalDate, theme: String) = DayPromptEntity(

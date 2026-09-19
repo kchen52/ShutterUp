@@ -248,6 +248,9 @@ private class FakeDayPrompts : DayPromptRepository {
 
     override suspend fun recentDays(limit: Int): List<DayPrompt> =
         days.values.sortedByDescending { it.date }.take(limit)
+
+    override suspend fun allDays(): List<DayPrompt> =
+        days.values.sortedBy { it.date }
 }
 
 private class FakeGamification(

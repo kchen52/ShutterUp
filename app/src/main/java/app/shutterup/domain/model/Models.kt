@@ -49,10 +49,17 @@ data class SupersededPrompt(
     val generatedAt: Instant,
 )
 
-/** The user's single photo answering a day's prompt (SPEC §10). */
+/** Still or motion capture stored with a day's prompt. */
+enum class MediaKind {
+    PHOTO,
+    VIDEO,
+}
+
+/** One captured still or clip answering a day's prompt (SPEC §10; up to three per day). */
 data class Entry(
+    val id: Long = 0,
     val date: LocalDate,
-    /** `content://` URI of the MediaStore original. */
+    /** FileProvider or content URI of the original bytes. */
     val mediaUri: String,
     val thumbPath: String,
     val capturedAt: Instant,
@@ -61,6 +68,7 @@ data class Entry(
     val note: String?,
     val importedFromGallery: Boolean,
     val createdAt: Instant,
+    val mediaKind: MediaKind = MediaKind.PHOTO,
 )
 
 data class Achievement(

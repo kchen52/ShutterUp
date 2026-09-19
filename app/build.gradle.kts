@@ -73,6 +73,9 @@ android {
         // Release gate: Android Lint is fatal on release (SPEC §12).
         abortOnError = true
         checkReleaseBuilds = true
+        // Media3 Transformer/ExoPlayer APIs are @UnstableApi; usage is confined
+        // to capture trim/preview and opted-in at the Kotlin compiler.
+        disable += "UnsafeOptInUsageError"
     }
 
     testOptions {
@@ -126,6 +129,14 @@ dependencies {
     ksp(libs.androidx.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 
+    implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.video)
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.ui)
+    implementation(libs.androidx.media3.transformer)
+
     // On-device AI (Gemini Nano via ML Kit GenAI Prompt API; SPEC §7.2)
     implementation(libs.mlkit.genai.prompt)
     ksp(libs.mlkit.genai.schema.compiler)
@@ -145,6 +156,7 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     // Robolectric runs SDK-35 shadows (JDK 17 compatible); DAO behavior is SDK-independent.
     testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.room.testing)
     // Screenshot tests (Roborazzi; record with recordRoborazziDebug, verified in CI)
     testImplementation(libs.roborazzi)
     testImplementation(libs.roborazzi.compose)
