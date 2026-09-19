@@ -1,7 +1,11 @@
 package app.shutterup.ui.calendar
 
 import android.content.res.Configuration
+import android.provider.Settings
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.animate
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -15,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -42,6 +47,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -51,12 +57,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavType
@@ -64,6 +78,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import app.shutterup.domain.calendar.yearGrid
 import app.shutterup.domain.model.DayStatus
 import app.shutterup.ui.adaptive.ShutterUpListDetail
 import app.shutterup.ui.adaptive.isExpandedWidth
@@ -75,14 +90,19 @@ import app.shutterup.ui.theme.ShutterUpTheme
 import coil3.compose.AsyncImage
 import java.io.File
 import java.time.DayOfWeek
+import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
+import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 
 private val PAGER_START = YearMonth.of(2020, 1)
 private const val PAGER_MONTHS = 240
+private const val PAGER_YEARS = 20
+private val EmphasizedDecelerate = CubicBezierEasing(0.05f, 0.7f, 0.1f, 1.0f)
+private const val ZOOM_DURATION_MS = 400
 
 /**
  * Month grid with day-status dots/rings. Compact: tap opens `day/{dateIso}`.
@@ -146,43 +166,102 @@ fun CalendarRoute(
 fun CalendarScreen(
     state: CalendarUiState,
     onMonthChange: (YearMonth) -> Unit = {},
-    onOpenDay: (java.time.LocalDate) -> Unit = {},
+    onOpenDay: (LocalDate) -> Unit = {},
+    startInYearView: Boolean = false,
 ) {
     val monthTitle = remember(state.month) {
         state.month.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH))
     }
+    val yearTitle = remember(state.month.year) { state.month.year.toString() }
     val startPage = remember {
         monthsBetween(PAGER_START, YearMonth.from(state.today)).coerceIn(0, PAGER_MONTHS - 1)
     }
+    val yearStartPage = remember {
+        (state.today.year - PAGER_START.year).coerceIn(0, PAGER_YEARS - 1)
+    }
     val pagerState = rememberPagerState(initialPage = startPage, pageCount = { PAGER_MONTHS })
+    val yearPagerState = rememberPagerState(initialPage = yearStartPage, pageCount = { PAGER_YEARS })
     val scope = rememberCoroutineScope()
     val scroll = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val yearProgress = remember { mutableFloatStateOf(if (startInYearView) 1f else 0f) }
+    var pinching by remember { mutableStateOf(false) }
+    val animScale = rememberAnimatorDurationScale()
+    val zooming = pinching || yearProgress.floatValue in 0.01f..0.99f
+    val inYear = yearProgress.floatValue >= 0.5f
+    val title = if (inYear) yearTitle else monthTitle
+    val monthInteractive = !pinching && yearProgress.floatValue < 0.5f
+    val yearInteractive = !pinching && yearProgress.floatValue > 0.5f
+
     LaunchedEffect(pagerState.settledPage) {
-        onMonthChange(PAGER_START.plusMonths(pagerState.settledPage.toLong()))
+        if (yearProgress.floatValue < 0.5f) {
+            onMonthChange(PAGER_START.plusMonths(pagerState.settledPage.toLong()))
+        }
     }
+    LaunchedEffect(yearPagerState.settledPage) {
+        if (yearProgress.floatValue >= 0.5f) {
+            val year = PAGER_START.year + yearPagerState.settledPage
+            if (year != state.month.year) {
+                onMonthChange(YearMonth.of(year, state.month.monthValue))
+            }
+        }
+    }
+    LaunchedEffect(state.month.year) {
+        val target = (state.month.year - PAGER_START.year).coerceIn(0, PAGER_YEARS - 1)
+        if (yearPagerState.currentPage != target) {
+            yearPagerState.scrollToPage(target)
+        }
+    }
+
+    fun animateYearProgress(target: Float) {
+        scope.launch {
+            val duration = (ZOOM_DURATION_MS * animScale).roundToInt()
+            if (duration <= 0) {
+                yearProgress.floatValue = target
+            } else {
+                animate(
+                    initialValue = yearProgress.floatValue,
+                    targetValue = target,
+                    animationSpec = tween(durationMillis = duration, easing = EmphasizedDecelerate),
+                ) { value, _ -> yearProgress.floatValue = value }
+            }
+        }
+    }
+
+    suspend fun scrollPager(year: Boolean, delta: Int) {
+        val pager = if (year) yearPagerState else pagerState
+        val page = (pager.currentPage + delta).coerceIn(0, pager.pageCount - 1)
+        if (animScale <= 0f) pager.scrollToPage(page) else pager.animateScrollToPage(page)
+    }
+
     Scaffold(
         modifier = Modifier.nestedScroll(scroll.nestedScrollConnection),
         topBar = {
             LargeTopAppBar(
                 title = {
-                    AnimatedContent(targetState = monthTitle, label = "monthTitle") { title ->
-                        Text(text = title, style = MaterialTheme.typography.headlineMedium)
+                    AnimatedContent(targetState = title, label = "calendarTitle") { text ->
+                        Text(text = text, style = MaterialTheme.typography.headlineMedium)
                     }
                 },
                 actions = {
+                    YearViewToggle(
+                        inYear = inYear,
+                        onClick = { animateYearProgress(if (inYear) 0f else 1f) },
+                    )
                     IconButton(
-                        onClick = {
-                            scope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) }
-                        },
+                        onClick = { scope.launch { scrollPager(inYear, -1) } },
                     ) {
-                        Icon(Icons.Filled.ChevronLeft, contentDescription = "Previous month")
+                        Icon(
+                            Icons.Filled.ChevronLeft,
+                            contentDescription = if (inYear) "Previous year" else "Previous month",
+                        )
                     }
                     IconButton(
-                        onClick = {
-                            scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
-                        },
+                        onClick = { scope.launch { scrollPager(inYear, 1) } },
                     ) {
-                        Icon(Icons.Filled.ChevronRight, contentDescription = "Next month")
+                        Icon(
+                            Icons.Filled.ChevronRight,
+                            contentDescription = if (inYear) "Next year" else "Next month",
+                        )
                     }
                 },
                 scrollBehavior = scroll,
@@ -193,7 +272,20 @@ fun CalendarScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 16.dp)
+                .pointerInput(animScale) {
+                    detectCalendarPinch(
+                        onPinchDelta = { zoom ->
+                            pinching = true
+                            yearProgress.floatValue =
+                                yearProgressAfterPinch(yearProgress.floatValue, zoom)
+                        },
+                        onPinchEnd = {
+                            pinching = false
+                            animateYearProgress(snapYearProgress(yearProgress.floatValue))
+                        },
+                    )
+                },
         ) {
             if (!state.hasHistory) {
                 Column(
@@ -214,35 +306,93 @@ fun CalendarScreen(
                 }
                 return@Column
             }
-            WeekdayHeader()
-            HorizontalPager(
-                state = pagerState,
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f, fill = false),
-            ) { page ->
-                val pageMonth = PAGER_START.plusMonths(page.toLong())
-                val cells = if (pageMonth == state.month) {
-                    state.cells
-                } else {
-                    emptyList()
+                    .then(if (inYear) Modifier.weight(1f) else Modifier),
+            ) {
+                val p = yearProgress.floatValue
+                if (p < 1f || zooming) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .graphicsLayer {
+                                alpha = 1f - p
+                                val scale = 1f - 0.08f * p
+                                scaleX = scale
+                                scaleY = scale
+                            }
+                            .then(
+                                if (inYear) Modifier.clearAndSetSemantics { } else Modifier,
+                            ),
+                    ) {
+                        WeekdayHeader()
+                        HorizontalPager(
+                            state = pagerState,
+                            userScrollEnabled = monthInteractive,
+                            modifier = Modifier.fillMaxWidth(),
+                        ) { page ->
+                            val pageMonth = PAGER_START.plusMonths(page.toLong())
+                            val cells = if (pageMonth == state.month) {
+                                state.cells
+                            } else {
+                                emptyList()
+                            }
+                            MonthGrid(
+                                cells = cells.ifEmpty {
+                                    monthCells(pageMonth, emptyMap(), emptyMap(), state.today)
+                                },
+                                onOpenDay = onOpenDay,
+                            )
+                        }
+                    }
                 }
-                MonthGrid(
-                    cells = cells.ifEmpty {
-                        monthCells(pageMonth, emptyMap(), emptyMap(), state.today)
-                    },
-                    onOpenDay = onOpenDay,
-                )
+                if (p > 0f || zooming) {
+                    HorizontalPager(
+                        state = yearPagerState,
+                        userScrollEnabled = yearInteractive,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .graphicsLayer {
+                                alpha = p
+                                val scale = 0.92f + 0.08f * p
+                                scaleX = scale
+                                scaleY = scale
+                            }
+                            .then(
+                                if (!inYear) Modifier.clearAndSetSemantics { } else Modifier,
+                            ),
+                    ) { page ->
+                        val pageYear = PAGER_START.year + page
+                        val grid = if (pageYear == state.yearGrid.year) {
+                            state.yearGrid
+                        } else {
+                            yearGrid(pageYear, emptyList(), state.today)
+                        }
+                        YearGridView(
+                            grid = grid,
+                            onOpenDay = onOpenDay,
+                            interactive = yearInteractive,
+                        )
+                    }
+                }
             }
             Spacer(Modifier.height(24.dp))
+            val summaryCompleted = if (inYear) state.yearGrid.progress.completed else state.monthCompleted
+            val summaryEligible = if (inYear) state.yearGrid.progress.eligible else state.monthEligible
+            val summaryLabel = if (inYear) {
+                "$summaryCompleted of $summaryEligible days this year"
+            } else {
+                "$summaryCompleted of $summaryEligible days this month"
+            }
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                val progress = if (state.monthEligible <= 0) {
+                val progress = if (summaryEligible <= 0) {
                     0f
                 } else {
-                    (state.monthCompleted.toFloat() / state.monthEligible.toFloat()).coerceIn(0f, 1f)
+                    (summaryCompleted.toFloat() / summaryEligible.toFloat()).coerceIn(0f, 1f)
                 }
                 CircularProgressIndicator(
                     progress = { progress },
@@ -253,7 +403,7 @@ fun CalendarScreen(
                     strokeCap = ProgressIndicatorDefaults.CircularDeterminateStrokeCap,
                 )
                 Text(
-                    text = "${state.monthCompleted} of ${state.monthEligible} days this month",
+                    text = summaryLabel,
                     style = MaterialTheme.typography.labelMedium,
                 )
             }
@@ -264,6 +414,48 @@ fun CalendarScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(24.dp))
+        }
+    }
+}
+
+@Composable
+private fun YearViewToggle(
+    inYear: Boolean,
+    onClick: () -> Unit,
+) {
+    val label = if (inYear) "MONTH" else "YEAR"
+    val description = if (inYear) "Show month view" else "Show year view"
+    Box(
+        modifier = Modifier
+            .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
+            .semantics {
+                role = Role.Button
+                contentDescription = description
+            }
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 1.sp),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
+private fun rememberAnimatorDurationScale(): Float {
+    val inspect = LocalInspectionMode.current
+    val context = LocalContext.current
+    return remember(inspect) {
+        if (inspect) {
+            1f
+        } else {
+            Settings.Global.getFloat(
+                context.contentResolver,
+                Settings.Global.ANIMATOR_DURATION_SCALE,
+                1f,
+            )
         }
     }
 }
@@ -461,5 +653,61 @@ private fun CalendarPreviewLight() {
 private fun CalendarPreviewDark() {
     ShutterUpTheme(darkTheme = true) {
         Surface { CalendarScreen(state = sampleCalendarState()) }
+    }
+}
+
+@Preview(name = "Year sparse light", showBackground = true, widthDp = 360, heightDp = 800)
+@Composable
+private fun CalendarYearPreviewSparseLight() {
+    ShutterUpTheme(darkTheme = false) {
+        Surface {
+            CalendarScreen(state = sampleYearCalendarState(full = false), startInYearView = true)
+        }
+    }
+}
+
+@Preview(
+    name = "Year sparse dark",
+    showBackground = true,
+    widthDp = 360,
+    heightDp = 800,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+)
+@Composable
+private fun CalendarYearPreviewSparseDark() {
+    ShutterUpTheme(darkTheme = true) {
+        Surface {
+            CalendarScreen(state = sampleYearCalendarState(full = false), startInYearView = true)
+        }
+    }
+}
+
+@Preview(name = "Year full light", showBackground = true, widthDp = 360, heightDp = 800)
+@Composable
+private fun CalendarYearPreviewFullLight() {
+    ShutterUpTheme(darkTheme = false) {
+        Surface {
+            CalendarScreen(state = sampleYearCalendarState(full = true), startInYearView = true)
+        }
+    }
+}
+
+@Preview(name = "Year expanded", showBackground = true, widthDp = 840, heightDp = 800)
+@Composable
+private fun CalendarYearPreviewExpanded() {
+    ShutterUpTheme(darkTheme = false) {
+        Surface {
+            CalendarScreen(state = sampleYearCalendarState(full = true), startInYearView = true)
+        }
+    }
+}
+
+@Preview(name = "Year font 200%", showBackground = true, widthDp = 360, heightDp = 1200, fontScale = 2f)
+@Composable
+private fun CalendarYearPreviewFontScale() {
+    ShutterUpTheme(darkTheme = false) {
+        Surface {
+            CalendarScreen(state = sampleYearCalendarState(full = false), startInYearView = true)
+        }
     }
 }

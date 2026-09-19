@@ -2,6 +2,9 @@ package app.shutterup.ui.calendar
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.shutterup.domain.calendar.YearGrid
+import app.shutterup.domain.calendar.toYearDayRecord
+import app.shutterup.domain.calendar.yearGrid as buildYearGrid
 import app.shutterup.domain.model.DayPrompt
 import app.shutterup.domain.model.DayStatus
 import app.shutterup.domain.model.StreakState
@@ -25,7 +28,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/** Calendar month grid plus month-ring totals and longest streak. */
+/** Calendar month grid plus month-ring totals, year grid, and longest streak. */
 data class CalendarUiState(
     val month: YearMonth,
     val today: LocalDate,
@@ -34,6 +37,7 @@ data class CalendarUiState(
     val monthEligible: Int = 0,
     val longestStreak: Int = 0,
     val hasHistory: Boolean = false,
+    val yearGrid: YearGrid = buildYearGrid(month.year, emptyList(), today),
 )
 
 /**
@@ -78,6 +82,9 @@ class CalendarViewModel @Inject constructor(
                 val month = visibleMonth.value
                 val byDate = slice.days.associateBy { it.date }
                 val progress = monthProgress(slice.days, today, month)
+                val yearRecords = slice.allDays
+                    .filter { it.date.year == month.year }
+                    .map { it.toYearDayRecord() }
                 _state.value = CalendarUiState(
                     month = month,
                     today = today,
@@ -86,6 +93,7 @@ class CalendarViewModel @Inject constructor(
                     monthEligible = progress.eligible,
                     longestStreak = slice.streak.longest,
                     hasHistory = slice.allDays.any { it.status.isHistory() } || slice.thumbMap.isNotEmpty(),
+                    yearGrid = buildYearGrid(month.year, yearRecords, today),
                 )
             }
         }
@@ -143,5 +151,28 @@ fun sampleCalendarState(
         monthEligible = progress.eligible,
         longestStreak = longest,
         hasHistory = true,
+        yearGrid = sampleYearGrid(year = month.year, today = today, full = false),
+    )
+}
+
+/** Preview / Roborazzi helper for the year view. */
+fun sampleYearCalendarState(
+    year: Int = 2026,
+    today: LocalDate = LocalDate.of(2026, 9, 19),
+    full: Boolean = false,
+    longest: Int = 22,
+): CalendarUiState {
+    val month = YearMonth.of(year, today.month)
+    val days = sampleMonthPrompts(today)
+    val grid = sampleYearGrid(year = year, today = today, full = full)
+    return CalendarUiState(
+        month = month,
+        today = today,
+        cells = monthCells(month, days.associateBy { it.date }, emptyMap(), today),
+        monthCompleted = 18,
+        monthEligible = 19,
+        longestStreak = longest,
+        hasHistory = true,
+        yearGrid = grid,
     )
 }
