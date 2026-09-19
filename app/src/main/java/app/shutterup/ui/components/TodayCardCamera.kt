@@ -30,7 +30,7 @@ val TodayCardCameraSize = 128.dp
 const val TodayCardCameraTilt = -16f
 
 /**
- * Material photo_camera outline for the Today card corner.
+ * Material Symbols photo_camera outline (weight 200) for the Today card corner.
  *
  * Decorative only — complementary to the system primary. Callers clip this
  * to the card shape so only the overlapping part is visible.
@@ -39,7 +39,7 @@ const val TodayCardCameraTilt = -16f
 fun TodayCardCamera(modifier: Modifier = Modifier) {
     val dark = isSystemInDarkTheme()
     val tint = complementaryAccent(MaterialTheme.colorScheme, dark).copy(
-        alpha = if (dark) 0.86f else 0.80f,
+        alpha = if (dark) 0.48f else 0.40f,
     )
     Icon(
         painter = painterResource(R.drawable.ic_photo_camera_outline),
