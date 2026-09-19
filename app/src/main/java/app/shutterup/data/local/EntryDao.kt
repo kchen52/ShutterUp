@@ -8,10 +8,13 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface EntryDao {
-    @Query("SELECT * FROM entries WHERE date = :date")
+    @Query("SELECT * FROM entries WHERE date = :date ORDER BY createdAt ASC")
+    fun observeEntries(date: LocalDate): Flow<List<EntryEntity>>
+
+    @Query("SELECT * FROM entries WHERE date = :date ORDER BY createdAt DESC LIMIT 1")
     fun observeEntry(date: LocalDate): Flow<EntryEntity?>
 
-    @Query("SELECT * FROM entries ORDER BY date DESC LIMIT :limit")
+    @Query("SELECT * FROM entries ORDER BY date DESC, createdAt DESC LIMIT :limit")
     fun observeRecent(limit: Int): Flow<List<EntryEntity>>
 
     @Query(
@@ -19,7 +22,7 @@ interface EntryDao {
         SELECT entries.* FROM entries
         INNER JOIN day_prompts ON entries.date = day_prompts.date
         WHERE day_prompts.theme = :theme
-        ORDER BY entries.date DESC
+        ORDER BY entries.date DESC, entries.createdAt DESC
         """,
     )
     fun observeByTheme(theme: String): Flow<List<EntryEntity>>
@@ -32,4 +35,10 @@ interface EntryDao {
 
     @Query("SELECT COUNT(*) FROM entries")
     suspend fun count(): Int
+
+    @Query("SELECT COUNT(*) FROM entries WHERE date = :date")
+    suspend fun countForDate(date: LocalDate): Int
+
+    @Query("SELECT * FROM entries ORDER BY date ASC, createdAt ASC")
+    suspend fun listAll(): List<EntryEntity>
 }

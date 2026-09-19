@@ -18,15 +18,20 @@ interface DayPromptRepository {
     suspend fun recentThemes(limit: Int): List<String>
     /** Newest first; backs dedup and reroll history. */
     suspend fun recentDays(limit: Int): List<DayPrompt>
+    /** Every persisted day, oldest first. */
+    suspend fun allDays(): List<DayPrompt>
 }
 
 interface EntryRepository {
     fun observeEntry(date: LocalDate): Flow<Entry?>
+    fun observeEntries(date: LocalDate): Flow<List<Entry>>
     fun observeRecentEntries(limit: Int): Flow<List<Entry>>
     fun observeEntriesByTheme(theme: String): Flow<List<Entry>>
     suspend fun upsert(entry: Entry)
     suspend fun delete(date: LocalDate)
     suspend fun count(): Int
+    suspend fun countForDate(date: LocalDate): Int
+    suspend fun listAll(): List<Entry>
 }
 
 interface GamificationRepository {

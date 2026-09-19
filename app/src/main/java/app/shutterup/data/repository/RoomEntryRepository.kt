@@ -16,6 +16,9 @@ class RoomEntryRepository @Inject constructor(
     override fun observeEntry(date: LocalDate): Flow<Entry?> =
         dao.observeEntry(date).map { it?.toDomain() }
 
+    override fun observeEntries(date: LocalDate): Flow<List<Entry>> =
+        dao.observeEntries(date).map { rows -> rows.map { it.toDomain() } }
+
     override fun observeRecentEntries(limit: Int): Flow<List<Entry>> =
         dao.observeRecent(limit).map { rows -> rows.map { it.toDomain() } }
 
@@ -31,4 +34,8 @@ class RoomEntryRepository @Inject constructor(
     }
 
     override suspend fun count(): Int = dao.count()
+
+    override suspend fun countForDate(date: LocalDate): Int = dao.countForDate(date)
+
+    override suspend fun listAll(): List<Entry> = dao.listAll().map { it.toDomain() }
 }

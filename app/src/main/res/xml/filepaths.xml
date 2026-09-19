@@ -4,4 +4,10 @@
     <cache-path
         name="pending"
         path="pending/" />
+    <external-files-path
+        name="ext_pictures"
+        path="Pictures/" />
+    <files-path
+        name="thumbs"
+        path="thumbs/" />
 </paths>

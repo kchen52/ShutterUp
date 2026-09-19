@@ -3,6 +3,7 @@ package app.shutterup.domain.capture
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -31,6 +32,15 @@ class CaptureDateValidatorTest {
         assertTrue(CaptureDateValidator.isTakenToday(late, today, zone))
         assertFalse(CaptureDateValidator.isTakenToday(earlyNext, today, zone))
         assertTrue(CaptureDateValidator.isTakenToday(earlyNext, today.plusDays(1), zone))
+    }
+
+    @Test
+    fun isCapturedToday_matchesIsTakenToday() {
+        val capturedAt = today.atTime(LocalTime.NOON).atZone(zone).toInstant()
+        assertEquals(
+            CaptureDateValidator.isTakenToday(capturedAt, today, zone),
+            CaptureDateValidator.isCapturedToday(capturedAt, today, zone),
+        )
     }
 
     @Test

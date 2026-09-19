@@ -13,7 +13,7 @@ import androidx.room.TypeConverters
         StreakStateEntity::class,
         LibraryUsageEntity::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = true,
 )
 @TypeConverters(ShutterUpConverters::class)

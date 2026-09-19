@@ -9,4 +9,8 @@ object CaptureDateValidator {
     fun isTakenToday(capturedAt: Instant, today: LocalDate, zone: ZoneId): Boolean {
         return capturedAt.atZone(zone).toLocalDate() == today
     }
+
+    /** Alias used by the capture pipeline when gating yesterday-crossed returns. */
+    fun isCapturedToday(capturedAt: Instant, today: LocalDate, zone: ZoneId): Boolean =
+        isTakenToday(capturedAt, today, zone)
 }

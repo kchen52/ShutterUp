@@ -48,6 +48,7 @@ internal fun DayPrompt.toEntity(): DayPromptEntity = DayPromptEntity(
 )
 
 internal fun EntryEntity.toDomain(): Entry = Entry(
+    id = id,
     date = date,
     mediaUri = mediaUri,
     thumbPath = thumbPath,
@@ -57,9 +58,11 @@ internal fun EntryEntity.toDomain(): Entry = Entry(
     note = note,
     importedFromGallery = importedFromGallery,
     createdAt = createdAt,
+    mediaKind = mediaKind,
 )
 
 internal fun Entry.toEntity(): EntryEntity = EntryEntity(
+    id = id,
     date = date,
     mediaUri = mediaUri,
     thumbPath = thumbPath,
@@ -69,6 +72,7 @@ internal fun Entry.toEntity(): EntryEntity = EntryEntity(
     note = note,
     importedFromGallery = importedFromGallery,
     createdAt = createdAt,
+    mediaKind = mediaKind,
 )
 
 internal fun AchievementEntity.toDomain(): Achievement = Achievement(
