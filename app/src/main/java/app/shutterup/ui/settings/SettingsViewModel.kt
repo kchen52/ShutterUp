@@ -5,11 +5,11 @@ import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
-import android.os.Environment
-import android.provider.MediaStore
 import android.text.format.Formatter
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.shutterup.capture.CaptureFileStore
+import app.shutterup.capture.MediaStorePhotoArchiver
 import app.shutterup.data.ai.NanoPromptGenerator
 import app.shutterup.data.local.ShutterUpDatabase
 import app.shutterup.domain.ai.Availability
@@ -90,6 +90,8 @@ class SettingsViewModel @Inject constructor(
     private val widgetUpdater: TodayWidgetUpdater,
     @Named("primaryGenerator") private val generator: PromptGenerator,
     private val nano: NanoPromptGenerator,
+    private val files: CaptureFileStore,
+    private val photos: MediaStorePhotoArchiver,
     private val gamification: GamificationRepository,
     private val prompts: DayPromptRepository,
     private val rollover: DayRolloverUseCase,
@@ -193,6 +195,17 @@ class SettingsViewModel @Inject constructor(
     fun setDebugUseFakeAi(useFake: Boolean) {
         viewModelScope.launch {
             preferences.setDebugUseFakeAi(useFake)
+            val availability = runCatching { generator.availability() }
+                .getOrDefault(Availability.UNAVAILABLE)
+            val modelName = if (useFake) {
+                null
+            } else {
+                runCatching { nano.baseModelName() }.getOrNull()
+            }
+            ai.value = AiSlice(
+                status = aiStatusLine(availability, modelName),
+                supporting = aiSupporting(availability),
+            )
         }
     }
 
@@ -256,7 +269,10 @@ class SettingsViewModel @Inject constructor(
 
     private fun refreshStorage() {
         viewModelScope.launch(Dispatchers.IO) {
-            storageUsed.value = Formatter.formatShortFileSize(appContext, storageUsedBytes(appContext))
+            storageUsed.value = Formatter.formatShortFileSize(
+                appContext,
+                storageUsedBytes(files, photos),
+            )
         }
     }
 
@@ -304,25 +320,5 @@ private fun isBatteryRestricted(context: Context): Boolean {
     return usage.appStandbyBucket >= UsageStatsManager.STANDBY_BUCKET_RESTRICTED
 }
 
-internal fun storageUsedBytes(context: Context): Long {
-    var total = 0L
-    context.filesDir.walkTopDown().forEach { file ->
-        if (file.isFile) total += file.length()
-    }
-    val resolver = context.contentResolver
-    resolver.query(
-        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-        arrayOf(MediaStore.Images.Media.SIZE),
-        "${MediaStore.Images.Media.RELATIVE_PATH} LIKE ?",
-        arrayOf("%${Environment.DIRECTORY_PICTURES}/ShutterUp%"),
-        null,
-    )?.use { cursor ->
-        val sizeIndex = cursor.getColumnIndex(MediaStore.Images.Media.SIZE)
-        if (sizeIndex >= 0) {
-            while (cursor.moveToNext()) {
-                total += cursor.getLong(sizeIndex)
-            }
-        }
-    }
-    return total
-}
+internal fun storageUsedBytes(files: CaptureFileStore, photos: MediaStorePhotoArchiver): Long =
+    files.thumbsBytes() + files.leftoverPrivateOriginalBytes() + photos.albumBytes()
