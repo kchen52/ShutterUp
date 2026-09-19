@@ -1,5 +1,6 @@
 package app.shutterup.ui.onboarding
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.shutterup.data.ai.NanoDownloadState
@@ -88,25 +89,43 @@ class OnboardingViewModel @Inject constructor(
         _state.update { it.copy(themeFocus = raw.take(THEME_FOCUS_MAX)) }
     }
 
-    /** Persist prefs, generate today, schedule, mark onboarding complete (SPEC §4.1). */
+    /** Persist prefs, generate today, then finish immediately; the buffer top-up
+     * follows after navigation so a slow first Nano inference can never trap
+     * the user on this screen (SPEC §4.1). Failures still complete onboarding:
+     * Home shows the preparing state and the worker retries. */
     fun finish() {
         if (_state.value.saving || _state.value.finished) return
         viewModelScope.launch {
             _state.update { it.copy(saving = true) }
-            val snapshot = _state.value
-            preferences.setNotifyTime(LocalTime.of(snapshot.notifyHour, snapshot.notifyMinute))
-            preferences.setThemeFocus(sanitizeThemeFocus(snapshot.themeFocus))
-            val today = LocalDate.now(clock.withZone(zone))
-            val focus = preferences.observeThemeFocus().first()
-            val paused = preferences.observePaused().first()
-            if (!paused) {
-                generatePrompt.promptFor(today, focus)
-                generatePrompt.topUpBuffer(today, focus)
+            try {
+                val snapshot = _state.value
+                preferences.setNotifyTime(LocalTime.of(snapshot.notifyHour, snapshot.notifyMinute))
+                preferences.setThemeFocus(sanitizeThemeFocus(snapshot.themeFocus))
+                val today = LocalDate.now(clock.withZone(zone))
+                val focus = preferences.observeThemeFocus().first()
+                val paused = preferences.observePaused().first()
+                if (!paused) {
+                    runCatching { generatePrompt.promptFor(today, focus) }
+                }
+                scheduler.onSettingsChanged()
+                runCatching { widgetUpdater.refresh() }
+                preferences.setOnboardingComplete(true)
+                _state.update { it.copy(finished = true) }
+            } catch (e: Exception) {
+                Log.w(TAG, "finish failed; completing onboarding anyway", e)
+                runCatching { preferences.setOnboardingComplete(true) }
+                _state.update { it.copy(finished = true) }
+            } finally {
+                _state.update { it.copy(saving = false) }
             }
-            scheduler.onSettingsChanged()
-            widgetUpdater.refresh()
-            preferences.setOnboardingComplete(true)
-            _state.update { it.copy(saving = false, finished = true) }
+            runCatching {
+                val today = LocalDate.now(clock.withZone(zone))
+                val focus = preferences.observeThemeFocus().first()
+                if (!preferences.observePaused().first()) {
+                    generatePrompt.topUpBuffer(today, focus)
+                }
+                widgetUpdater.refresh()
+            }
         }
     }
 
@@ -140,5 +159,6 @@ class OnboardingViewModel @Inject constructor(
 
     companion object {
         const val THEME_FOCUS_MAX = 60
+        private const val TAG = "Onboarding"
     }
 }

@@ -33,4 +33,5 @@ object OnboardingCopy {
     const val AI_UNAVAILABLE =
         "On-device AI isn't available on this phone right now. ShutterUp is using its built-in prompt library."
     const val AI_READY = "Ready"
+    const val AI_READY_BODY = "Your prompts are generated on this phone, one day at a time."
 }
