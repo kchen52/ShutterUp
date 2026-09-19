@@ -2,10 +2,12 @@ package app.shutterup.data.di
 
 import app.shutterup.data.ai.AssetLibraryPromptSource
 import app.shutterup.data.ai.BlocklistProvider
+import app.shutterup.data.ai.NanoPromptGenerator
 import app.shutterup.domain.ai.LibraryPromptGenerator
 import app.shutterup.domain.ai.LibraryPromptSource
 import app.shutterup.domain.ai.PromptGenerator
 import app.shutterup.domain.repository.GamificationRepository
+import com.google.mlkit.genai.prompt.GenerativeModel
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -39,10 +41,15 @@ object AiModule {
     ): LibraryPromptGenerator = LibraryPromptGenerator(source, gamification, clock, Random.Default)
 
     /**
-     * Temporary: Milestone 4 rewires this binding to NanoPromptGenerator.
-     * Until then the library generator is the primary so a prompt is always available.
+     * Real Nano primary (SPEC §7.2). When Nano is unavailable or fails, the use case
+     * falls back to the library, so a prompt is always available. Debug builds can
+     * select FakePromptGenerator instead (Settings → Debug, later milestone).
      */
     @Provides
     @Named("primaryGenerator")
-    fun providePrimaryGenerator(library: LibraryPromptGenerator): PromptGenerator = library
+    fun providePrimaryGenerator(nano: NanoPromptGenerator): PromptGenerator = nano
+
+    @Provides
+    @Singleton
+    fun provideGenerativeModel(): GenerativeModel = NanoPromptGenerator.defaultClient()
 }

@@ -127,6 +127,7 @@ dependencies {
 
     // On-device AI (Gemini Nano via ML Kit GenAI Prompt API; SPEC §7.2)
     implementation(libs.mlkit.genai.prompt)
+    ksp(libs.mlkit.genai.schema.compiler)
 
     // Images
     implementation(libs.coil.compose)
