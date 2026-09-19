@@ -374,7 +374,7 @@ Preferences (DataStore)
 - **Images:** Coil 3, `androidx.exifinterface`.
 - **Widget:** Glance (`AppWidget`) — today's title + one-liner, tap opens Prompt Detail. Updated on prompt change / status change.
 - **Navigation:** Navigation Compose with type-safe routes; deep link `shutterup://day/{date}`.
-- **Theming:** Material You dynamic colour, dark mode follows system, edge-to-edge.
+- **Theming:** Material You dynamic colour, dark mode follows system, edge-to-edge. Visual design, typography, motion, copy voice, badge emblems, widget and icon are specified in [DESIGN.md](DESIGN.md), which takes precedence over M3 defaults for everything it covers.
 - **Build:** Gradle Kotlin DSL, version catalog, `debug` and `release` build types; release signed with a local keystore (gitignored — `.gitignore` already covers `*.jks`/`*.keystore`).
 - **Quality:** `ktlint` or `detekt`, Android Lint fatal on `release`, strict `explicitApi` not required.
 - **CI:** GitHub Actions running `./gradlew lint testDebugUnitTest assembleDebug` on PRs, plus a manually triggered signed-APK workflow (§16.1). Instrumented tests run on the plugged-in Fold 7 (`connectedDebugAndroidTest`), not in CI.
@@ -543,9 +543,10 @@ Each milestone below is a separate PR. A milestone is done when: it builds (`ass
 3. Persistence: Room entities/DAOs, DataStore prefs, repository layer.
 4. `NanoPromptGenerator` (behind the interface) + AI status UI. Verify on device.
 5. Scheduling + notification worker + rollover wiring.
-6. Capture pipeline (TakePicture → MediaStore → thumbnail) + Prompt Detail + Completion screens.
-7. Home, Calendar, Day, Feed, Themes, Badges, Settings; adaptive layouts.
-8. Widget, onboarding polish, Precise-timing opt-in path.
-9. UI tests on the Fold 7; manual checklist.
+6. Design system foundations from DESIGN.md: `ShutterUpTheme` (type scale, Fraunces, theme tint), `BadgeEmblem`, shared components, previews.
+7. Capture pipeline (TakePicture → MediaStore → thumbnail) + Prompt Detail + Completion screens.
+8. Home, Calendar, Day, Feed, Themes, Badges, Settings; adaptive layouts; named transitions.
+9. Widget, onboarding, app icon, Precise-timing opt-in path.
+10. UI tests on the Fold 7; manual checklist.
 
 Things to verify against current docs at implementation time (they move quickly): the exact ML Kit GenAI Prompt API artifact/version and structured-output request shape; `material3-adaptive` stable version; WorkManager/Hilt versions.
