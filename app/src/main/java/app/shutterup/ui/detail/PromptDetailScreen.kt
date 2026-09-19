@@ -49,6 +49,7 @@ import app.shutterup.domain.model.PromptSourceRef
 import app.shutterup.ui.components.ConstraintCard
 import app.shutterup.ui.components.Kicker
 import app.shutterup.ui.components.LibraryTag
+import app.shutterup.ui.components.SeriesDots
 import app.shutterup.ui.components.ShootButton
 import app.shutterup.ui.settings.SettingsCopy
 import app.shutterup.ui.theme.ProvideThemeTint
@@ -207,6 +208,9 @@ fun PromptDetailScreen(
                     .padding(horizontal = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
+                state.seriesProgress?.let { progress ->
+                    Kicker(text = progress.kicker)
+                }
                 Kicker(text = dateKicker(state.date))
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -217,6 +221,7 @@ fun PromptDetailScreen(
                         LibraryTag()
                     }
                 }
+                state.seriesProgress?.let { SeriesDots(dots = it.dots) }
                 if (state.debugSource && prompt.source == PromptSourceRef.ON_DEVICE_AI) {
                     Kicker(text = "${prompt.theme} · FROM NANO")
                 }
@@ -330,6 +335,48 @@ private fun PromptDetailPreviewFontScale() {
                     isToday = true,
                     debugSource = true,
                     offerGallery = true,
+                ),
+            )
+        }
+    }
+}
+
+@Preview(name = "Series light", showBackground = true, widthDp = 360, heightDp = 800)
+@Composable
+private fun PromptDetailPreviewSeriesLight() {
+    ShutterUpTheme(darkTheme = false) {
+        Surface {
+            PromptDetailScreen(
+                state = PromptDetailUiState(
+                    date = samplePrompt().date,
+                    prompt = samplePrompt(),
+                    remainingLabel = "9 hours left today",
+                    isToday = true,
+                    seriesProgress = app.shutterup.ui.home.sampleSeriesProgress(),
+                ),
+            )
+        }
+    }
+}
+
+@Preview(
+    name = "Series dark",
+    showBackground = true,
+    widthDp = 360,
+    heightDp = 800,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+)
+@Composable
+private fun PromptDetailPreviewSeriesDark() {
+    ShutterUpTheme(darkTheme = true) {
+        Surface {
+            PromptDetailScreen(
+                state = PromptDetailUiState(
+                    date = samplePrompt().date,
+                    prompt = samplePrompt(),
+                    remainingLabel = "9 hours left today",
+                    isToday = true,
+                    seriesProgress = app.shutterup.ui.home.sampleSeriesProgress(),
                 ),
             )
         }

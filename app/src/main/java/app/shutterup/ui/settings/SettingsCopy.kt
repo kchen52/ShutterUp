@@ -13,6 +13,11 @@ object SettingsCopy {
     /** DESIGN.md §4.8 supporting text */
     const val THEME_FOCUS_SUPPORTING = "Leave blank to be surprised"
 
+    const val SERIES = "Series"
+
+    const val SERIES_SUPPORTING =
+        "Some weeks arrive as a set of seven related prompts instead of seven separate ones."
+
     /** DESIGN.md §7 */
     const val PAUSE_SUPPORTING =
         "No prompts or notifications. Paused days don't affect your streak."

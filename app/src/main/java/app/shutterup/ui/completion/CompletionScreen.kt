@@ -142,7 +142,8 @@ fun CompletionScreen(
                 }
             }
             val kicker = buildString {
-                append(prompt?.theme?.uppercase().orEmpty())
+                val label = state.seriesTitle ?: prompt?.theme
+                append(label?.uppercase().orEmpty())
                 if (state.streak.current > 0) {
                     if (isNotEmpty()) append(" · ")
                     append("DAY ${state.streak.current}")
@@ -276,7 +277,23 @@ private fun CompletionPreviewDark() {
     }
 }
 
-internal fun sampleCompletionState(firstEver: Boolean): CompletionUiState = CompletionUiState(
+@Preview(name = "Series light", showBackground = true, widthDp = 360, heightDp = 800)
+@Composable
+private fun CompletionPreviewSeriesLight() {
+    ShutterUpTheme(darkTheme = false) {
+        Surface {
+            CompletionScreen(
+                state = sampleCompletionState(firstEver = false, seriesTitle = "A Week of Hands"),
+                showBadgeSheet = false,
+            )
+        }
+    }
+}
+
+internal fun sampleCompletionState(
+    firstEver: Boolean,
+    seriesTitle: String? = null,
+): CompletionUiState = CompletionUiState(
     date = samplePrompt().date,
     prompt = samplePrompt(),
     streak = app.shutterup.domain.model.StreakState(
@@ -289,4 +306,5 @@ internal fun sampleCompletionState(firstEver: Boolean): CompletionUiState = Comp
     freezeEarned = !firstEver,
     previousStreak = if (firstEver) 0 else 14,
     firstEver = firstEver,
+    seriesTitle = seriesTitle,
 )

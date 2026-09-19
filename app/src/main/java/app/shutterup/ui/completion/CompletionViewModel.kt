@@ -9,6 +9,7 @@ import app.shutterup.domain.model.StreakState
 import app.shutterup.domain.repository.DayPromptRepository
 import app.shutterup.domain.repository.EntryRepository
 import app.shutterup.domain.repository.GamificationRepository
+import app.shutterup.domain.repository.SeriesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDate
 import javax.inject.Inject
@@ -29,6 +30,7 @@ data class CompletionUiState(
     val freezeEarned: Boolean = false,
     val previousStreak: Int = 0,
     val firstEver: Boolean = false,
+    val seriesTitle: String? = null,
 )
 
 /**
@@ -40,6 +42,7 @@ class CompletionViewModel @Inject constructor(
     prompts: DayPromptRepository,
     private val entries: EntryRepository,
     gamification: GamificationRepository,
+    seriesRepo: SeriesRepository,
 ) : ViewModel() {
     val date: LocalDate = LocalDate.parse(checkNotNull(savedStateHandle.get<String>("dateIso")))
     private val newBadges = savedStateHandle.get<String>("newBadges").orEmpty()
@@ -52,7 +55,8 @@ class CompletionViewModel @Inject constructor(
         entries.observeEntries(date),
         gamification.observeStreak(),
         gamification.observeAchievements(),
-    ) { prompt, dayEntries, streak, achievements ->
+        seriesRepo.observeCovering(date),
+    ) { prompt, dayEntries, streak, achievements, series ->
         CompletionUiState(
             date = date,
             prompt = prompt,
@@ -65,6 +69,7 @@ class CompletionViewModel @Inject constructor(
             freezeEarned = freezeEarned,
             previousStreak = previousStreak,
             firstEver = achievements.any { it.id == "first_light" && it.unlockedOnDate == date },
+            seriesTitle = series?.title,
         )
     }.stateIn(
         viewModelScope,
