@@ -52,10 +52,10 @@ fun themeAccent(theme: String, scheme: ColorScheme): Color {
 }
 
 // Complementary of primary: mid-chroma so a large outline stays playful, not neon.
-private const val COMPLEMENT_SATURATION_LIGHT = 0.46f
-private const val COMPLEMENT_SATURATION_DARK = 0.40f
-private const val COMPLEMENT_LIGHTNESS_LIGHT = 0.50f
-private const val COMPLEMENT_LIGHTNESS_DARK = 0.66f
+private const val COMPLEMENT_SATURATION_LIGHT = 0.52f
+private const val COMPLEMENT_SATURATION_DARK = 0.44f
+private const val COMPLEMENT_LIGHTNESS_LIGHT = 0.48f
+private const val COMPLEMENT_LIGHTNESS_DARK = 0.68f
 
 /**
  * Opposite hue of [ColorScheme.primary], softened so it can sit on a

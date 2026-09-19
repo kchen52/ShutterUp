@@ -17,12 +17,12 @@ import app.shutterup.ui.theme.ShutterUpTheme
 import app.shutterup.ui.theme.complementaryAccent
 
 /** Inset that lets the outline sit on the corner and still spill off it. */
-val TodayCardCameraInsetEnd = 14.dp
-val TodayCardCameraInsetBottom = 10.dp
-val TodayCardCameraSpillX = 2.dp
-val TodayCardCameraSpillY = 4.dp
-val TodayCardCameraSize = 104.dp
-const val TodayCardCameraTilt = -15f
+val TodayCardCameraInsetEnd = 22.dp
+val TodayCardCameraInsetBottom = 18.dp
+val TodayCardCameraSpillX = 6.dp
+val TodayCardCameraSpillY = 8.dp
+val TodayCardCameraSize = 112.dp
+const val TodayCardCameraTilt = -16f
 
 /**
  * Playful camera outline for the Today card corner.
@@ -34,7 +34,7 @@ const val TodayCardCameraTilt = -15f
 fun TodayCardCamera(modifier: Modifier = Modifier) {
     val dark = isSystemInDarkTheme()
     val tint = complementaryAccent(MaterialTheme.colorScheme, dark).copy(
-        alpha = if (dark) 0.82f else 0.74f,
+        alpha = if (dark) 0.86f else 0.80f,
     )
     Icon(
         imageVector = CameraOutlineIcon,

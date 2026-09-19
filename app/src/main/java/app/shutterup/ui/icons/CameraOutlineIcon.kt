@@ -30,66 +30,66 @@ val CameraOutlineIcon: ImageVector = ImageVector.Builder(
     viewportWidth = 96f,
     viewportHeight = 96f,
 ).apply {
-    // Soft-box body.
+    // Soft-box body, pulled to the viewport so the corner can hang off the card.
     strokePath {
-        moveTo(22f, 36f)
-        lineTo(74f, 36f)
-        arcTo(10f, 10f, 0f, false, true, 84f, 46f)
-        lineTo(84f, 72f)
-        arcTo(10f, 10f, 0f, false, true, 74f, 82f)
-        lineTo(22f, 82f)
-        arcTo(10f, 10f, 0f, false, true, 12f, 72f)
-        lineTo(12f, 46f)
-        arcTo(10f, 10f, 0f, false, true, 22f, 36f)
+        moveTo(18f, 32f)
+        lineTo(78f, 32f)
+        arcTo(10f, 10f, 0f, false, true, 88f, 42f)
+        lineTo(88f, 78f)
+        arcTo(10f, 10f, 0f, false, true, 78f, 88f)
+        lineTo(18f, 88f)
+        arcTo(10f, 10f, 0f, false, true, 8f, 78f)
+        lineTo(8f, 42f)
+        arcTo(10f, 10f, 0f, false, true, 18f, 32f)
         close()
     }
     // Viewfinder hump — the bit that peeks over the card edge.
     strokePath {
-        moveTo(56f, 20f)
-        lineTo(70f, 20f)
-        arcTo(6f, 6f, 0f, false, true, 76f, 26f)
-        lineTo(76f, 36f)
-        lineTo(50f, 36f)
-        lineTo(50f, 26f)
-        arcTo(6f, 6f, 0f, false, true, 56f, 20f)
+        moveTo(58f, 12f)
+        lineTo(74f, 12f)
+        arcTo(6f, 6f, 0f, false, true, 80f, 18f)
+        lineTo(80f, 32f)
+        lineTo(52f, 32f)
+        lineTo(52f, 18f)
+        arcTo(6f, 6f, 0f, false, true, 58f, 12f)
         close()
     }
     // Lens — a curious "eye".
     strokePath {
-        moveTo(58f, 59f)
-        arcTo(16f, 16f, 0f, true, true, 26f, 59f)
-        arcTo(16f, 16f, 0f, true, true, 58f, 59f)
+        moveTo(60f, 60f)
+        arcTo(18f, 18f, 0f, true, true, 24f, 60f)
+        arcTo(18f, 18f, 0f, true, true, 60f, 60f)
         close()
     }
     strokePath {
-        moveTo(50f, 59f)
-        arcTo(8f, 8f, 0f, true, true, 34f, 59f)
-        arcTo(8f, 8f, 0f, true, true, 50f, 59f)
+        moveTo(51f, 60f)
+        arcTo(9f, 9f, 0f, true, true, 33f, 60f)
+        arcTo(9f, 9f, 0f, true, true, 51f, 60f)
         close()
     }
     // Catchlight, like a wink of sky in the glass.
     strokePath {
-        moveTo(36f, 52.5f)
-        arcTo(5.5f, 5.5f, 0f, false, true, 42f, 50f)
+        moveTo(34f, 52f)
+        arcTo(6.5f, 6.5f, 0f, false, true, 42f, 49f)
     }
     // Shutter button.
     strokePath {
-        moveTo(76.5f, 46f)
-        arcTo(3.5f, 3.5f, 0f, true, true, 69.5f, 46f)
-        arcTo(3.5f, 3.5f, 0f, true, true, 76.5f, 46f)
+        moveTo(81f, 42f)
+        arcTo(4f, 4f, 0f, true, true, 73f, 42f)
+        arcTo(4f, 4f, 0f, true, true, 81f, 42f)
         close()
     }
     // Flash window.
     strokePath {
-        moveTo(20f, 46f)
-        lineTo(30f, 46f)
-        arcTo(3f, 3f, 0f, false, true, 33f, 49f)
-        lineTo(33f, 53f)
-        arcTo(3f, 3f, 0f, false, true, 30f, 56f)
-        lineTo(20f, 56f)
-        arcTo(3f, 3f, 0f, false, true, 17f, 53f)
-        lineTo(17f, 49f)
-        arcTo(3f, 3f, 0f, false, true, 20f, 46f)
+        moveTo(16f, 42f)
+        lineTo(28f, 42f)
+        arcTo(3f, 3f, 0f, false, true, 31f, 45f)
+        lineTo(31f, 51f)
+        arcTo(3f, 3f, 0f, false, true, 28f, 54f)
+        lineTo(16f, 54f)
+        arcTo(3f, 3f, 0f, false, true, 13f, 51f)
+        lineTo(13f, 45f)
+        arcTo(3f, 3f, 0f, false, true, 16f, 42f)
         close()
     }
 }.build()
