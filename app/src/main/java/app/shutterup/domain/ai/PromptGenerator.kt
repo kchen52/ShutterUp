@@ -6,7 +6,7 @@ import java.time.LocalDate
 /**
  * AI prompt-generation contract (SPEC §7.1). Every implementation —
  * [NanoPromptGenerator][app.shutterup.data.ai.NanoPromptGenerator] (real),
- * [LibraryPromptGenerator][app.shutterup.data.ai.LibraryPromptGenerator] (fallback bank),
+ * [LibraryPromptGenerator][app.shutterup.domain.ai.LibraryPromptGenerator] (fallback bank),
  * `FakePromptGenerator` (deterministic, debug source set) — is used through this interface,
  * so the app stays fully usable when Nano is unavailable.
  */
@@ -63,4 +63,6 @@ data class GeneratedPrompt(
     /** ≤ 24 chars label. */
     val theme: String,
     val source: PromptSource,
+    /** Populated by the Nano implementation; null for library/fake. */
+    val modelName: String? = null,
 )

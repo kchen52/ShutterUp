@@ -16,6 +16,8 @@ interface DayPromptRepository {
     suspend fun recordSuperseded(prompt: SupersededPrompt)
     suspend fun recentTitles(limit: Int): List<String>
     suspend fun recentThemes(limit: Int): List<String>
+    /** Newest first; backs dedup and reroll history. */
+    suspend fun recentDays(limit: Int): List<DayPrompt>
 }
 
 interface EntryRepository {

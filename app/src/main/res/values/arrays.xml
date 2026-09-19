@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="blocklist_terms">
+        <item>weapon</item>
+        <item>gun</item>
+        <item>rifle</item>
+        <item>knife</item>
+        <item>nudity</item>
+        <item>nude</item>
+        <item>naked</item>
+        <item>trespass</item>
+        <item>trespassing</item>
+        <item>stranger</item>
+        <item>child</item>
+        <item>children</item>
+        <item>kid</item>
+        <item>baby</item>
+        <item>roof</item>
+        <item>rooftop</item>
+        <item>cliff</item>
+        <item>driving</item>
+        <item>drugged</item>
+        <item>alcohol</item>
+    </string-array>
+    <string-array name="gear_terms">
+        <item>dslr</item>
+        <item>mirrorless</item>
+        <item>50mm</item>
+        <item>35mm</item>
+        <item>85mm</item>
+        <item>telephoto</item>
+        <item>drone</item>
+        <item>nd filter</item>
+        <item>polarizer</item>
+        <item>polarizing</item>
+        <item>speedlight</item>
+    </string-array>
+</resources>
