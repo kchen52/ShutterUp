@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
@@ -65,9 +66,9 @@ import app.shutterup.ui.components.NotificationPermissionCard
 import app.shutterup.ui.components.ShootButton
 import app.shutterup.ui.components.StreakStatus
 import app.shutterup.ui.components.TodayCardCamera
-import app.shutterup.ui.components.TodayCardCameraPaddingBottom
-import app.shutterup.ui.components.TodayCardCameraPaddingEnd
 import app.shutterup.ui.components.TodayCardCameraSize
+import app.shutterup.ui.components.TodayCardCameraSpillX
+import app.shutterup.ui.components.TodayCardCameraSpillY
 import app.shutterup.ui.components.TodayCardCameraTilt
 import app.shutterup.ui.detail.samplePrompt
 import app.shutterup.ui.settings.SettingsCopy
@@ -281,7 +282,8 @@ private fun TodayCard(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(min = minHeight),
+                .heightIn(min = minHeight)
+                .clip(RoundedCornerShape(28.dp)),
         ) {
             Column(
                 modifier = Modifier
@@ -333,7 +335,7 @@ private fun TodayCard(
             TodayCardCamera(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(end = TodayCardCameraPaddingEnd, bottom = TodayCardCameraPaddingBottom)
+                    .offset(x = TodayCardCameraSpillX, y = TodayCardCameraSpillY)
                     .rotate(TodayCardCameraTilt)
                     .size(TodayCardCameraSize),
             )

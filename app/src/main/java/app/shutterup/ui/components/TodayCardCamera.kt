@@ -10,23 +10,27 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import app.shutterup.ui.icons.CameraOutlineIcon
+import app.shutterup.R
 import app.shutterup.ui.theme.ShutterUpTheme
 import app.shutterup.ui.theme.complementaryAccent
 
-/** Keeps the tilted outline inside the card's 28 dp corner. */
-val TodayCardCameraPaddingEnd = 8.dp
-val TodayCardCameraPaddingBottom = 12.dp
-val TodayCardCameraSize = 108.dp
-const val TodayCardCameraTilt = -10f
+/**
+ * Same placement as the original overflowing corner sticker: the icon sits
+ * past the card's bottom-end, and the card clips anything off the surface.
+ */
+val TodayCardCameraSpillX = 28.dp
+val TodayCardCameraSpillY = 26.dp
+val TodayCardCameraSize = 112.dp
+const val TodayCardCameraTilt = -16f
 
 /**
- * Playful camera outline for the Today card corner.
+ * Material photo_camera outline for the Today card corner.
  *
- * Decorative only — complementary to the system primary, drawn as a child of
- * the card so nothing renders past the rounded edge.
+ * Decorative only — complementary to the system primary. Callers clip this
+ * to the card shape so only the overlapping part is visible.
  */
 @Composable
 fun TodayCardCamera(modifier: Modifier = Modifier) {
@@ -35,7 +39,7 @@ fun TodayCardCamera(modifier: Modifier = Modifier) {
         alpha = if (dark) 0.86f else 0.80f,
     )
     Icon(
-        imageVector = CameraOutlineIcon,
+        painter = painterResource(R.drawable.ic_photo_camera_outline),
         contentDescription = null,
         tint = tint,
         modifier = modifier,
