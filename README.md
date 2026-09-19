@@ -29,6 +29,7 @@ Dark-mode, large-font, and expanded-width (foldable) references live alongside t
 - **Reminders** — daily notification with Shoot/Reroll actions, exact-alarm precise-timing option, timezone/boot/update rescheduling
 - **Glance widgets** (2×2 and 4×2) with deep links, 4-page first-run onboarding, adaptive layouts (bottom bar / rail / list-detail on foldables)
 - **Fully offline** — no `INTERNET` permission (enforced by a manifest guard test), no accounts, no sync
+- **Series** — opt-in weeks of seven related prompts, with a quiet seven-dot progress row; the daily loop stays one prompt and one photo a day
 
 ## Tech stack
 

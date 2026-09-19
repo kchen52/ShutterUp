@@ -113,6 +113,9 @@ class FeedViewModelTest {
         override suspend fun recentThemes(limit: Int) = emptyList<String>()
         override suspend fun recentDays(limit: Int) = days.value.take(limit)
         override suspend fun allDays() = days.value
+        override suspend fun deleteAfter(date: LocalDate) = Unit
+        override fun observeDaysInSeries(seriesId: Long) = flowOf(emptyList<DayPrompt>())
+        override suspend fun daysInSeries(seriesId: Long) = emptyList<DayPrompt>()
     }
 
     private class FakeEntries : EntryRepository {

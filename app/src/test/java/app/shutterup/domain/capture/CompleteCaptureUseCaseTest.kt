@@ -135,6 +135,13 @@ class CompleteCaptureUseCaseTest {
         override suspend fun recentThemes(limit: Int) = emptyList<String>()
         override suspend fun recentDays(limit: Int) = days.take(limit)
         override suspend fun allDays() = days.toList()
+        override suspend fun deleteAfter(date: LocalDate) {
+            days.removeAll { it.date > date }
+        }
+        override fun observeDaysInSeries(seriesId: Long) =
+            flowOf(days.filter { it.seriesId == seriesId })
+        override suspend fun daysInSeries(seriesId: Long) =
+            days.filter { it.seriesId == seriesId }
     }
 
     private class FakeEntries(
@@ -185,5 +192,7 @@ class CompleteCaptureUseCaseTest {
         override suspend fun setDebugUseFakeAi(useFake: Boolean) = Unit
         override fun observeLastNotifiedDate(): Flow<LocalDate?> = flowOf(null)
         override suspend fun setLastNotifiedDate(date: LocalDate?) = Unit
+        override fun observeSeriesEnabled() = flowOf(false)
+        override suspend fun setSeriesEnabled(enabled: Boolean) = Unit
     }
 }

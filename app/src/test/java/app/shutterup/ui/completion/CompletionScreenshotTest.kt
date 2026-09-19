@@ -44,4 +44,17 @@ class CompletionScreenshotTest {
         }
         composeRule.onRoot().captureRoboImage()
     }
+
+    @Test
+    fun completionSeriesLight() {
+        composeRule.setContent {
+            ShutterUpTheme(darkTheme = false) {
+                CompletionScreen(
+                    state = sampleCompletionState(firstEver = false, seriesTitle = "A Week of Hands"),
+                    showBadgeSheet = false,
+                )
+            }
+        }
+        composeRule.onRoot().captureRoboImage()
+    }
 }

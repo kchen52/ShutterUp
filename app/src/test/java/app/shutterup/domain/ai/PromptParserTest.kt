@@ -167,6 +167,39 @@ class PromptParserTest {
         assertTrue("message should name index 1: $message", message.contains("1"))
     }
 
+    @Test
+    fun parseSeries_sevenPrompts_succeeds() {
+        val promptJson = """
+            {
+              "title": "Steam Maps",
+              "oneLiner": "Turn kitchen steam into contour lines of light.",
+              "details": "Wait for a kettle or hot tap. Side-light the plume and expose for the brightest edge.",
+              "tips": ["Use a dark backdrop."],
+              "theme": "Steam",
+              "constraint": "No zoom"
+            }
+        """.trimIndent()
+        val numbered = (1..7).joinToString(",") { i ->
+            promptJson.replace("Steam Maps", "Steam Maps $i")
+                .replace("Turn kitchen", "Turn kettle $i")
+        }
+        val json = """{"title":"A Week of Steam","theme":"Steam","prompts":[$numbered]}"""
+        val result = PromptParser.parseSeries(json, PromptSource.ON_DEVICE_AI)
+        assertTrue(result.isSuccess)
+        val series = result.getOrThrow()
+        assertEquals("A Week of Steam", series.title)
+        assertEquals("Steam", series.theme)
+        assertEquals(7, series.prompts.size)
+        assertEquals("Steam Maps 1", series.prompts.first().title)
+    }
+
+    @Test
+    fun parseSeries_wrongCount_fails() {
+        val json = """{"title":"A Week of Steam","prompts":[]}"""
+        val result = PromptParser.parseSeries(json, PromptSource.ON_DEVICE_AI)
+        assertFailureNames(result, "7")
+    }
+
     private fun assertFailureNames(result: Result<*>, token: String) {
         assertTrue(result.isFailure)
         val error = result.exceptionOrNull()

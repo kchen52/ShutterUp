@@ -31,6 +31,22 @@ class NanoPromptTextTest {
     }
 
     @Test
+    fun seriesSystemPrompt_asksForSevenRelatedPrompts() {
+        val text = NanoPromptText.seriesSystemPrompt(request)
+        assertTrue(text.contains("seven-day"))
+        assertTrue(text.contains("my dog"))
+        assertTrue(text.contains("At least four of the seven must work indoors"))
+        assertTrue(text.contains("not restate"))
+    }
+
+    @Test
+    fun systemPrompt_staysInSeriesWhenRerolling() {
+        val text = NanoPromptText.systemPrompt(request.copy(seriesTitle = "A Week of Hands"))
+        assertTrue(text.contains("A Week of Hands"))
+        assertTrue(text.contains("Stay within that series"))
+    }
+
+    @Test
     fun systemPrompt_autoThemeWhenFocusBlank() {
         val text = NanoPromptText.systemPrompt(request.copy(themeFocus = null, recentTitles = emptyList(), recentThemes = emptyList()))
         assertTrue(text.contains("Auto-generate"))

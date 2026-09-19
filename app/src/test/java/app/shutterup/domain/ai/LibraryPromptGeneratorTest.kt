@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -90,6 +91,31 @@ class LibraryPromptGeneratorTest {
             random = Random(42),
         ).pick(request())
         assertEquals(first.id, second.id)
+    }
+
+    @Test
+    fun pickSeries_takesSevenFromOneThemeRespectingExclusionAndFocus() = runBlocking {
+        val hands = (1..8).map { i ->
+            lib("h$i", "Hand $i", tags = listOf("indoor", "hands"), theme = "Hands")
+                .copy(oneLiner = "Photograph gesture $i on a nearby surface today.")
+        }
+        val windows = (1..8).map { i ->
+            lib("w$i", "Window $i", tags = listOf("glass"), theme = "Windows")
+                .copy(oneLiner = "Frame window $i as a bright rectangle today.")
+        }
+        val generator = LibraryPromptGenerator(
+            source = GeneratorLibrarySource(hands + windows),
+            gamification = FakeGamification(usedSince = setOf("h1")),
+            clock = clock,
+            random = Random(0),
+        )
+        val series = generator.pickSeries(request(themeFocus = "hands"))
+        assertNotNull(series)
+        assertEquals("A Week of Hands", series!!.title)
+        assertEquals("Hands", series.theme)
+        assertEquals(7, series.prompts.size)
+        assertFalse(series.libraryIds.contains("h1"))
+        assertEquals(7, series.libraryIds.distinct().size)
     }
 
     private fun request(themeFocus: String? = null) = GenerationRequest(

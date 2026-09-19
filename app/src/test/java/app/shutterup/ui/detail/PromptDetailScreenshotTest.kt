@@ -52,4 +52,40 @@ class PromptDetailScreenshotTest {
         }
         composeRule.onRoot().captureRoboImage()
     }
+
+    @Test
+    fun promptDetailSeriesLight() {
+        composeRule.setContent {
+            ShutterUpTheme(darkTheme = false) {
+                PromptDetailScreen(
+                    state = PromptDetailUiState(
+                        date = samplePrompt().date,
+                        prompt = samplePrompt(),
+                        remainingLabel = "9 hours left today",
+                        isToday = true,
+                        seriesProgress = app.shutterup.ui.home.sampleSeriesProgress(),
+                    ),
+                )
+            }
+        }
+        composeRule.onRoot().captureRoboImage()
+    }
+
+    @Test
+    fun promptDetailSeriesDark() {
+        composeRule.setContent {
+            ShutterUpTheme(darkTheme = true) {
+                PromptDetailScreen(
+                    state = PromptDetailUiState(
+                        date = samplePrompt().date,
+                        prompt = samplePrompt(),
+                        remainingLabel = "9 hours left today",
+                        isToday = true,
+                        seriesProgress = app.shutterup.ui.home.sampleSeriesProgress(),
+                    ),
+                )
+            }
+        }
+        composeRule.onRoot().captureRoboImage()
+    }
 }
