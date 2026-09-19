@@ -11,6 +11,9 @@ import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.HiltAndroidApp
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Inject
+import javax.inject.Named
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @HiltAndroidApp
 class ShutterUpApplication : Application(), Configuration.Provider {
@@ -24,15 +27,22 @@ class ShutterUpApplication : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
+        // Never block the main thread at startup: scheduleNext() awaits
+        // DataStore + Room and would stall first-frame rendering (and, under
+        // memory pressure, make the whole system feel the stall).
         val entry = EntryPointAccessors.fromApplication(this, SchedulerEntryPoint::class.java)
-        entry.notificationScheduler().onSettingsChanged()
-        entry.todayWidgetUpdater().refreshAsync()
+        entry.appScope().launch {
+            runCatching { entry.notificationScheduler().onSettingsChanged() }
+            entry.todayWidgetUpdater().refreshAsync()
+        }
     }
 }
 
 @EntryPoint
 @InstallIn(SingletonComponent::class)
 interface SchedulerEntryPoint {
+    @Named("appScope")
+    fun appScope(): CoroutineScope
     fun notificationScheduler(): NotificationScheduler
     fun todayWidgetUpdater(): TodayWidgetUpdater
 }
