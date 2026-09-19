@@ -25,6 +25,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -73,34 +74,55 @@ fun BadgesScreen(
             )
         },
     ) { padding ->
-        BoxWithConstraints(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-        ) {
+        val cacheEntries = remember(state.sections) {
+            state.sections.flatMap { section ->
+                section.badges.map { it.id to it.unlocked }
+            }
+        }
+        WarmBadgeEmblemCache(cacheEntries)
+        // Keep collapsing-bar insets on the grid's contentPadding so the
+        // viewport size stays stable; Modifier.padding would relayout every frame.
+        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
             val minCell = if (maxWidth >= 600.dp) 96.dp else 108.dp
             LazyVerticalGrid(
                 columns = GridCells.Adaptive(minSize = minCell),
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                contentPadding = PaddingValues(
+                    start = 16.dp,
+                    end = 16.dp,
+                    top = padding.calculateTopPadding() + 8.dp,
+                    bottom = padding.calculateBottomPadding() + 8.dp,
+                ),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                item(span = { GridItemSpan(maxLineSpan) }) {
+                item(
+                    key = "streak-stats",
+                    span = { GridItemSpan(maxLineSpan) },
+                    contentType = "streak-stats",
+                ) {
                     StreakStatRow(
                         current = state.currentStreak,
                         longest = state.longestStreak,
                     )
                 }
                 state.sections.forEach { section ->
-                    item(span = { GridItemSpan(maxLineSpan) }) {
+                    item(
+                        key = "header-${section.title}",
+                        span = { GridItemSpan(maxLineSpan) },
+                        contentType = "section-header",
+                    ) {
                         Text(
                             text = section.title,
                             style = MaterialTheme.typography.titleLarge,
                             modifier = Modifier.padding(top = 8.dp),
                         )
                     }
-                    items(section.badges, key = { it.id }) { badge ->
+                    items(
+                        items = section.badges,
+                        key = { it.id },
+                        contentType = { "badge" },
+                    ) { badge ->
                         BadgeGridCell(
                             badge = badge,
                             onClick = { onSelectBadge(badge.id) },

@@ -16,38 +16,55 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.RoundRect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Canvas as ComposeCanvas
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathOperation
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.asAndroidPath
 import androidx.compose.ui.graphics.compositeOver
+import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import app.shutterup.ui.theme.ShutterUpTheme
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.min
 import kotlin.math.sin
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
-/** Unknown [badgeId] values render a plain circle. */
+/**
+ * Rasterized once per (id, unlock, size, theme colours). Locked emblems use
+ * [BlurMaskFilter], which is software-only and too expensive to re-run while
+ * a lazy grid is scrolling.
+ */
 @Composable
 fun BadgeEmblem(
     badgeId: String,
@@ -57,61 +74,199 @@ fun BadgeEmblem(
 ) {
     val scheme = MaterialTheme.colorScheme
     val spec = BadgeCatalog[badgeId]
-    val family = spec?.familyColor(scheme) ?: scheme.outline
-    val ringColor = if (unlocked) family else scheme.outlineVariant
-    val symbolColor = family
-    val discColor = family.copy(alpha = 0.20f).compositeOver(scheme.surfaceContainerHigh)
+    val colors = badgeEmblemColors(scheme, spec, unlocked)
     val name = badgeDisplayName(badgeId)
     val state = if (unlocked) "unlocked" else "locked"
-    val blurPx = with(LocalDensity.current) { 4.dp.toPx() }
-    val surfaceColor = scheme.surface
+    val density = LocalDensity.current
+    val layoutDirection = LocalLayoutDirection.current
+    val blurPx = with(density) { LockedSymbolBlur.toPx() }
+    val pixelSize = with(density) { size.roundToPx() }.coerceAtLeast(1)
+
+    val bitmap = remember(
+        badgeId,
+        unlocked,
+        pixelSize,
+        colors,
+        blurPx,
+        spec,
+        layoutDirection,
+    ) {
+        badgeEmblemBitmap(
+            badgeId = badgeId,
+            unlocked = unlocked,
+            pixelSize = pixelSize,
+            density = density,
+            layoutDirection = layoutDirection,
+            spec = spec,
+            colors = colors,
+            blurPx = blurPx,
+        )
+    }
 
     Canvas(
         modifier = modifier
             .size(size)
             .semantics { contentDescription = "$name, $state" },
     ) {
-        val unit = this.size.minDimension / 96f
-        val ringWidth = 3f * unit
-        val symbolBox = 52f * unit
-        val center = Offset(this.size.width / 2f, this.size.height / 2f)
+        drawImage(
+            image = bitmap,
+            dstSize = IntSize(this.size.width.toInt(), this.size.height.toInt()),
+            filterQuality = FilterQuality.None,
+        )
+    }
+}
 
-        if (unlocked) {
-            val discRadius = (this.size.minDimension - ringWidth * 2f) / 2f
-            drawCircle(color = discColor, radius = discRadius, center = center)
-        }
-
-        if (spec == null) {
-            drawFallbackCircle(center, ringColor, ringWidth)
-        } else {
-            drawBadgeSymbol(
-                spec = spec,
-                center = center,
-                box = symbolBox,
-                color = symbolColor,
-                stroke = 2.5f * unit,
-                unit = unit,
-                unlocked = unlocked,
-                blurPx = blurPx,
-            )
-            drawCircle(
-                color = ringColor,
-                radius = this.size.minDimension / 2f - ringWidth / 2f,
-                center = center,
-                style = Stroke(width = ringWidth),
-            )
-            val dots = spec.tierDots
-            if (dots > 0) {
-                drawTierDots(
-                    count = dots,
-                    center = center,
-                    ringRadius = this.size.minDimension / 2f - ringWidth / 2f,
-                    color = family,
-                    knockout = surfaceColor,
-                    unit = unit,
+/**
+ * Rasterize [size] emblems off the UI thread so the first scroll past
+ * not-yet-composed cells does not hit [BlurMaskFilter] on the main thread.
+ */
+@Composable
+internal fun WarmBadgeEmblemCache(
+    badges: List<Pair<String, Boolean>>,
+    size: Dp = 96.dp,
+) {
+    val scheme = MaterialTheme.colorScheme
+    val density = LocalDensity.current
+    val layoutDirection = LocalLayoutDirection.current
+    val blurPx = with(density) { LockedSymbolBlur.toPx() }
+    val pixelSize = with(density) { size.roundToPx() }.coerceAtLeast(1)
+    LaunchedEffect(
+        badges,
+        pixelSize,
+        blurPx,
+        layoutDirection,
+        scheme.primary,
+        scheme.secondary,
+        scheme.tertiary,
+        scheme.outline,
+        scheme.outlineVariant,
+        scheme.surface,
+        scheme.surfaceContainerHigh,
+    ) {
+        withContext(Dispatchers.Default) {
+            for ((badgeId, unlocked) in badges) {
+                val spec = BadgeCatalog[badgeId]
+                badgeEmblemBitmap(
+                    badgeId = badgeId,
+                    unlocked = unlocked,
+                    pixelSize = pixelSize,
+                    density = density,
+                    layoutDirection = layoutDirection,
+                    spec = spec,
+                    colors = badgeEmblemColors(scheme, spec, unlocked),
+                    blurPx = blurPx,
                 )
             }
         }
+    }
+}
+
+private val LockedSymbolBlur = 4.dp
+
+internal data class BadgeEmblemColors(
+    val family: Color,
+    val ringColor: Color,
+    val symbolColor: Color,
+    val discColor: Color,
+    val surfaceColor: Color,
+)
+
+internal fun badgeEmblemColors(
+    scheme: ColorScheme,
+    spec: BadgeSpec?,
+    unlocked: Boolean,
+): BadgeEmblemColors {
+    val family = spec?.familyColor(scheme) ?: scheme.outline
+    return BadgeEmblemColors(
+        family = family,
+        ringColor = if (unlocked) family else scheme.outlineVariant,
+        symbolColor = family,
+        discColor = family.copy(alpha = 0.20f).compositeOver(scheme.surfaceContainerHigh),
+        surfaceColor = scheme.surface,
+    )
+}
+
+private data class EmblemCacheKey(
+    val badgeId: String,
+    val unlocked: Boolean,
+    val pixelSize: Int,
+    val colors: BadgeEmblemColors,
+    val blurPxBits: Int,
+    val layoutDirection: LayoutDirection,
+)
+
+private const val MaxCachedEmblems = 64
+
+private val emblemBitmapCache = object : LinkedHashMap<EmblemCacheKey, ImageBitmap>(16, 0.75f, true) {
+    override fun removeEldestEntry(eldest: MutableMap.MutableEntry<EmblemCacheKey, ImageBitmap>?): Boolean =
+        size > MaxCachedEmblems
+}
+
+internal fun badgeEmblemBitmap(
+    badgeId: String,
+    unlocked: Boolean,
+    pixelSize: Int,
+    density: Density,
+    layoutDirection: LayoutDirection,
+    spec: BadgeSpec?,
+    colors: BadgeEmblemColors,
+    blurPx: Float,
+): ImageBitmap {
+    val key = EmblemCacheKey(
+        badgeId = badgeId,
+        unlocked = unlocked,
+        pixelSize = pixelSize,
+        colors = colors,
+        blurPxBits = blurPx.toBits(),
+        layoutDirection = layoutDirection,
+    )
+    synchronized(emblemBitmapCache) {
+        emblemBitmapCache[key]?.let { return it }
+    }
+    val image = rasterizeBadgeEmblem(
+        pixelSize = pixelSize,
+        density = density,
+        layoutDirection = layoutDirection,
+        spec = spec,
+        unlocked = unlocked,
+        colors = colors,
+        blurPx = blurPx,
+    )
+    synchronized(emblemBitmapCache) {
+        emblemBitmapCache[key] = image
+    }
+    return image
+}
+
+internal fun rasterizeBadgeEmblem(
+    pixelSize: Int,
+    density: Density,
+    layoutDirection: LayoutDirection,
+    spec: BadgeSpec?,
+    unlocked: Boolean,
+    colors: BadgeEmblemColors,
+    blurPx: Float,
+): ImageBitmap {
+    val image = ImageBitmap(pixelSize, pixelSize)
+    CanvasDrawScope().draw(
+        density = density,
+        layoutDirection = layoutDirection,
+        canvas = ComposeCanvas(image),
+        size = Size(pixelSize.toFloat(), pixelSize.toFloat()),
+    ) {
+        drawBadgeEmblem(
+            spec = spec,
+            unlocked = unlocked,
+            colors = colors,
+            blurPx = blurPx,
+        )
+    }
+    return image
+}
+
+internal fun clearBadgeEmblemBitmapCache() {
+    synchronized(emblemBitmapCache) {
+        emblemBitmapCache.clear()
     }
 }
 
@@ -455,6 +610,56 @@ internal val BadgeCatalog: Map<String, BadgeSpec> = mapOf(
         glyphParam = 0,
     ),
 )
+
+private fun DrawScope.drawBadgeEmblem(
+    spec: BadgeSpec?,
+    unlocked: Boolean,
+    colors: BadgeEmblemColors,
+    blurPx: Float,
+) {
+    val unit = size.minDimension / 96f
+    val ringWidth = 3f * unit
+    val symbolBox = 52f * unit
+    val center = Offset(size.width / 2f, size.height / 2f)
+
+    if (unlocked) {
+        val discRadius = (size.minDimension - ringWidth * 2f) / 2f
+        drawCircle(color = colors.discColor, radius = discRadius, center = center)
+    }
+
+    if (spec == null) {
+        drawFallbackCircle(center, colors.ringColor, ringWidth)
+        return
+    }
+
+    drawBadgeSymbol(
+        spec = spec,
+        center = center,
+        box = symbolBox,
+        color = colors.symbolColor,
+        stroke = 2.5f * unit,
+        unit = unit,
+        unlocked = unlocked,
+        blurPx = blurPx,
+    )
+    drawCircle(
+        color = colors.ringColor,
+        radius = size.minDimension / 2f - ringWidth / 2f,
+        center = center,
+        style = Stroke(width = ringWidth),
+    )
+    val dots = spec.tierDots
+    if (dots > 0) {
+        drawTierDots(
+            count = dots,
+            center = center,
+            ringRadius = size.minDimension / 2f - ringWidth / 2f,
+            color = colors.family,
+            knockout = colors.surfaceColor,
+            unit = unit,
+        )
+    }
+}
 
 private fun DrawScope.drawFallbackCircle(
     center: Offset,
