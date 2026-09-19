@@ -59,7 +59,7 @@ enum class MediaKind {
 data class Entry(
     val id: Long = 0,
     val date: LocalDate,
-    /** FileProvider or content URI of the original bytes. */
+    /** MediaStore content URI of the original bytes (SPEC §9). */
     val mediaUri: String,
     val thumbPath: String,
     val capturedAt: Instant,

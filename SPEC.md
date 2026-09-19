@@ -295,6 +295,8 @@ Status rollover (`PENDING` → `MISSED`, freeze consumption, achievement evaluat
 
 Scoped storage: writing to `MediaStore` collections needs no permission on API 29+; reading the app's own inserted URIs needs no permission; the Photo Picker needs no permission. **Do not** request `READ_MEDIA_IMAGES`.
 
+One-time migration: installs that still point `Entry.mediaUri` at app-private files (`FileProvider` / `file://`) are walked on a background coroutine at process start. Each readable original is stream-copied into `Pictures/ShutterUp` with the same `DISPLAY_NAME` rule and the row is rewritten to the new `content://` URI; thumbnails are left alone. The pass is idempotent (already-migrated MediaStore URIs are skipped) and interruption-safe (a crash mid-loop resumes remaining rows on the next launch). A file that cannot be copied keeps working off its thumbnail. Settings → Photos reports `Pictures/ShutterUp` and counts Gallery originals plus private thumbnails.
+
 ---
 
 ## 10. Data model

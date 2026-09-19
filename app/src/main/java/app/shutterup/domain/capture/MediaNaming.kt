@@ -4,6 +4,9 @@ import java.text.Normalizer
 import java.time.LocalDate
 
 object MediaNaming {
+    /** Gallery album path (SPEC §2 / §9). No trailing slash. */
+    const val RELATIVE_PATH = "Pictures/ShutterUp"
+
     fun slug(theme: String): String {
         val nfd = Normalizer.normalize(theme, Normalizer.Form.NFD)
         val withoutDiacritics = buildString(nfd.length) {

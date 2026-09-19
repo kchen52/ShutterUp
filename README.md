@@ -23,7 +23,7 @@ Dark-mode, large-font, and expanded-width (foldable) references live alongside t
 ## Features
 
 - **Daily prompts** — generated on-device via the ML Kit GenAI Prompt API (Gemini Nano v2, structured output), validated and de-duplicated, with a 220-prompt hand-written library fallback and 180-day exclusion
-- **Quiet capture** — one still photo per day via the system camera into app-private storage; photo-picker fallback if the camera fails twice
+- **Quiet capture** — one still photo per day via the system camera into `Pictures/ShutterUp` (visible in Gallery and kept on uninstall); photo-picker fallback if the camera fails twice
 - **Streaks, freezes, badges** — streak counting with pause/freeze semantics, 18 canvas-drawn badge emblems in five sections
 - **History** — calendar month grid, chronological feed with theme filters, per-day view with notes
 - **Reminders** — daily notification with Shoot/Reroll actions, exact-alarm precise-timing option, timezone/boot/update rescheduling
@@ -54,7 +54,7 @@ CI (`.github/workflows/ci.yml`) runs all four gates on every PR and uploads the 
 
 ```
 app/src/main/java/app/shutterup/
-  capture/        # FileProvider store, TakePicture contract, metadata
+  capture/        # FileProvider pending file, MediaStore archive, TakePicture, metadata
   data/           # Room (entities/DAOs), DataStore prefs, AI (Nano/library), repos
   domain/         # pure-Kotlin core: AI parsing/validation, gamification,
                   # scheduling, rollover, capture rules (no Android imports)

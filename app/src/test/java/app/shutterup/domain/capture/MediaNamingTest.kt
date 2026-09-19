@@ -47,4 +47,9 @@ class MediaNamingTest {
         val date = LocalDate.of(2026, 1, 5)
         assertEquals("2026-01-05_untitled.jpg", MediaNaming.displayName(date, "!!!"))
     }
+
+    @Test
+    fun relativePath_isPicturesShutterUp() {
+        assertEquals("Pictures/ShutterUp", MediaNaming.RELATIVE_PATH)
+    }
 }

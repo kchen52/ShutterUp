@@ -6,19 +6,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.shutterup.capture.CaptureFileStore
 import app.shutterup.capture.CaptureMetadataReader
-import app.shutterup.capture.ThumbnailWriter
+import app.shutterup.capture.CapturePipeline
+import app.shutterup.capture.PendingCapture
+import app.shutterup.capture.PersistOutcome
+import app.shutterup.capture.SkipTodayAction
 import app.shutterup.data.notifications.NotificationHelper
 import app.shutterup.domain.ai.GeneratePromptUseCase
 import app.shutterup.domain.capture.CaptureDateValidator
 import app.shutterup.domain.capture.CaptureLimits
-import app.shutterup.domain.capture.CompleteCaptureResult
-import app.shutterup.domain.capture.CompleteCaptureUseCase
 import app.shutterup.work.NotificationScheduler
 import app.shutterup.domain.capture.RemainingToday
-import app.shutterup.domain.capture.SkipDayUseCase
 import app.shutterup.domain.model.DayPrompt
+import app.shutterup.domain.model.DayStatus
 import app.shutterup.domain.model.Entry
-import app.shutterup.domain.model.MediaKind
 import app.shutterup.domain.model.StreakState
 import app.shutterup.domain.repository.DayPromptRepository
 import app.shutterup.domain.repository.EntryRepository
@@ -53,14 +53,6 @@ data class CompletionNav(
     val previousStreak: Int,
 )
 
-data class PendingCapture(
-    val path: String,
-    val capturedAtEpoch: Long,
-    val width: Int,
-    val height: Int,
-    val imported: Boolean,
-)
-
 data class PromptDetailUiState(
     val date: LocalDate,
     val prompt: DayPrompt? = null,
@@ -85,17 +77,16 @@ data class PromptDetailUiState(
  */
 @HiltViewModel
 class PromptDetailViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
+    private val savedStateHandle: SavedStateHandle,
     private val prompts: DayPromptRepository,
     private val entries: EntryRepository,
     private val gamification: GamificationRepository,
     private val preferences: PreferencesRepository,
-    private val completeCapture: CompleteCaptureUseCase,
-    private val skipDay: SkipDayUseCase,
+    private val pipeline: CapturePipeline,
+    private val skipToday: SkipTodayAction,
     private val generatePrompt: GeneratePromptUseCase,
     private val files: CaptureFileStore,
     private val metadata: CaptureMetadataReader,
-    private val thumbs: ThumbnailWriter,
     private val notifications: NotificationHelper,
     private val widgetUpdater: TodayWidgetUpdater,
     private val scheduler: NotificationScheduler,
@@ -114,6 +105,7 @@ class PromptDetailViewModel @Inject constructor(
             date = date,
             remainingLabel = RemainingToday.label(clock.instant().atZone(zone)),
             isToday = date == LocalDate.now(clock.withZone(zone)),
+            pending = restorePending(),
         ),
     )
     val state: StateFlow<PromptDetailUiState> = _state.asStateFlow()
@@ -158,16 +150,18 @@ class PromptDetailViewModel @Inject constructor(
             }
             val file = files.createPending("jpg")
             launchNonce += 1
+            val pending = PendingCapture(
+                path = file.absolutePath,
+                capturedAtEpoch = clock.instant().toEpochMilli(),
+                width = 0,
+                height = 0,
+                imported = false,
+            )
+            rememberPending(pending)
             _state.update {
                 it.copy(
                     launch = CaptureLaunch(files.uriFor(file), launchNonce),
-                    pending = PendingCapture(
-                        path = file.absolutePath,
-                        capturedAtEpoch = clock.instant().toEpochMilli(),
-                        width = 0,
-                        height = 0,
-                        imported = false,
-                    ),
+                    pending = pending,
                     showStorageDialog = false,
                 )
             }
@@ -213,7 +207,7 @@ class PromptDetailViewModel @Inject constructor(
 
     fun confirmSkip() {
         viewModelScope.launch {
-            skipDay()
+            skipToday()
             widgetUpdater.refresh()
             _state.update { it.copy(showSkipDialog = false) }
         }
@@ -229,10 +223,11 @@ class PromptDetailViewModel @Inject constructor(
     }
 
     fun onCameraReturned(success: Boolean) {
-        val pendingPath = _state.value.pending?.path
+        val pendingPath = _state.value.pending?.path ?: savedPendingPath()
         if (!success) {
             cameraFailures++
             pendingPath?.let { files.deleteQuietly(File(it)) }
+            rememberPending(null)
             _state.update { it.copy(pending = null, launch = null) }
             if (cameraFailures >= 2) {
                 _state.update { it.copy(offerGallery = true) }
@@ -241,13 +236,34 @@ class PromptDetailViewModel @Inject constructor(
         }
         val file = pendingPath?.let(::File)
         if (file == null || !file.exists() || file.length() == 0L) {
-            cameraFailures++
-            file?.let(files::deleteQuietly)
-            _state.update { it.copy(pending = null, launch = null) }
-            if (cameraFailures >= 2) {
-                _state.update { it.copy(offerGallery = true) }
-            } else {
-                requestStill()
+            viewModelScope.launch {
+                val prompt = prompts.getDay(date)
+                if (prompt?.status == DayStatus.COMPLETED) {
+                    rememberPending(null)
+                    notifications.cancel(date)
+                    _state.update {
+                        it.copy(
+                            pending = null,
+                            launch = null,
+                            completion = CompletionNav(
+                                dateIso = date.toString(),
+                                newBadges = "",
+                                freezeEarned = false,
+                                previousStreak = it.streak.current,
+                            ),
+                        )
+                    }
+                    return@launch
+                }
+                cameraFailures++
+                file?.let(files::deleteQuietly)
+                rememberPending(null)
+                _state.update { it.copy(pending = null, launch = null) }
+                if (cameraFailures >= 2) {
+                    _state.update { it.copy(offerGallery = true) }
+                } else {
+                    requestStill()
+                }
             }
             return
         }
@@ -279,6 +295,7 @@ class PromptDetailViewModel @Inject constructor(
             }
             if (!CaptureDateValidator.isCapturedToday(meta.capturedAt, today, zone) || date != today) {
                 files.deleteQuietly(file)
+                rememberPending(null)
                 _state.update {
                     it.copy(
                         snackbar = COPY_NOT_TODAY,
@@ -295,57 +312,28 @@ class PromptDetailViewModel @Inject constructor(
                 height = meta.height,
                 imported = imported,
             )
+            rememberPending(pending)
             _state.update { it.copy(pending = pending, launch = null) }
             persist(pending)
         }
     }
 
     private suspend fun persist(pending: PendingCapture) {
-        val prompt = _state.value.prompt ?: return
-        val count = entries.countForDate(date)
-        if (count > CaptureLimits.MAX_ENTRIES_PER_DAY) {
-            _state.update { it.copy(snackbar = COPY_CAP, showStorageDialog = false) }
-            return
-        }
-        val source = File(pending.path)
-        val dest = files.destinationFile(date, prompt.theme, 1, "jpg")
-        try {
-            source.copyTo(dest, overwrite = true)
-        } catch (_: Exception) {
-            _state.update { it.copy(showStorageDialog = true) }
-            return
-        }
-        val thumb = files.thumbFile(date, 1)
-        thumbs.write(dest, thumb)
-        val entry = Entry(
-            date = date,
-            mediaUri = files.uriFor(dest).toString(),
-            thumbPath = thumb.absolutePath,
-            capturedAt = java.time.Instant.ofEpochMilli(pending.capturedAtEpoch),
-            width = pending.width,
-            height = pending.height,
-            note = null,
-            importedFromGallery = pending.imported,
-            createdAt = clock.instant(),
-            mediaKind = MediaKind.PHOTO,
-        )
-        when (val result = completeCapture(entry)) {
-            CompleteCaptureResult.CapReached -> {
-                files.deleteQuietly(dest)
-                files.deleteQuietly(thumb)
+        when (val result = pipeline.persist(pending, date)) {
+            PersistOutcome.CapReached -> {
                 _state.update { it.copy(snackbar = COPY_CAP, showStorageDialog = false) }
             }
-            CompleteCaptureResult.NotToday -> {
-                files.deleteQuietly(dest)
-                files.deleteQuietly(thumb)
+            PersistOutcome.NotToday -> {
                 _state.update { it.copy(snackbar = COPY_NOT_TODAY, showStorageDialog = false) }
             }
-            CompleteCaptureResult.MissingPrompt -> {
-                files.deleteQuietly(dest)
-                files.deleteQuietly(thumb)
+            PersistOutcome.MissingPrompt, PersistOutcome.Undecodable -> {
+                _state.update { it.copy(showStorageDialog = true) }
             }
-            is CompleteCaptureResult.Saved -> {
-                files.deleteQuietly(source)
+            PersistOutcome.StorageError -> {
+                _state.update { it.copy(showStorageDialog = true) }
+            }
+            is PersistOutcome.Saved -> {
+                rememberPending(null)
                 notifications.cancel(date)
                 widgetUpdater.refresh()
                 scheduler.scheduleTopUpNow()
@@ -356,14 +344,37 @@ class PromptDetailViewModel @Inject constructor(
                         showStorageDialog = false,
                         completion = CompletionNav(
                             dateIso = date.toString(),
-                            newBadges = result.newlyUnlocked.joinToString(",") { a -> a.id },
-                            freezeEarned = result.freezeEarned,
-                            previousStreak = result.previousStreak,
+                            newBadges = result.result.newlyUnlocked.joinToString(",") { a -> a.id },
+                            freezeEarned = result.result.freezeEarned,
+                            previousStreak = result.result.previousStreak,
                         ),
                     )
                 }
             }
         }
+    }
+
+    private fun rememberPending(pending: PendingCapture?) {
+        savedStateHandle[KEY_PENDING_PATH] = pending?.path
+        savedStateHandle[KEY_PENDING_IMPORTED] = pending?.imported
+        savedStateHandle[KEY_PENDING_CAPTURED_AT] = pending?.capturedAtEpoch
+        savedStateHandle[KEY_PENDING_WIDTH] = pending?.width
+        savedStateHandle[KEY_PENDING_HEIGHT] = pending?.height
+    }
+
+    private fun savedPendingPath(): String? = savedStateHandle.get<String>(KEY_PENDING_PATH)
+
+    private fun restorePending(): PendingCapture? {
+        val path = savedPendingPath() ?: return null
+        val file = File(path)
+        if (!file.exists()) return null
+        return PendingCapture(
+            path = path,
+            capturedAtEpoch = savedStateHandle.get<Long>(KEY_PENDING_CAPTURED_AT) ?: file.lastModified(),
+            width = savedStateHandle.get<Int>(KEY_PENDING_WIDTH) ?: 0,
+            height = savedStateHandle.get<Int>(KEY_PENDING_HEIGHT) ?: 0,
+            imported = savedStateHandle.get<Boolean>(KEY_PENDING_IMPORTED) ?: false,
+        )
     }
 
     companion object {
@@ -374,5 +385,10 @@ class PromptDetailViewModel @Inject constructor(
         const val COPY_STORAGE_BODY = "Today's capture isn't completed."
         const val COPY_TRY_AGAIN = "Try again"
         const val COPY_CHOOSE_GALLERY = "Choose from Gallery"
+        private const val KEY_PENDING_PATH = "pendingPath"
+        private const val KEY_PENDING_IMPORTED = "pendingImported"
+        private const val KEY_PENDING_CAPTURED_AT = "pendingCapturedAt"
+        private const val KEY_PENDING_WIDTH = "pendingWidth"
+        private const val KEY_PENDING_HEIGHT = "pendingHeight"
     }
 }

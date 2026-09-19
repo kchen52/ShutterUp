@@ -3,6 +3,7 @@ package app.shutterup.capture
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.net.Uri
 import android.provider.MediaStore
 import androidx.exifinterface.media.ExifInterface
@@ -33,6 +34,21 @@ class CaptureMetadataReader @Inject constructor(
         DateTimeFormatter.ofPattern("yyyy:MM:dd HH:mm:ss")
 
     fun read(file: File, fallback: Instant): CaptureMetadata = readImage(file, fallback)
+
+    /** Bounds-decode only: the original bytes are never re-encoded. */
+    fun isDecodable(file: File): Boolean {
+        if (!file.exists() || file.length() == 0L) return false
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeFile(file.absolutePath, bounds)
+        return bounds.outWidth > 0 && bounds.outHeight > 0
+    }
+
+    /**
+     * Capture time for pending-file recovery: EXIF first, then file mtime.
+     * Does not fall back to "now" — that would make yesterday's leftovers look like today.
+     */
+    fun capturedAtForRecovery(file: File): Instant =
+        readExifInstant(file) ?: Instant.ofEpochMilli(file.lastModified())
 
     /**
      * Picker photos: prefer [MediaStore.Images.Media.DATE_TAKEN], then EXIF
@@ -106,7 +122,37 @@ class ThumbnailWriter @Inject constructor() {
         val sample = (longest / 400).coerceAtLeast(1)
         val opts = BitmapFactory.Options().apply { inSampleSize = sample }
         val raw = BitmapFactory.decodeFile(source.absolutePath, opts) ?: return null
-        return scaleToLongest(raw, 400)
+        val oriented = applyExifOrientation(raw, source)
+        return scaleToLongest(oriented, 400)
+    }
+
+    private fun applyExifOrientation(source: Bitmap, file: File): Bitmap {
+        val orientation = try {
+            ExifInterface(file).getAttributeInt(
+                ExifInterface.TAG_ORIENTATION,
+                ExifInterface.ORIENTATION_NORMAL,
+            )
+        } catch (_: Exception) {
+            return source
+        }
+        val matrix = Matrix()
+        when (orientation) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> matrix.postRotate(90f)
+            ExifInterface.ORIENTATION_ROTATE_180 -> matrix.postRotate(180f)
+            ExifInterface.ORIENTATION_ROTATE_270 -> matrix.postRotate(270f)
+            ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> matrix.preScale(-1f, 1f)
+            ExifInterface.ORIENTATION_FLIP_VERTICAL -> matrix.preScale(1f, -1f)
+            ExifInterface.ORIENTATION_TRANSPOSE -> {
+                matrix.postRotate(90f)
+                matrix.preScale(-1f, 1f)
+            }
+            ExifInterface.ORIENTATION_TRANSVERSE -> {
+                matrix.postRotate(270f)
+                matrix.preScale(-1f, 1f)
+            }
+            else -> return source
+        }
+        return Bitmap.createBitmap(source, 0, 0, source.width, source.height, matrix, true)
     }
 
     private fun scaleToLongest(source: Bitmap, longest: Int): Bitmap {
