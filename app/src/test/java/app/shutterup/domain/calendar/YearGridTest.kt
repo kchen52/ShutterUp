@@ -77,7 +77,7 @@ class YearGridTest {
         assertEquals(1, leap.monthIndex)
         assertEquals(28, leap.dayColumn)
         assertEquals("Thresholds", leap.theme)
-        assertFalse(grid.cells.any { it.date == LocalDate.of(2023, 2, 29) })
+        assertTrue(grid.cells.all { it.date.year == 2024 })
     }
 
     @Test
