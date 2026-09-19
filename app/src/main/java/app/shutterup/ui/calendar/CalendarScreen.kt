@@ -23,7 +23,6 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.CircularProgressIndicator
@@ -68,6 +67,7 @@ import androidx.navigation.navArgument
 import app.shutterup.domain.model.DayStatus
 import app.shutterup.ui.adaptive.ShutterUpListDetail
 import app.shutterup.ui.adaptive.isExpandedWidth
+import app.shutterup.ui.components.ApertureCheckMark
 import app.shutterup.ui.day.DayRoute
 import app.shutterup.ui.icons.SnowflakeIcon
 import app.shutterup.ui.navigation.ShutterUpDestinations
@@ -306,14 +306,17 @@ private fun CalendarDayCell(
     onClick: () -> Unit,
 ) {
     val description = calendarCellDescription(cell)
+    val thumbPath = cell.thumbPath
+    val completedWithPhoto = cell.status == DayStatus.COMPLETED &&
+        !thumbPath.isNullOrBlank() && File(thumbPath).exists()
+    val completedNoPhoto = (cell.status == DayStatus.COMPLETED ||
+        cell.status == DayStatus.COMPLETED_NO_PHOTO) && !completedWithPhoto
     val numberColor = when {
         !cell.inMonth -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
         cell.isFuture -> MaterialTheme.colorScheme.onSurfaceVariant
         cell.status == DayStatus.PAUSED -> MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
         cell.status == DayStatus.MISSED -> MaterialTheme.colorScheme.outline
         cell.isToday && cell.status == DayStatus.PENDING -> MaterialTheme.colorScheme.primary
-        cell.status == DayStatus.COMPLETED || cell.status == DayStatus.COMPLETED_NO_PHOTO ->
-            MaterialTheme.colorScheme.inverseOnSurface
         else -> MaterialTheme.colorScheme.onSurface
     }
     Box(
@@ -332,10 +335,9 @@ private fun CalendarDayCell(
             contentAlignment = Alignment.Center,
         ) {
             when {
-                cell.status == DayStatus.COMPLETED && !cell.thumbPath.isNullOrBlank() &&
-                    File(cell.thumbPath).exists() -> {
+                completedWithPhoto -> {
                     AsyncImage(
-                        model = File(cell.thumbPath),
+                        model = File(requireNotNull(thumbPath)),
                         contentDescription = null,
                         modifier = Modifier
                             .fillMaxSize()
@@ -353,19 +355,28 @@ private fun CalendarDayCell(
                             .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.35f)),
                     )
                 }
-                cell.status == DayStatus.COMPLETED || cell.status == DayStatus.COMPLETED_NO_PHOTO -> {
+                completedNoPhoto -> {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
                             .clip(RoundedCornerShape(12.dp))
                             .background(MaterialTheme.colorScheme.secondaryContainer),
-                        contentAlignment = Alignment.Center,
                     ) {
-                        Icon(
-                            imageVector = Icons.Filled.Check,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                            modifier = Modifier.size(18.dp),
+                        Text(
+                            text = cell.date.dayOfMonth.toString(),
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                            style = MaterialTheme.typography.labelSmall,
+                            modifier = Modifier
+                                .align(Alignment.TopStart)
+                                .padding(start = 6.dp, top = 4.dp),
+                        )
+                        ApertureCheckMark(
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .padding(bottom = 5.dp),
+                            size = 18.dp,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                            progress = 1f,
                         )
                     }
                 }
@@ -392,16 +403,18 @@ private fun CalendarDayCell(
                     )
                 }
             }
-            Text(
-                text = cell.date.dayOfMonth.toString(),
-                color = if (cell.status == DayStatus.COMPLETED || cell.status == DayStatus.COMPLETED_NO_PHOTO) {
-                    if (!cell.thumbPath.isNullOrBlank()) Color.White else MaterialTheme.colorScheme.onSecondaryContainer
-                } else {
-                    numberColor
-                },
-                style = MaterialTheme.typography.labelMedium,
-                modifier = Modifier.alpha(if (cell.status == DayStatus.PAUSED) 0.6f else 1f),
-            )
+            if (!completedNoPhoto) {
+                Text(
+                    text = cell.date.dayOfMonth.toString(),
+                    color = if (completedWithPhoto) {
+                        Color.White
+                    } else {
+                        numberColor
+                    },
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier.alpha(if (cell.status == DayStatus.PAUSED) 0.6f else 1f),
+                )
+            }
             if (cell.frozen && (cell.status == DayStatus.SKIPPED || cell.status == DayStatus.MISSED)) {
                 Icon(
                     imageVector = SnowflakeIcon,
