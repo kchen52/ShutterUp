@@ -15,4 +15,6 @@ interface PreferencesRepository {
     suspend fun setPaused(paused: Boolean)
     fun observeOnboardingComplete(): Flow<Boolean>
     suspend fun setOnboardingComplete(complete: Boolean)
+    fun observeDebugUseFakeAi(): Flow<Boolean>
+    suspend fun setDebugUseFakeAi(useFake: Boolean)
 }
