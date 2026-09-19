@@ -2,7 +2,6 @@ package app.shutterup.widget
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -61,54 +59,69 @@ fun TodayWidgetPreviewContent(
                 .fillMaxSize()
                 .padding(if (medium) 12.dp else 10.dp),
         ) {
-            Text(
-                text = state.kicker,
-                style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp),
-                color = scheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-            Spacer(Modifier.height(4.dp))
-            Text(
-                text = state.title,
-                fontFamily = FontFamily.Serif,
-                fontSize = if (medium) 20.sp else 18.sp,
-                lineHeight = if (medium) 24.sp else 22.sp,
-                color = scheme.onSurface,
-                maxLines = if (medium) 2 else 3,
-                overflow = TextOverflow.Ellipsis,
-            )
-            if (medium && !state.paused) {
-                Spacer(Modifier.height(4.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
                 Text(
-                    text = state.constraint ?: state.oneLiner,
-                    style = MaterialTheme.typography.bodySmall,
-                    fontSize = 14.sp,
-                    color = scheme.onSurface,
-                    maxLines = 2,
+                    text = if (medium) state.kicker else state.shortKicker,
+                    style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp),
+                    color = scheme.onSurfaceVariant,
+                    maxLines = if (medium) 1 else 2,
                     overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f),
                 )
-                Spacer(Modifier.weight(1f))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    Text(
-                        text = state.streakLabel,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = scheme.onSurfaceVariant,
-                    )
+                if (state.completed) {
                     Box(
                         modifier = Modifier
-                            .background(scheme.primary, RoundedCornerShape(50))
-                            .padding(horizontal = 12.dp, vertical = 6.dp),
+                            .background(scheme.primaryContainer, RoundedCornerShape(50))
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
                     ) {
                         Text(
-                            text = "Shoot",
-                            color = scheme.onPrimary,
-                            style = MaterialTheme.typography.labelLarge,
+                            text = "✓",
+                            color = scheme.onPrimaryContainer,
+                            style = MaterialTheme.typography.labelMedium,
                         )
+                    }
+                }
+            }
+            if (!state.completed) {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = state.title,
+                    fontFamily = FontFamily.Serif,
+                    fontSize = if (medium) 20.sp else 18.sp,
+                    lineHeight = if (medium) 24.sp else 22.sp,
+                    color = scheme.onSurface,
+                    maxLines = if (medium) 2 else 3,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                if (medium && !state.paused) {
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = state.oneLiner,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontSize = 14.sp,
+                        color = scheme.onSurface,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Spacer(Modifier.weight(1f))
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.CenterEnd,
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .background(scheme.primary, RoundedCornerShape(50))
+                                .padding(horizontal = 12.dp, vertical = 6.dp),
+                        ) {
+                            Text(
+                                text = "Shoot",
+                                color = scheme.onPrimary,
+                                style = MaterialTheme.typography.labelLarge,
+                            )
+                        }
                     }
                 }
             }

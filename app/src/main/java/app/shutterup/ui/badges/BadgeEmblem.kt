@@ -402,7 +402,7 @@ internal val BadgeCatalog: Map<String, BadgeSpec> = mapOf(
     ),
     BadgeIds.EARLY_BIRD to BadgeSpec(
         unlockedName = "Early Bird",
-        lockedHint = "5 times near notify",
+        lockedHint = "Complete 5 days near notification time",
         description = "5 captures within an hour of notification time.",
         family = BadgeFamily.EARLY_BIRD,
         tierIndex = null,
@@ -411,7 +411,7 @@ internal val BadgeCatalog: Map<String, BadgeSpec> = mapOf(
     ),
     BadgeIds.NIGHT_OWL to BadgeSpec(
         unlockedName = "Night Owl",
-        lockedHint = "After 21:00, 5 times",
+        lockedHint = "Complete 5 days after 21:00",
         description = "5 captures after 21:00.",
         family = BadgeFamily.NIGHT_OWL,
         tierIndex = null,

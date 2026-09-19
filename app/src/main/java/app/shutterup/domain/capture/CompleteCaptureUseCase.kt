@@ -52,10 +52,15 @@ class CompleteCaptureUseCase @Inject constructor(
         if (entry.date != today) {
             return CompleteCaptureResult.NotToday
         }
-        if (entries.countForDate(today) >= CaptureLimits.MAX_ENTRIES_PER_DAY) {
+        val existing = entries.countForDate(today)
+        if (existing > CaptureLimits.MAX_ENTRIES_PER_DAY) {
             return CompleteCaptureResult.CapReached
         }
         val prompt = prompts.getDay(today) ?: return CompleteCaptureResult.MissingPrompt
+        if (existing == CaptureLimits.MAX_ENTRIES_PER_DAY) {
+            // Retake: one photo answers the prompt (SPEC §1.2 / §4.3).
+            entries.delete(today)
+        }
         entries.upsert(entry)
         if (prompt.status == DayStatus.PENDING) {
             prompts.upsert(prompt.copy(status = DayStatus.COMPLETED))

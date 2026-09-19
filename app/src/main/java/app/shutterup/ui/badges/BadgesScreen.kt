@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -67,7 +68,7 @@ fun BadgesScreen(
         modifier = modifier.nestedScroll(scroll.nestedScrollConnection),
         topBar = {
             LargeTopAppBar(
-                title = { Text("Badges", style = MaterialTheme.typography.headlineSmall) },
+                title = { Text("Badges", style = MaterialTheme.typography.headlineMedium) },
                 scrollBehavior = scroll,
             )
         },
@@ -77,22 +78,22 @@ fun BadgesScreen(
                 .fillMaxSize()
                 .padding(padding),
         ) {
-            val columns = if (maxWidth >= 600.dp) 5 else 3
+            val minCell = if (maxWidth >= 600.dp) 96.dp else 108.dp
             LazyVerticalGrid(
-                columns = GridCells.Fixed(columns),
+                columns = GridCells.Adaptive(minSize = minCell),
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                item(span = { GridItemSpan(columns) }) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
                     StreakStatRow(
                         current = state.currentStreak,
                         longest = state.longestStreak,
                     )
                 }
                 state.sections.forEach { section ->
-                    item(span = { GridItemSpan(columns) }) {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
                         Text(
                             text = section.title,
                             style = MaterialTheme.typography.titleLarge,
@@ -182,6 +183,8 @@ private fun BadgeGridCell(
                 text = badge.caption,
                 style = MaterialTheme.typography.titleSmall,
                 textAlign = TextAlign.Center,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.padding(top = 4.dp),
             )
         }

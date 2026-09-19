@@ -1,9 +1,12 @@
 package app.shutterup.ui.home
 
+import android.content.Intent
 import android.content.res.Configuration
+import android.provider.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -22,8 +25,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -42,6 +45,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -53,13 +57,14 @@ import app.shutterup.domain.model.DayStatus
 import app.shutterup.domain.model.Entry
 import app.shutterup.domain.model.PromptSourceRef
 import app.shutterup.domain.model.StreakState
-import app.shutterup.ui.components.ConstraintCard
+import app.shutterup.ui.calendar.spokenDate
 import app.shutterup.ui.components.Kicker
 import app.shutterup.ui.components.LibraryTag
 import app.shutterup.ui.components.NotificationPermissionCard
 import app.shutterup.ui.components.ShootButton
 import app.shutterup.ui.components.StreakStatus
 import app.shutterup.ui.detail.samplePrompt
+import app.shutterup.ui.settings.SettingsCopy
 import app.shutterup.ui.theme.LocalThemeTint
 import app.shutterup.ui.theme.ProvideThemeTint
 import app.shutterup.ui.theme.ShutterUpTheme
@@ -71,6 +76,9 @@ import java.util.Locale
 
 /**
  * Today card, streak row, month ring, recent strip. Shoot opens Prompt Detail.
+ *
+ * @param listPane expanded left pane: compact Today minus the card's detail text
+ *   and without Shoot (Shoot lives in the Prompt Detail pane).
  */
 @Composable
 fun HomeRoute(
@@ -78,11 +86,14 @@ fun HomeRoute(
     onOpenDay: (dateIso: String) -> Unit,
     onOpenCalendar: () -> Unit,
     onOpenSettings: () -> Unit,
+    listPane: Boolean = false,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     HomeScreen(
         state = state,
+        listPane = listPane,
         onShoot = { onOpenDetail(state.today.toString(), true) },
         onDetails = { onOpenDetail(state.today.toString(), false) },
         onAddNote = { onOpenDay(state.today.toString()) },
@@ -91,7 +102,13 @@ fun HomeRoute(
         onOpenCalendar = onOpenCalendar,
         onOpenSettings = onOpenSettings,
         onResume = viewModel::resume,
-        onOpenNotificationSettings = onOpenSettings,
+        onOpenNotificationSettings = {
+            context.startActivity(
+                Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                    putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                },
+            )
+        },
     )
 }
 
@@ -107,11 +124,16 @@ fun HomeScreen(
     onOpenSettings: () -> Unit = {},
     onResume: () -> Unit = {},
     onOpenNotificationSettings: () -> Unit = {},
+    listPane: Boolean = false,
 ) {
-    val dark = androidx.compose.foundation.isSystemInDarkTheme()
+    val dark = isSystemInDarkTheme()
     val prompt = state.prompt
     ProvideThemeTint(theme = prompt?.theme.orEmpty(), darkTheme = dark) {
-        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surface),
+        ) {
             val cardMin = maxHeight * 0.55f
             Column(
                 modifier = Modifier
@@ -131,12 +153,13 @@ fun HomeScreen(
                     )
                     Spacer(Modifier.weight(1f))
                     IconButton(onClick = onOpenSettings) {
-                        Icon(Icons.Filled.Settings, contentDescription = "Settings")
+                        Icon(Icons.Outlined.Settings, contentDescription = "Settings")
                     }
                 }
                 TodayCard(
                     state = state,
                     minHeight = cardMin,
+                    listPane = listPane,
                     onShoot = onShoot,
                     onDetails = onDetails,
                     onAddNote = onAddNote,
@@ -152,11 +175,10 @@ fun HomeScreen(
                 if (state.aiDownloadPercent != null) {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         LinearProgressIndicator(
-                            progress = { (state.aiDownloadPercent / 100f).coerceIn(0f, 1f) },
                             modifier = Modifier.fillMaxWidth(),
                         )
                         Text(
-                            text = "Preparing on-device AI · ${state.aiDownloadPercent} %",
+                            text = SettingsCopy.AI_PREPARING,
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -183,6 +205,7 @@ fun HomeScreen(
 private fun TodayCard(
     state: HomeUiState,
     minHeight: androidx.compose.ui.unit.Dp,
+    listPane: Boolean,
     onShoot: () -> Unit,
     onDetails: () -> Unit,
     onAddNote: () -> Unit,
@@ -213,6 +236,10 @@ private fun TodayCard(
         return
     }
     if (prompt == null) {
+        val copy = when {
+            state.preparingPrompts || state.aiDownloadPercent != null -> "Preparing on-device AI"
+            else -> SettingsCopy.AI_UNAVAILABLE
+        }
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -221,7 +248,7 @@ private fun TodayCard(
             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         ) {
             Box(Modifier.fillMaxWidth().padding(20.dp)) {
-                Text("Your first photo goes here.", style = MaterialTheme.typography.bodyLarge)
+                Text(copy, style = MaterialTheme.typography.bodyLarge)
             }
         }
         return
@@ -272,19 +299,22 @@ private fun TodayCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             } else {
-                Text(
-                    text = prompt.oneLiner,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                prompt.constraint?.let { ConstraintCard(text = it) }
+                if (!listPane) {
+                    Text(
+                        text = prompt.oneLiner,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    ShootButton(onClick = onShoot)
-                    Spacer(Modifier.weight(1f))
-                    TextButton(onClick = onDetails) { Text("Details") }
+                    if (!listPane) {
+                        ShootButton(onClick = onShoot)
+                        Spacer(Modifier.weight(1f))
+                    }
+                    TextButton(onClick = onDetails) { Text("Details →") }
                 }
             }
         }
@@ -326,7 +356,7 @@ private fun CompletedTodayCard(
                 model = file,
                 contentDescription = "Today's photo",
                 modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop,
+                contentScale = ContentScale.Fit,
             )
         } else {
             Box(
@@ -387,7 +417,7 @@ private fun RecentStrip(
             Kicker(text = "Recent")
             Spacer(Modifier.weight(1f))
             IconButton(onClick = onOpenCalendar) {
-                Icon(Icons.Filled.ChevronRight, contentDescription = "Calendar")
+                Icon(Icons.AutoMirrored.Outlined.KeyboardArrowRight, contentDescription = "Calendar")
             }
         }
         LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -407,7 +437,7 @@ private fun RecentStrip(
                     if (file.exists()) {
                         AsyncImage(
                             model = file,
-                            contentDescription = "Recent ${entry.date}",
+                            contentDescription = "${spokenDate(entry.date)}, completed",
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop,
                         )

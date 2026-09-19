@@ -2,6 +2,7 @@ package app.shutterup.ui.calendar
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.shutterup.domain.model.DayPrompt
 import app.shutterup.domain.model.DayStatus
 import app.shutterup.domain.model.StreakState
 import app.shutterup.domain.repository.DayPromptRepository
@@ -67,23 +68,24 @@ class CalendarViewModel @Inject constructor(
             visibleMonth.flatMapLatest { month ->
                 combine(
                     prompts.observeDays(month.atDay(1), month.atEndOfMonth()),
+                    prompts.observeDays(LocalDate.of(1970, 1, 1), LocalDate.of(2100, 12, 31)),
                     thumbs,
                     gamification.observeStreak(),
-                ) { days, thumbMap, streak ->
-                    Triple(days, thumbMap, streak)
+                ) { days, allDays, thumbMap, streak ->
+                    HistorySlice(days, allDays, thumbMap, streak)
                 }
-            }.collect { (days, thumbMap, streak) ->
+            }.collect { slice ->
                 val month = visibleMonth.value
-                val byDate = days.associateBy { it.date }
-                val progress = monthProgress(days, today, month)
+                val byDate = slice.days.associateBy { it.date }
+                val progress = monthProgress(slice.days, today, month)
                 _state.value = CalendarUiState(
                     month = month,
                     today = today,
-                    cells = monthCells(month, byDate, thumbMap, today),
+                    cells = monthCells(month, byDate, slice.thumbMap, today),
                     monthCompleted = progress.completed,
                     monthEligible = progress.eligible,
-                    longestStreak = streak.longest,
-                    hasHistory = days.any { it.status.isHistory() } || thumbMap.isNotEmpty(),
+                    longestStreak = slice.streak.longest,
+                    hasHistory = slice.allDays.any { it.status.isHistory() } || slice.thumbMap.isNotEmpty(),
                 )
             }
         }
@@ -107,6 +109,13 @@ class CalendarViewModel @Inject constructor(
         showMonth(visibleMonth.value.plusMonths(1))
     }
 }
+
+private data class HistorySlice(
+    val days: List<DayPrompt>,
+    val allDays: List<DayPrompt>,
+    val thumbMap: Map<LocalDate, String>,
+    val streak: StreakState,
+)
 
 private fun DayStatus.isHistory(): Boolean = when (this) {
     DayStatus.COMPLETED,

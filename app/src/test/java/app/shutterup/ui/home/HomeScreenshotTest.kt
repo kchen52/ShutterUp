@@ -1,5 +1,6 @@
 package app.shutterup.ui.home
 
+import androidx.compose.material3.Surface
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
 import app.shutterup.ui.theme.ShutterUpTheme
@@ -23,7 +24,7 @@ class HomeScreenshotTest {
     fun homeLight() {
         composeRule.setContent {
             ShutterUpTheme(darkTheme = false) {
-                HomeScreen(state = sampleHomeState())
+                Surface { HomeScreen(state = sampleHomeState()) }
             }
         }
         composeRule.onRoot().captureRoboImage()
@@ -33,7 +34,7 @@ class HomeScreenshotTest {
     fun homeDark() {
         composeRule.setContent {
             ShutterUpTheme(darkTheme = true) {
-                HomeScreen(state = sampleHomeState())
+                Surface { HomeScreen(state = sampleHomeState()) }
             }
         }
         composeRule.onRoot().captureRoboImage()

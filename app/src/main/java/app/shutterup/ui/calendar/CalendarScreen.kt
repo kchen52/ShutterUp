@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,24 +26,33 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -52,9 +60,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import app.shutterup.domain.model.DayStatus
-import app.shutterup.ui.components.MonthRing
+import app.shutterup.ui.adaptive.ShutterUpListDetail
+import app.shutterup.ui.adaptive.isExpandedWidth
+import app.shutterup.ui.day.DayRoute
 import app.shutterup.ui.icons.SnowflakeIcon
+import app.shutterup.ui.navigation.ShutterUpDestinations
 import app.shutterup.ui.theme.ShutterUpTheme
 import coil3.compose.AsyncImage
 import java.io.File
@@ -69,19 +85,60 @@ private val PAGER_START = YearMonth.of(2020, 1)
 private const val PAGER_MONTHS = 240
 
 /**
- * Month grid with day-status dots/rings. Tap opens `day/{dateIso}`.
+ * Month grid with day-status dots/rings. Compact: tap opens `day/{dateIso}`.
+ * Expanded: grid | Day in [ShutterUpListDetail].
  */
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun CalendarRoute(
     onOpenDay: (String) -> Unit,
+    onOpenDetail: (dateIso: String, autoLaunchCamera: Boolean) -> Unit = { _, _ -> },
+    onOpenCompletion: (String) -> Unit = {},
     viewModel: CalendarViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    CalendarScreen(
-        state = state,
-        onMonthChange = viewModel::showMonth,
-        onOpenDay = { date -> onOpenDay(date.toString()) },
-    )
+    val expanded = isExpandedWidth(currentWindowAdaptiveInfo().windowSizeClass.minWidthDp)
+    if (expanded) {
+        var selectedIso by remember(state.today) { mutableStateOf(state.today.toString()) }
+        ShutterUpListDetail(
+            listFraction = 0.45f,
+            list = {
+                CalendarScreen(
+                    state = state,
+                    onMonthChange = viewModel::showMonth,
+                    onOpenDay = { date -> selectedIso = date.toString() },
+                )
+            },
+            detail = {
+                key(selectedIso) {
+                    val paneNav = rememberNavController()
+                    NavHost(
+                        navController = paneNav,
+                        startDestination = ShutterUpDestinations.day(selectedIso),
+                    ) {
+                        composable(
+                            route = ShutterUpDestinations.DAY,
+                            arguments = listOf(
+                                navArgument("dateIso") { type = NavType.StringType },
+                            ),
+                        ) {
+                            DayRoute(
+                                onBack = { },
+                                onOpenDetail = onOpenDetail,
+                                onOpenCompletion = onOpenCompletion,
+                            )
+                        }
+                    }
+                }
+            },
+        )
+    } else {
+        CalendarScreen(
+            state = state,
+            onMonthChange = viewModel::showMonth,
+            onOpenDay = { date -> onOpenDay(date.toString()) },
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -99,12 +156,14 @@ fun CalendarScreen(
     }
     val pagerState = rememberPagerState(initialPage = startPage, pageCount = { PAGER_MONTHS })
     val scope = rememberCoroutineScope()
+    val scroll = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     LaunchedEffect(pagerState.settledPage) {
         onMonthChange(PAGER_START.plusMonths(pagerState.settledPage.toLong()))
     }
     Scaffold(
+        modifier = Modifier.nestedScroll(scroll.nestedScrollConnection),
         topBar = {
-            TopAppBar(
+            LargeTopAppBar(
                 title = {
                     AnimatedContent(targetState = monthTitle, label = "monthTitle") { title ->
                         Text(text = title, style = MaterialTheme.typography.headlineMedium)
@@ -126,7 +185,7 @@ fun CalendarScreen(
                         Icon(Icons.Filled.ChevronRight, contentDescription = "Next month")
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(),
+                scrollBehavior = scroll,
             )
         },
     ) { padding ->
@@ -153,6 +212,7 @@ fun CalendarScreen(
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
+                return@Column
             }
             WeekdayHeader()
             HorizontalPager(
@@ -179,7 +239,19 @@ fun CalendarScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                MonthRing(completed = state.monthCompleted, eligible = state.monthEligible)
+                val progress = if (state.monthEligible <= 0) {
+                    0f
+                } else {
+                    (state.monthCompleted.toFloat() / state.monthEligible.toFloat()).coerceIn(0f, 1f)
+                }
+                CircularProgressIndicator(
+                    progress = { progress },
+                    modifier = Modifier.size(28.dp),
+                    color = MaterialTheme.colorScheme.primary,
+                    strokeWidth = 2.dp,
+                    trackColor = MaterialTheme.colorScheme.outlineVariant,
+                    strokeCap = ProgressIndicatorDefaults.CircularDeterminateStrokeCap,
+                )
                 Text(
                     text = "${state.monthCompleted} of ${state.monthEligible} days this month",
                     style = MaterialTheme.typography.labelMedium,
@@ -199,15 +271,13 @@ fun CalendarScreen(
 @Composable
 private fun WeekdayHeader() {
     Row(modifier = Modifier.fillMaxWidth()) {
-        DayOfWeek.entries.let { days ->
-            days.forEach { day ->
-                Text(
-                    text = day.getDisplayName(TextStyle.NARROW, Locale.ENGLISH),
-                    modifier = Modifier.weight(1f),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+        DayOfWeek.entries.forEach { day ->
+            Text(
+                text = day.getDisplayName(TextStyle.NARROW, Locale.ENGLISH),
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }
@@ -220,8 +290,8 @@ private fun MonthGrid(
     LazyVerticalGrid(
         columns = GridCells.Fixed(7),
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(0.dp),
+        verticalArrangement = Arrangement.spacedBy(0.dp),
         userScrollEnabled = false,
     ) {
         items(cells, key = { it.date }) { cell ->
@@ -242,91 +312,107 @@ private fun CalendarDayCell(
         cell.status == DayStatus.PAUSED -> MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
         cell.status == DayStatus.MISSED -> MaterialTheme.colorScheme.outline
         cell.isToday && cell.status == DayStatus.PENDING -> MaterialTheme.colorScheme.primary
+        cell.status == DayStatus.COMPLETED || cell.status == DayStatus.COMPLETED_NO_PHOTO ->
+            MaterialTheme.colorScheme.inverseOnSurface
         else -> MaterialTheme.colorScheme.onSurface
     }
     Box(
         modifier = Modifier
-            .aspectRatio(1f)
+            .height(48.dp)
+            .fillMaxWidth()
             .semantics { contentDescription = description }
-            .clip(RoundedCornerShape(12.dp))
-            .clickable(onClick = onClick)
-            .todayRing(cell),
+            .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        when {
-            cell.status == DayStatus.COMPLETED && !cell.thumbPath.isNullOrBlank() &&
-                File(cell.thumbPath).exists() -> {
-                AsyncImage(
-                    model = File(cell.thumbPath),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(RoundedCornerShape(12.dp))
-                        .border(
-                            1.dp,
-                            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
-                            RoundedCornerShape(12.dp),
-                        ),
-                    contentScale = ContentScale.Crop,
-                )
-            }
-            cell.status == DayStatus.COMPLETED || cell.status == DayStatus.COMPLETED_NO_PHOTO -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(MaterialTheme.colorScheme.secondaryContainer),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Check,
+        Box(
+            modifier = Modifier
+                .size(44.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .todayRing(cell),
+            contentAlignment = Alignment.Center,
+        ) {
+            when {
+                cell.status == DayStatus.COMPLETED && !cell.thumbPath.isNullOrBlank() &&
+                    File(cell.thumbPath).exists() -> {
+                    AsyncImage(
+                        model = File(cell.thumbPath),
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                        modifier = Modifier.size(18.dp),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(RoundedCornerShape(12.dp))
+                            .border(
+                                1.dp,
+                                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
+                                RoundedCornerShape(12.dp),
+                            ),
+                        contentScale = ContentScale.Crop,
                     )
-                }
-            }
-            cell.status == DayStatus.SKIPPED -> {
-                Box(
-                    modifier = Modifier
-                        .size(28.dp)
-                        .border(1.5.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape),
-                    contentAlignment = Alignment.Center,
-                ) {
                     Box(
                         Modifier
-                            .size(width = 10.dp, height = 1.5.dp)
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.35f)),
+                    )
+                }
+                cell.status == DayStatus.COMPLETED || cell.status == DayStatus.COMPLETED_NO_PHOTO -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.secondaryContainer),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Check,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                            modifier = Modifier.size(18.dp),
+                        )
+                    }
+                }
+                cell.status == DayStatus.SKIPPED -> {
+                    Box(
+                        modifier = Modifier
+                            .size(28.dp)
+                            .border(1.5.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Box(
+                            Modifier
+                                .size(width = 10.dp, height = 1.5.dp)
+                                .background(MaterialTheme.colorScheme.outlineVariant),
+                        )
+                    }
+                }
+                cell.status == DayStatus.MISSED -> {
+                    Box(
+                        modifier = Modifier
+                            .size(6.dp)
+                            .clip(CircleShape)
                             .background(MaterialTheme.colorScheme.outlineVariant),
                     )
                 }
             }
-            cell.status == DayStatus.MISSED -> {
-                Box(
-                    modifier = Modifier
-                        .size(6.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.outlineVariant),
-                )
-            }
-        }
-        if (cell.status != DayStatus.COMPLETED && cell.status != DayStatus.COMPLETED_NO_PHOTO) {
             Text(
                 text = cell.date.dayOfMonth.toString(),
-                color = numberColor,
+                color = if (cell.status == DayStatus.COMPLETED || cell.status == DayStatus.COMPLETED_NO_PHOTO) {
+                    if (!cell.thumbPath.isNullOrBlank()) Color.White else MaterialTheme.colorScheme.onSecondaryContainer
+                } else {
+                    numberColor
+                },
                 style = MaterialTheme.typography.labelMedium,
                 modifier = Modifier.alpha(if (cell.status == DayStatus.PAUSED) 0.6f else 1f),
             )
-        }
-        if (cell.frozen && (cell.status == DayStatus.SKIPPED || cell.status == DayStatus.MISSED)) {
-            Icon(
-                imageVector = SnowflakeIcon,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.tertiary,
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(2.dp)
-                    .size(12.dp),
-            )
+            if (cell.frozen && (cell.status == DayStatus.SKIPPED || cell.status == DayStatus.MISSED)) {
+                Icon(
+                    imageVector = SnowflakeIcon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.tertiary,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(2.dp)
+                        .size(12.dp),
+                )
+            }
         }
     }
 }

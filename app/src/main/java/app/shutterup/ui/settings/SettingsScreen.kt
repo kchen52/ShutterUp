@@ -42,6 +42,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -72,6 +74,9 @@ fun SettingsRoute(
         onPaused = viewModel::setPaused,
         onThemeFocus = viewModel::setThemeFocus,
         onDebugUseFakeAi = viewModel::setDebugUseFakeAi,
+        onForceRollover = viewModel::forceDayRollover,
+        onSeedHistory = viewModel::seedSixtyDays,
+        onResetAll = viewModel::resetAllData,
         onOpenPrivacy = onOpenPrivacy,
         onOpenExactAlarmSettings = {
             context.startActivity(
@@ -82,12 +87,19 @@ fun SettingsRoute(
             )
         },
         onOpenBatterySettings = {
-            context.startActivity(
-                Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                    data = Uri.parse("package:${context.packageName}")
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                },
-            )
+            val pkg = context.packageName
+            val appBattery = Intent("android.settings.APP_BATTERY_SETTINGS").apply {
+                data = Uri.parse("package:$pkg")
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            val launched = runCatching { context.startActivity(appBattery) }.isSuccess
+            if (!launched) {
+                context.startActivity(
+                    Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    },
+                )
+            }
         },
     )
 }
@@ -114,6 +126,9 @@ fun SettingsScreen(
     onPaused: (Boolean) -> Unit = {},
     onThemeFocus: (String) -> Unit = {},
     onDebugUseFakeAi: (Boolean) -> Unit = {},
+    onForceRollover: () -> Unit = {},
+    onSeedHistory: () -> Unit = {},
+    onResetAll: () -> Unit = {},
     onOpenPrivacy: (() -> Unit)? = null,
     onOpenExactAlarmSettings: () -> Unit = {},
     onOpenBatterySettings: () -> Unit = {},
@@ -164,6 +179,9 @@ fun SettingsScreen(
                         onPaused = onPaused,
                         onThemeFocus = onThemeFocus,
                         onDebugUseFakeAi = onDebugUseFakeAi,
+                        onForceRollover = onForceRollover,
+                        onSeedHistory = onSeedHistory,
+                        onResetAll = onResetAll,
                         onOpenPrivacy = onOpenPrivacy,
                         onOpenExactAlarmSettings = onOpenExactAlarmSettings,
                         onOpenBatterySettings = onOpenBatterySettings,
@@ -194,6 +212,9 @@ fun SettingsScreen(
                         onPaused = onPaused,
                         onThemeFocus = onThemeFocus,
                         onDebugUseFakeAi = onDebugUseFakeAi,
+                        onForceRollover = onForceRollover,
+                        onSeedHistory = onSeedHistory,
+                        onResetAll = onResetAll,
                         onOpenPrivacy = onOpenPrivacy,
                         onOpenExactAlarmSettings = onOpenExactAlarmSettings,
                         onOpenBatterySettings = onOpenBatterySettings,
@@ -257,6 +278,9 @@ private fun SettingsGroup(
     onPaused: (Boolean) -> Unit,
     onThemeFocus: (String) -> Unit,
     onDebugUseFakeAi: (Boolean) -> Unit,
+    onForceRollover: () -> Unit,
+    onSeedHistory: () -> Unit,
+    onResetAll: () -> Unit,
     onOpenPrivacy: (() -> Unit)?,
     onOpenExactAlarmSettings: () -> Unit,
     onOpenBatterySettings: () -> Unit,
@@ -273,7 +297,13 @@ private fun SettingsGroup(
         SettingsCategory.Prompts -> PromptsSection(state = state, onThemeFocus = onThemeFocus)
         SettingsCategory.Photos -> PhotosSection(state = state)
         SettingsCategory.About -> AboutSection(state = state, onOpenPrivacy = onOpenPrivacy)
-        SettingsCategory.Debug -> DebugSection(state = state, onDebugUseFakeAi = onDebugUseFakeAi)
+        SettingsCategory.Debug -> DebugSection(
+            state = state,
+            onDebugUseFakeAi = onDebugUseFakeAi,
+            onForceRollover = onForceRollover,
+            onSeedHistory = onSeedHistory,
+            onResetAll = onResetAll,
+        )
     }
 }
 
@@ -303,44 +333,44 @@ private fun DailyPromptSection(
         onCheckedChange = onPreciseTiming,
         supporting = SettingsCopy.PRECISE_SUPPORTING,
     )
-    ListItem(
-        headlineContent = { Text(state.preciseTimingStatus) },
-        modifier = Modifier
-            .heightIn(min = 48.dp)
-            .then(
-                if (!state.exactAlarmAllowed) {
-                    Modifier.clickable(onClick = onOpenExactAlarmSettings)
-                } else {
-                    Modifier
-                },
-            ),
-        supportingContent = if (!state.exactAlarmAllowed) {
-            { Text(SettingsCopy.OPEN_SETTINGS) }
-        } else {
-            null
-        },
-    )
+    if (state.preciseTiming) {
+        ListItem(
+            headlineContent = { Text(state.preciseTimingStatus) },
+            modifier = Modifier
+                .heightIn(min = 48.dp)
+                .then(
+                    if (!state.exactAlarmAllowed) {
+                        Modifier.clickable(onClick = onOpenExactAlarmSettings)
+                    } else {
+                        Modifier
+                    },
+                ),
+            supportingContent = if (!state.exactAlarmAllowed) {
+                { Text(SettingsCopy.OPEN_SETTINGS) }
+            } else {
+                null
+            },
+        )
+    }
     SwitchRow(
         title = SettingsCopy.PAUSE,
         checked = state.paused,
         onCheckedChange = onPaused,
         supporting = SettingsCopy.PAUSE_SUPPORTING,
     )
+    val freezeLabel = if (state.freezeCount == 1) {
+        "1 freeze held"
+    } else {
+        "${state.freezeCount} freezes held"
+    }
     ListItem(
         headlineContent = { Text(SettingsCopy.FREEZES) },
-        supportingContent = {
-            Text(
-                text = if (state.freezeCount == 1) {
-                    "1 freeze held"
-                } else {
-                    "${state.freezeCount} freezes held"
-                },
-            )
-        },
+        supportingContent = { Text(freezeLabel) },
+        modifier = Modifier.semantics { contentDescription = freezeLabel },
         leadingContent = {
             Icon(
                 imageVector = SnowflakeIcon,
-                contentDescription = null,
+                contentDescription = freezeLabel,
                 tint = MaterialTheme.colorScheme.tertiary,
             )
         },
@@ -429,6 +459,10 @@ private fun PhotosSection(state: SettingsUiState) {
         headlineContent = { Text(SettingsCopy.SAVE_LOCATION_LABEL) },
         supportingContent = { Text(state.saveLocation) },
     )
+    ListItem(
+        headlineContent = { Text(SettingsCopy.STORAGE_USED) },
+        supportingContent = { Text(state.storageUsed) },
+    )
 }
 
 @Composable
@@ -448,7 +482,6 @@ private fun AboutSection(
     )
     ListItem(
         headlineContent = { Text(SettingsCopy.PRIVACY) },
-        supportingContent = { Text(state.privacyBody) },
         modifier = Modifier
             .heightIn(min = 48.dp)
             .clickable {
@@ -457,7 +490,6 @@ private fun AboutSection(
     )
     ListItem(
         headlineContent = { Text(SettingsCopy.LICENCES) },
-        supportingContent = { Text(SettingsCopy.LICENCES_BODY) },
         modifier = Modifier
             .heightIn(min = 48.dp)
             .clickable { showLicences = true },
@@ -498,12 +530,33 @@ private fun AboutSection(
 private fun DebugSection(
     state: SettingsUiState,
     onDebugUseFakeAi: (Boolean) -> Unit,
+    onForceRollover: () -> Unit,
+    onSeedHistory: () -> Unit,
+    onResetAll: () -> Unit,
 ) {
     SectionHeader(SettingsCopy.SECTION_DEBUG)
     SwitchRow(
         title = SettingsCopy.DEBUG_FAKE_AI,
         checked = state.debugUseFakeAi,
         onCheckedChange = onDebugUseFakeAi,
+    )
+    ListItem(
+        headlineContent = { Text(SettingsCopy.DEBUG_FORCE_ROLLOVER) },
+        modifier = Modifier
+            .heightIn(min = 48.dp)
+            .clickable(onClick = onForceRollover),
+    )
+    ListItem(
+        headlineContent = { Text(SettingsCopy.DEBUG_SEED) },
+        modifier = Modifier
+            .heightIn(min = 48.dp)
+            .clickable(onClick = onSeedHistory),
+    )
+    ListItem(
+        headlineContent = { Text(SettingsCopy.DEBUG_RESET) },
+        modifier = Modifier
+            .heightIn(min = 48.dp)
+            .clickable(onClick = onResetAll),
     )
 }
 
@@ -552,6 +605,7 @@ internal fun sampleSettingsState(): SettingsUiState {
         showDebug = true,
         debugUseFakeAi = false,
         showBatteryHint = false,
+        storageUsed = "12 MB",
     )
 }
 

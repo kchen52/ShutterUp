@@ -25,7 +25,6 @@ class CompletionScreenshotTest {
             ShutterUpTheme(darkTheme = false) {
                 CompletionScreen(
                     state = sampleCompletionState(firstEver = true),
-                    showConfetti = true,
                     showBadgeSheet = false,
                 )
             }
@@ -39,7 +38,6 @@ class CompletionScreenshotTest {
             ShutterUpTheme(darkTheme = true) {
                 CompletionScreen(
                     state = sampleCompletionState(firstEver = false),
-                    showConfetti = true,
                     showBadgeSheet = false,
                 )
             }

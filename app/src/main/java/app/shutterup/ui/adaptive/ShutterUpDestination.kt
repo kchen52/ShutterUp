@@ -6,29 +6,65 @@ import androidx.compose.material.icons.outlined.GridView
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.MilitaryTech
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.rounded.CalendarMonth
+import androidx.compose.material.icons.rounded.GridView
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.MilitaryTech
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 
 /**
- * Top-level destinations shown in [ShutterUpAdaptiveScaffold].
+ * Destinations for [ShutterUpAdaptiveScaffold].
  *
- * Route strings live in the nav graph (worker A). This model is
- * `currentRoute`-agnostic: the host passes [selected] plus [ShutterUpTabCallbacks].
+ * Four primary tabs (DESIGN.md §3): Today · Calendar · Feed · Badges.
+ * Settings is not a compact tab; it sits at the bottom of the expanded rail
+ * and is opened from Today's gear on compact width.
  */
 enum class ShutterUpDestination(
     /** Visible label (DESIGN.md §3: Today, not "Home"). */
     val label: String,
-    val icon: ImageVector,
+    val outlinedIcon: ImageVector,
+    val selectedIcon: ImageVector,
+    /** Compact bottom bar shows only primary tabs. */
+    val primaryTab: Boolean,
 ) {
-    Home(label = "Today", icon = Icons.Outlined.Home),
-    Calendar(label = "Calendar", icon = Icons.Outlined.CalendarMonth),
-    Feed(label = "Feed", icon = Icons.Outlined.GridView),
-    Badges(label = "Badges", icon = Icons.Outlined.MilitaryTech),
-    Settings(label = "Settings", icon = Icons.Outlined.Settings),
+    Home(
+        label = "Today",
+        outlinedIcon = Icons.Outlined.Home,
+        selectedIcon = Icons.Rounded.Home,
+        primaryTab = true,
+    ),
+    Calendar(
+        label = "Calendar",
+        outlinedIcon = Icons.Outlined.CalendarMonth,
+        selectedIcon = Icons.Rounded.CalendarMonth,
+        primaryTab = true,
+    ),
+    Feed(
+        label = "Feed",
+        outlinedIcon = Icons.Outlined.GridView,
+        selectedIcon = Icons.Rounded.GridView,
+        primaryTab = true,
+    ),
+    Badges(
+        label = "Badges",
+        outlinedIcon = Icons.Outlined.MilitaryTech,
+        selectedIcon = Icons.Rounded.MilitaryTech,
+        primaryTab = true,
+    ),
+    Settings(
+        label = "Settings",
+        outlinedIcon = Icons.Outlined.Settings,
+        selectedIcon = Icons.Rounded.Settings,
+        primaryTab = false,
+    );
+
+    fun icon(selected: Boolean): ImageVector = if (selected) selectedIcon else outlinedIcon
 }
 
 /**
  * Click handlers for each [ShutterUpDestination]. The scaffold never holds a
- * `NavController`; worker A maps these to `navController.navigate(...)`.
+ * `NavController`; the host maps these to `navController.navigate(...)`.
  */
 data class ShutterUpTabCallbacks(
     val onHome: () -> Unit,

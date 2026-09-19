@@ -75,6 +75,10 @@ class NotificationHelperTest {
         assertEquals(2, actions.size)
         assertEquals("Shoot", actions[0].title.toString())
         assertEquals("Reroll", actions[1].title.toString())
+        val shootUri = Shadows.shadowOf(actions[0].actionIntent).savedIntent.data.toString()
+        val rerollUri = Shadows.shadowOf(actions[1].actionIntent).savedIntent.data.toString()
+        assertEquals("shutterup://day/2024-06-15?autoLaunchCamera=true", shootUri)
+        assertEquals("shutterup://day/2024-06-15?reroll=true", rerollUri)
     }
 
     @Test

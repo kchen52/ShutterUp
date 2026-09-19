@@ -31,6 +31,6 @@ class SettingsCopyAndFocusTest {
             "Everything stays on your phone. ShutterUp has no internet access.",
             SettingsCopy.ABOUT_LINE,
         )
-        assertEquals(SettingsCopy.ABOUT_LINE, SettingsCopy.PRIVACY_BODY.lineSequence().first())
+        assertEquals(SettingsCopy.ABOUT_LINE, SettingsCopy.PRIVACY_BODY.take(SettingsCopy.ABOUT_LINE.length))
     }
 }

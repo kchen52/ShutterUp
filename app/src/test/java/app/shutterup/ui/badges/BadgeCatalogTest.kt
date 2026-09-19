@@ -99,8 +99,8 @@ class BadgeCatalogTest {
 
     @Test
     fun hintsUseNumerals() {
-        assertEquals("5 times near notify", badgeLockedHint(BadgeIds.EARLY_BIRD))
-        assertEquals("After 21:00, 5 times", badgeLockedHint(BadgeIds.NIGHT_OWL))
+        assertEquals("Complete 5 days near notification time", badgeLockedHint(BadgeIds.EARLY_BIRD))
+        assertEquals("Complete 5 days after 21:00", badgeLockedHint(BadgeIds.NIGHT_OWL))
     }
 
     @Test

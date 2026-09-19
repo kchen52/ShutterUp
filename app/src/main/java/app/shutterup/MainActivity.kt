@@ -34,12 +34,12 @@ class MainActivity : ComponentActivity() {
     @Inject lateinit var zone: ZoneId
     @Inject lateinit var preferences: PreferencesRepository
 
-    private var deepLink by mutableStateOf<Uri?>(null)
+    private var pendingDeepLink by mutableStateOf<Uri?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        deepLink = intent?.data
+        pendingDeepLink = intent?.data
         val today = LocalDate.now(clock.withZone(zone)).toString()
         val onboardedInitially = runBlocking { preferences.observeOnboardingComplete().first() }
         setContent {
@@ -51,8 +51,10 @@ class MainActivity : ComponentActivity() {
                         OnboardingRoute(onFinished = {})
                     } else {
                         val navController = rememberNavController()
-                        LaunchedEffect(deepLink) {
-                            navController.navigateDayUri(deepLink)
+                        LaunchedEffect(onboarded, pendingDeepLink) {
+                            val uri = pendingDeepLink ?: return@LaunchedEffect
+                            navController.navigateDayUri(uri)
+                            consumePendingDeepLink()
                         }
                         ShutterUpNavGraph(
                             navController = navController,
@@ -67,6 +69,13 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        deepLink = intent.data
+        pendingDeepLink = intent.data
+    }
+
+    private fun consumePendingDeepLink() {
+        pendingDeepLink = null
+        val cleared = Intent(intent)
+        cleared.data = null
+        setIntent(cleared)
     }
 }

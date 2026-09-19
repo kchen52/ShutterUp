@@ -53,11 +53,14 @@ fun monthCells(
 private val cellDateFormatter: DateTimeFormatter =
     DateTimeFormatter.ofPattern("d MMMM", Locale.ENGLISH)
 
+/** Spoken date, e.g. `19 September` (DESIGN §11). */
+fun spokenDate(date: LocalDate): String = date.format(cellDateFormatter)
+
 /**
  * Spoken status for a cell (DESIGN §11): "19 September, completed".
  */
 fun calendarCellDescription(cell: CalendarCell): String {
-    val datePart = cell.date.format(cellDateFormatter)
+    val datePart = spokenDate(cell.date)
     if (!cell.inMonth) return datePart
     val status = when {
         cell.isFuture -> null

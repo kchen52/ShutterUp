@@ -37,8 +37,8 @@ class MediaNamingTest {
     fun fileName_includesOneBasedIndexAndExtension() {
         val date = LocalDate.of(2026, 9, 19)
         assertEquals(
-            "2026-09-19_negative-space_2.mp4",
-            MediaNaming.fileName(date, "Negative Space", 2, "mp4"),
+            "2026-09-19_negative-space_1.jpg",
+            MediaNaming.fileName(date, "Negative Space", 1, "jpg"),
         )
     }
 
