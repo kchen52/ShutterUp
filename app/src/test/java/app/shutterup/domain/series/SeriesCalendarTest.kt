@@ -26,13 +26,13 @@ class SeriesCalendarTest {
     @Test
     fun nextEmptyDate_skipsExistingPrompts_soSeriesStartsAfterBuffer() {
         val filled = setOf(today, today.plusDays(1), today.plusDays(2))
-        val start = SeriesCalendar.nextEmptyDate(today) { it in filled }
+        val start = SeriesCalendar.nextEmptyDate(today, hasPrompt = { it in filled })
         assertEquals(today.plusDays(3), start)
     }
 
     @Test
     fun nextEmptyDate_isTodayWhenNothingGeneratedYet() {
-        assertEquals(today, SeriesCalendar.nextEmptyDate(today) { false })
+        assertEquals(today, SeriesCalendar.nextEmptyDate(today, hasPrompt = { false }))
     }
 
     @Test

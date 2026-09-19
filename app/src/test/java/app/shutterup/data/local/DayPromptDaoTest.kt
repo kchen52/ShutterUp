@@ -97,6 +97,26 @@ class DayPromptDaoTest {
         cursor.close()
     }
 
+    @Test
+    fun deleteAfter_keepsTodayAndDropsFuture() = runTest {
+        dao.upsert(dayPrompt(LocalDate.of(2024, 6, 15), title = "Today"))
+        dao.upsert(dayPrompt(LocalDate.of(2024, 6, 16), title = "Tomorrow"))
+        dao.upsert(dayPrompt(LocalDate.of(2024, 6, 17), title = "Later"))
+        dao.deleteAfter(LocalDate.of(2024, 6, 15))
+        assertEquals("Today", dao.getDay(LocalDate.of(2024, 6, 15))?.title)
+        assertNull(dao.getDay(LocalDate.of(2024, 6, 16)))
+        assertNull(dao.getDay(LocalDate.of(2024, 6, 17)))
+    }
+
+    @Test
+    fun daysInSeries_returnsOnlyMatchingRows() = runTest {
+        dao.upsert(dayPrompt(LocalDate.of(2024, 6, 15), title = "S1").copy(seriesId = 4, seriesIndex = 1))
+        dao.upsert(dayPrompt(LocalDate.of(2024, 6, 16), title = "S2").copy(seriesId = 4, seriesIndex = 2))
+        dao.upsert(dayPrompt(LocalDate.of(2024, 6, 17), title = "Other").copy(seriesId = 9, seriesIndex = 1))
+        val days = dao.daysInSeries(4)
+        assertEquals(listOf("S1", "S2"), days.map { it.title })
+    }
+
     private fun dayPrompt(
         date: LocalDate,
         title: String,

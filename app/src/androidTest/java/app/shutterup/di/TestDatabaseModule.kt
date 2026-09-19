@@ -6,6 +6,7 @@ import app.shutterup.data.di.DatabaseModule
 import app.shutterup.data.local.DayPromptDao
 import app.shutterup.data.local.EntryDao
 import app.shutterup.data.local.GamificationDao
+import app.shutterup.data.local.SeriesDao
 import app.shutterup.data.local.ShutterUpDatabase
 import dagger.Module
 import dagger.Provides
@@ -35,4 +36,7 @@ object TestDatabaseModule {
 
     @Provides
     fun provideGamificationDao(db: ShutterUpDatabase): GamificationDao = db.gamificationDao()
+
+    @Provides
+    fun provideSeriesDao(db: ShutterUpDatabase): SeriesDao = db.seriesDao()
 }
