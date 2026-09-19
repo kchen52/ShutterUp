@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">ShutterUp</string>
+    <string name="widget_label_small">Today (small)</string>
+    <string name="widget_label_medium">Today</string>
+    <string name="widget_description_small">Today\'s theme and title.</string>
+    <string name="widget_description_medium">Today\'s prompt, constraint, streak, and Shoot.</string>
 </resources>

@@ -13,20 +13,26 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
+import app.shutterup.domain.repository.PreferencesRepository
 import app.shutterup.ui.navigation.ShutterUpNavGraph
 import app.shutterup.ui.navigation.navigateDayUri
+import app.shutterup.ui.onboarding.OnboardingRoute
 import app.shutterup.ui.theme.ShutterUpTheme
 import dagger.hilt.android.AndroidEntryPoint
 import java.time.Clock
 import java.time.LocalDate
 import java.time.ZoneId
 import javax.inject.Inject
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     @Inject lateinit var clock: Clock
     @Inject lateinit var zone: ZoneId
+    @Inject lateinit var preferences: PreferencesRepository
 
     private var deepLink by mutableStateOf<Uri?>(null)
 
@@ -35,17 +41,24 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         deepLink = intent?.data
         val today = LocalDate.now(clock.withZone(zone)).toString()
+        val onboardedInitially = runBlocking { preferences.observeOnboardingComplete().first() }
         setContent {
             ShutterUpTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    val navController = rememberNavController()
-                    LaunchedEffect(deepLink) {
-                        navController.navigateDayUri(deepLink)
+                    val onboarded by preferences.observeOnboardingComplete()
+                        .collectAsStateWithLifecycle(initialValue = onboardedInitially)
+                    if (!onboarded) {
+                        OnboardingRoute(onFinished = {})
+                    } else {
+                        val navController = rememberNavController()
+                        LaunchedEffect(deepLink) {
+                            navController.navigateDayUri(deepLink)
+                        }
+                        ShutterUpNavGraph(
+                            navController = navController,
+                            todayIso = today,
+                        )
                     }
-                    ShutterUpNavGraph(
-                        navController = navController,
-                        todayIso = today,
-                    )
                 }
             }
         }

@@ -147,6 +147,7 @@ dependencies {
 
     // Widget
     implementation(libs.glance.appwidget)
+    implementation(libs.glance.material3)
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
