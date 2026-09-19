@@ -4,7 +4,6 @@ import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,7 +27,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
@@ -41,11 +39,16 @@ import app.shutterup.domain.calendar.YearMonthBand
 import app.shutterup.ui.components.Kicker
 import app.shutterup.ui.theme.ShutterUpTheme
 import app.shutterup.ui.theme.themeAccent
-import app.shutterup.ui.theme.themeTint
 import java.time.format.TextStyle
 import java.util.Locale
 
-private val YearCellShape = RoundedCornerShape(3.dp)
+/**
+ * Calendar day cells are 44 dp with a 12 dp radius (DESIGN §4.4). A dp
+ * radius that large swallows a 8–12 dp year cell into a circle, so the
+ * year uses the same *proportion of the straight edge*: about 12 % of
+ * the side, a slight corner at every size.
+ */
+private val YearCellShape = RoundedCornerShape(percent = 12)
 
 /**
  * Printed year: twelve month bands, one small cell per day. No photographs,
@@ -57,7 +60,6 @@ fun YearGridView(
     onOpenDay: (java.time.LocalDate) -> Unit,
     modifier: Modifier = Modifier,
     interactive: Boolean = true,
-    darkTheme: Boolean = isSystemInDarkTheme(),
 ) {
     Column(
         modifier = modifier
@@ -70,7 +72,6 @@ fun YearGridView(
                 band = band,
                 onOpenDay = onOpenDay,
                 interactive = interactive,
-                darkTheme = darkTheme,
             )
         }
     }
@@ -81,7 +82,6 @@ private fun YearMonthRow(
     band: YearMonthBand,
     onOpenDay: (java.time.LocalDate) -> Unit,
     interactive: Boolean,
-    darkTheme: Boolean,
 ) {
     Row(
         modifier = Modifier
@@ -98,7 +98,7 @@ private fun YearMonthRow(
                 modifier = Modifier
                     .weight(1f)
                     .height(48.dp),
-                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                horizontalArrangement = Arrangement.spacedBy(1.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 band.cells.forEach { cell ->
@@ -106,7 +106,6 @@ private fun YearMonthRow(
                         cell = cell,
                         onClick = { onOpenDay(cell.date) },
                         interactive = interactive,
-                        darkTheme = darkTheme,
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxHeight(),
@@ -122,12 +121,14 @@ private fun YearDayCell(
     cell: YearCell,
     onClick: () -> Unit,
     interactive: Boolean,
-    darkTheme: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val description = yearCellDescription(cell)
     val scheme = MaterialTheme.colorScheme
-    val hairline = scheme.outlineVariant.copy(alpha = 0.4f)
+    val paper = when {
+        cell.isFuture -> scheme.outlineVariant.copy(alpha = 0.03f)
+        else -> scheme.outlineVariant.copy(alpha = 0.08f)
+    }
     Box(
         modifier = modifier
             .semantics { contentDescription = description }
@@ -146,21 +147,14 @@ private fun YearDayCell(
                             val fill = if (theme.isNullOrBlank()) {
                                 scheme.surfaceContainerHigh
                             } else {
-                                lerp(
-                                    themeTint(theme, scheme, darkTheme),
-                                    themeAccent(theme, scheme),
-                                    if (darkTheme) 0.32f else 0.28f,
-                                )
+                                themeAccent(theme, scheme)
                             }
                             Modifier.background(fill)
                         }
                         YearCellMark.PENDING_TODAY -> Modifier
                             .background(scheme.surface)
-                            .border(1.5.dp, scheme.primary, YearCellShape)
-                        YearCellMark.SKIPPED,
-                        YearCellMark.MISSED,
-                        YearCellMark.ABSENT,
-                        -> Modifier.border(1.dp, hairline, YearCellShape)
+                            .border(1.dp, scheme.primary, YearCellShape)
+                        else -> Modifier.background(paper)
                     },
                 ),
             contentAlignment = Alignment.Center,
@@ -206,7 +200,7 @@ private fun YearGridPreviewSparseLight() {
 @Composable
 private fun YearGridPreviewSparseDark() {
     ShutterUpTheme(darkTheme = true) {
-        Surface { YearGridView(grid = sampleYearGrid(full = false), onOpenDay = {}, darkTheme = true) }
+        Surface { YearGridView(grid = sampleYearGrid(full = false), onOpenDay = {}) }
     }
 }
 

@@ -277,11 +277,11 @@ A zoom of Calendar, not a fifth destination. One Fraunces headline (the year). N
 ┌──────────────────────────────┐
 │ 2026           YEAR  ‹  ›    │  headlineMedium Fraunces
 │                              │  YEAR is MONTH while here
-│ JAN  ■■■■■■■■■■■■■■■■■■■■■■■ │  kicker + 28–31 hairline cells
-│ FEB  ■■■■■■■■■■■■■■■■■■■■■■  │  completed = theme tint wash
-│ MAR  ■■■■■■■■■■■■■■■■■■■■■■■ │  empty / paused = hairline
-│ APR  ■■■■■■■■■■■■■■■■■■■■■■  │  skipped = hairline + dash
-│ MAY  ■■■■■■■■■■■■■■■■■■■■■■■ │  missed = hairline + dot
+│ JAN  ■■■■■■■■■■■■■■■■■■■■■■■ │  kicker; completed = theme accent
+│ FEB  ■■■■■■■■■■■■■■■■■■■■■■  │  empty / paused = faint fill, no stroke
+│ MAR  ■■■■■■■■■■■■■■■■■■■■■■■ │  future recedes
+│ APR  ■■■■■■■■■■■■■■■■■■■■■■  │  skipped = dash
+│ MAY  ■■■■■■■■■■■■■■■■■■■■■■■ │  missed = dot
 │ JUN  ■■■■■■■■■■■■■■■■■■■■■■  │  today pending = primary ring
 │ JUL  ■■■■■■■■■■■■■■■■■■■■■■■ │
 │ AUG  ■■■■■■■■■■■■■■■■■■■■■■■ │
@@ -297,14 +297,15 @@ A zoom of Calendar, not a fifth destination. One Fraunces headline (the year). N
 
 Rules:
 
-- Twelve month bands, one small cell per calendar day. The grid is a continuous year — days with no entry are `outlineVariant` hairline cells, not holes. Shorter months are simply shorter bands.
-- Completed days fill with that day's **theme tint** (`themeTint` / `themeAccent`). No second colour mapping.
-- Paused days read as absent (hairline), not missed. Missed/skipped stay neutral — never red.
+- Twelve month bands, one small cell per calendar day. Elapsed empty / paused days are a whisper of `outlineVariant` fill, no stroke — not a hollow ring. Future days recede further (or read as absent) so the grid is the year *so far*. Shorter months are simply shorter bands.
+- Completed days fill with that day's **theme accent** (`themeAccent`). No second colour mapping. There is no text on these cells, so the low-alpha overlay rule does not apply.
+- Paused days read as absent, not missed. Missed/skipped stay neutral — never red.
 - Month kicker in the margin: `labelMedium`, uppercase, +1.0 tracking (`JAN`).
+- Cells are rounded squares (about 12 % of the side — a slight corner, never a circle), not beads. Compact gutters are 1 dp so a run of completed days reads as a band.
 - Swipe years; `‹ ›` also work. Pinch-in returns to the month that belongs to this year.
 - Tap a cell → Day screen, same navigation as the month grid.
 - When the system animator duration scale is 0, the zoom is an instant crossfade. No parallax.
-- Content description per cell in the month-grid format: "19 September, completed". Touch target height 48 dp; colour is never the only carrier of status (fill / dash / dot / hairline).
+- Content description per cell in the month-grid format: "19 September, completed". Touch target height 48 dp; colour is never the only carrier of status (fill / dash / dot / paper).
 
 The result should look like an abstract painting of the year that also happens to be the user's data. If it looks like a GitHub contribution graph, it is wrong.
 
