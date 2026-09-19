@@ -279,15 +279,12 @@ private fun TodayCard(
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(28.dp)),
         ) {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .offset(x = -TodayCardCameraSpillX, y = TodayCardCameraSpillY)
-                    .size(TodayCardCameraSize),
-            ) {
+            Box(modifier = Modifier.matchParentSize()) {
                 TodayCardCamera(
                     modifier = Modifier
-                        .fillMaxSize()
+                        .align(Alignment.BottomStart)
+                        .offset(x = -TodayCardCameraSpillX, y = TodayCardCameraSpillY)
+                        .size(TodayCardCameraSize)
                         .rotate(TodayCardCameraTilt),
                 )
             }
