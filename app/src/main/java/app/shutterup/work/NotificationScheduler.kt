@@ -97,10 +97,48 @@ class NotificationScheduler @Inject constructor(
         )
     }
 
+    fun scheduleMonthlyIssue() {
+        val request = PeriodicWorkRequestBuilder<MonthlyIssueWorker>(24, TimeUnit.HOURS)
+            .setConstraints(
+                Constraints.Builder()
+                    .setRequiresBatteryNotLow(true)
+                    .build(),
+            )
+            .addTag(MONTHLY_WORK_NAME)
+            .build()
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+            MONTHLY_WORK_NAME,
+            ExistingPeriodicWorkPolicy.KEEP,
+            request,
+        )
+    }
+
+    /**
+     * One-shot catch-up after process start or a month boundary the device slept
+     * through. KEEP: overlapping opens collapse into one run.
+     */
+    fun scheduleMonthlyIssueNow() {
+        val request = OneTimeWorkRequestBuilder<MonthlyIssueWorker>()
+            .setConstraints(
+                Constraints.Builder()
+                    .setRequiresBatteryNotLow(true)
+                    .build(),
+            )
+            .addTag(MONTHLY_NOW_NAME)
+            .build()
+        WorkManager.getInstance(context).enqueueUniqueWork(
+            MONTHLY_NOW_NAME,
+            ExistingWorkPolicy.KEEP,
+            request,
+        )
+    }
+
     /** Initial enqueue plus Settings notify-time / pause / theme-focus changes (M8). */
     fun onSettingsChanged() {
         scheduleNext()
         scheduleTopUp()
+        scheduleMonthlyIssue()
+        scheduleMonthlyIssueNow()
     }
 
     /**
@@ -157,6 +195,8 @@ class NotificationScheduler @Inject constructor(
         const val TOP_UP_WORK_NAME = "buffer-topup"
         const val TOP_UP_NOW_NAME = "buffer-topup-now"
         const val TOP_UP_NOW_TAG = "buffer-topup-now"
+        const val MONTHLY_WORK_NAME = "monthly-issue"
+        const val MONTHLY_NOW_NAME = "monthly-issue-now"
         const val EXACT_REQUEST_CODE = 7109
     }
 }

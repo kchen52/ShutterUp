@@ -25,7 +25,7 @@ import javax.inject.Named
  * is written once. Zero completed days produce no issue. Nano is attempted
  * when available; otherwise the fallback composer writes the page.
  */
-class GenerateMonthlyIssueUseCase @Inject constructor(
+open class GenerateMonthlyIssueUseCase @Inject constructor(
     @Named("primaryGenerator") private val primary: PromptGenerator,
     private val prompts: DayPromptRepository,
     private val entries: EntryRepository,

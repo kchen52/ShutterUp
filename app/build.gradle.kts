@@ -148,6 +148,7 @@ dependencies {
     // Robolectric runs SDK-35 shadows (JDK 17 compatible); DAO behavior is SDK-independent.
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.room.testing)
+    testImplementation(libs.androidx.work.testing)
     // Screenshot tests (Roborazzi; record with recordRoborazziDebug, verified in CI)
     testImplementation(libs.roborazzi)
     testImplementation(libs.roborazzi.compose)
