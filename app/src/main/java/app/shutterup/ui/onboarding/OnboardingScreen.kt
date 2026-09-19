@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -29,6 +30,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -163,7 +165,14 @@ fun OnboardingScreen(
                         enabled = !state.saving,
                         modifier = Modifier.heightIn(min = 48.dp),
                     ) {
-                        Text(OnboardingCopy.GET_FIRST_PROMPT)
+                        if (state.saving) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(20.dp),
+                                strokeWidth = 2.dp,
+                            )
+                        } else {
+                            Text(OnboardingCopy.GET_FIRST_PROMPT)
+                        }
                     }
                 } else {
                     Button(
@@ -363,6 +372,11 @@ private fun AiStatusPage(
                 Text(
                     text = OnboardingCopy.AI_READY,
                     style = MaterialTheme.typography.bodyLarge,
+                )
+                Text(
+                    text = OnboardingCopy.AI_READY_BODY,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             Availability.DOWNLOADABLE, Availability.DOWNLOADING, null -> {

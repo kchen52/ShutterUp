@@ -50,6 +50,9 @@ class GeneratePromptUseCase @Inject constructor(
             picked = library.pick(request)
             generated = picked.toGeneratedPrompt()
         }
+        // A concurrent writer (e.g. the notification worker) may have persisted
+        // this date while we were picking: keep the first writer, never overwrite.
+        prompts.getDay(date)?.let { return it.toGeneratedPrompt() }
         persistAndRecord(date, generated, picked.id, rerollUsed = false)
         return generated
     }
@@ -82,13 +85,14 @@ class GeneratePromptUseCase @Inject constructor(
                 generatedAt = clock.instant(),
             ),
         )
-        return generateFresh(date, themeFocus, rerollUsed = true)
+        return generateFresh(date, themeFocus, rerollUsed = true, overwrite = true)
     }
 
     private suspend fun generateFresh(
         date: LocalDate,
         themeFocus: String?,
         rerollUsed: Boolean,
+        overwrite: Boolean = false,
     ): GeneratedPrompt {
         val request = GenerationRequest(
             date = date,
@@ -132,6 +136,12 @@ class GeneratePromptUseCase @Inject constructor(
         }
 
         val result = checkNotNull(chosen)
+        // Same first-writer-wins guard as above: a slow Nano inference must not
+        // overwrite a prompt the worker already persisted (and notified).
+        // Rerolls explicitly overwrite (the old prompt was just superseded).
+        if (!overwrite) {
+            prompts.getDay(date)?.let { return it.toGeneratedPrompt() }
+        }
         persistAndRecord(date, result, libraryId, rerollUsed)
         return result
     }
