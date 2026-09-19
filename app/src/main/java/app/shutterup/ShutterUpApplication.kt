@@ -3,6 +3,8 @@ package app.shutterup
 import android.app.Application
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
+import app.shutterup.capture.LegacyPhotoMigrator
+import app.shutterup.capture.PendingCaptureRecovery
 import app.shutterup.widget.TodayWidgetUpdater
 import app.shutterup.work.NotificationScheduler
 import dagger.hilt.EntryPoint
@@ -32,6 +34,8 @@ class ShutterUpApplication : Application(), Configuration.Provider {
         // memory pressure, make the whole system feel the stall).
         val entry = EntryPointAccessors.fromApplication(this, SchedulerEntryPoint::class.java)
         entry.appScope().launch {
+            runCatching { entry.legacyPhotoMigrator().migrate() }
+            runCatching { entry.pendingCaptureRecovery().recover() }
             runCatching { entry.notificationScheduler().onSettingsChanged() }
             entry.todayWidgetUpdater().refreshAsync()
         }
@@ -45,4 +49,6 @@ interface SchedulerEntryPoint {
     fun appScope(): CoroutineScope
     fun notificationScheduler(): NotificationScheduler
     fun todayWidgetUpdater(): TodayWidgetUpdater
+    fun legacyPhotoMigrator(): LegacyPhotoMigrator
+    fun pendingCaptureRecovery(): PendingCaptureRecovery
 }
