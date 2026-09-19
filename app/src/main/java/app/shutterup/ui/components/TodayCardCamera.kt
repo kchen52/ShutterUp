@@ -18,16 +18,15 @@ import app.shutterup.ui.theme.ShutterUpTheme
 import app.shutterup.ui.theme.complementaryAccent
 
 /**
- * Same placement as the original overflowing corner sticker: the icon sits
- * past the card's bottom-end, and the card clips anything off the surface.
- *
- * Offsets are larger than the first hand-drawn icon because Material's
- * photo_camera vector has empty padding inside its 24dp viewport.
+ * Oversized bottom-start sticker, leaned right: most of the body hangs
+ * off the left edge so only the right side — plus a sliver of the lens —
+ * stays on the card. Callers overlay this with `matchParentSize` so the
+ * graphic does not stretch the wrap-content card.
  */
-val TodayCardCameraSpillX = 40.dp
-val TodayCardCameraSpillY = 44.dp
-val TodayCardCameraSize = 128.dp
-const val TodayCardCameraTilt = -16f
+val TodayCardCameraSpillX = 230.dp
+val TodayCardCameraSpillY = 24.dp
+val TodayCardCameraSize = 480.dp
+const val TodayCardCameraTilt = 22f
 
 /**
  * Material Symbols photo_camera outline (weight 200) for the Today card corner.

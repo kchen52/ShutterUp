@@ -279,6 +279,15 @@ private fun TodayCard(
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(28.dp)),
         ) {
+            Box(modifier = Modifier.matchParentSize()) {
+                TodayCardCamera(
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .offset(x = -TodayCardCameraSpillX, y = TodayCardCameraSpillY)
+                        .size(TodayCardCameraSize)
+                        .rotate(TodayCardCameraTilt),
+                )
+            }
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -324,18 +333,6 @@ private fun TodayCard(
                         TextButton(onClick = onDetails) { Text("Details →") }
                     }
                 }
-            }
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .offset(x = TodayCardCameraSpillX, y = TodayCardCameraSpillY)
-                    .size(TodayCardCameraSize),
-            ) {
-                TodayCardCamera(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .rotate(TodayCardCameraTilt),
-                )
             }
         }
     }
