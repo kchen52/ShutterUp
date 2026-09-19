@@ -332,13 +332,18 @@ private fun TodayCard(
                     }
                 }
             }
-            TodayCardCamera(
+            Box(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .offset(x = TodayCardCameraSpillX, y = TodayCardCameraSpillY)
-                    .rotate(TodayCardCameraTilt)
                     .size(TodayCardCameraSize),
-            )
+            ) {
+                TodayCardCamera(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .rotate(TodayCardCameraTilt),
+                )
+            }
         }
     }
 }
