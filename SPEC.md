@@ -377,7 +377,7 @@ Preferences (DataStore)
 - **Theming:** Material You dynamic colour, dark mode follows system, edge-to-edge.
 - **Build:** Gradle Kotlin DSL, version catalog, `debug` and `release` build types; release signed with a local keystore (gitignored — `.gitignore` already covers `*.jks`/`*.keystore`).
 - **Quality:** `ktlint` or `detekt`, Android Lint fatal on `release`, strict `explicitApi` not required.
-- **CI:** GitHub Actions running `./gradlew lint testDebugUnitTest assembleDebug` on PRs. Instrumented tests run on the plugged-in Fold 7 (`connectedDebugAndroidTest`), not in CI.
+- **CI:** GitHub Actions running `./gradlew lint testDebugUnitTest assembleDebug` on PRs, plus a manually triggered signed-APK workflow (§16.1). Instrumented tests run on the plugged-in Fold 7 (`connectedDebugAndroidTest`), not in CI.
 
 ---
 
@@ -460,7 +460,43 @@ Use `createAndroidComposeRule<MainActivity>()` with Hilt test modules binding `F
 
 ## 16. Distribution
 
-**Now (sideload):** `assembleRelease` signed with a local keystore; install via `adb install`. Keep `applicationId` stable (e.g. `app.shutterup`) from day one — changing it later breaks Auto Backup restore.
+**Now (sideload):** `assembleRelease` signed with the project's release keystore; install via `adb install`. Keep `applicationId` stable (`app.shutterup`) from day one — changing it later breaks Auto Backup restore and forces an uninstall.
+
+### 16.1 On-demand APK builds via GitHub Actions
+
+Requirement: the owner can trigger an APK build from GitHub whenever they want and download it to sideload.
+
+**Workflow `.github/workflows/build-apk.yml`**
+
+- Triggers: `workflow_dispatch` (manual "Run workflow" button) with inputs `build_type` (`release` default, or `debug`) and `create_release` (boolean, default false). Optionally also on `push` of a tag matching `v*`.
+- Steps: checkout → `actions/setup-java` (Temurin 17) → `gradle/actions/setup-gradle` (caching) → decode keystore from secrets → `./gradlew assembleRelease` (or `assembleDebug`) → `actions/upload-artifact` of `app/build/outputs/apk/**/*.apk` named `shutterup-<build_type>-<versionName>-<short-sha>` (retention 30 days) → if `create_release`, `softprops/action-gh-release` attaching the APK to a GitHub Release tagged `v<versionName>-<run_number>`.
+- Also build an AAB in the release path (`bundleRelease`) and upload it as a second artifact for future Play use.
+- Concurrency group per ref so re-runs cancel earlier builds.
+
+**Signing**
+
+Sideloaded updates must be signed with the *same* key every time or Android refuses to install over the existing app. Therefore the release keystore lives in GitHub Actions secrets, never in the repo:
+
+| Secret | Contents |
+|---|---|
+| `ANDROID_KEYSTORE_BASE64` | `base64 -w0 shutterup-release.jks` |
+| `ANDROID_KEYSTORE_PASSWORD` | store password |
+| `ANDROID_KEY_ALIAS` | key alias (e.g. `shutterup`) |
+| `ANDROID_KEY_PASSWORD` | key password |
+
+`app/build.gradle.kts` reads these from environment variables (`SHUTTERUP_KEYSTORE_PATH`, `SHUTTERUP_KEYSTORE_PASSWORD`, `SHUTTERUP_KEY_ALIAS`, `SHUTTERUP_KEY_PASSWORD`) and falls back to the debug signing config when they are absent, so local builds and CI on forks still succeed. The workflow writes the decoded keystore to `${RUNNER_TEMP}/release.jks` and exports the variables.
+
+**One-time owner setup** (cannot be done by an agent):
+
+1. Generate the keystore locally: `keytool -genkeypair -v -keystore shutterup-release.jks -alias shutterup -keyalg RSA -keysize 2048 -validity 10000`.
+2. Back it up somewhere safe (losing it means users must uninstall to update).
+3. Add the four secrets above under the repo's Settings → Secrets and variables → Actions.
+
+Until the secrets exist, the workflow's release path will produce a debug-signed APK and print a warning step; the `debug` build type always works.
+
+**Versioning:** `versionName` from `gradle.properties` (semver, bumped manually), `versionCode = GITHUB_RUN_NUMBER` when building in CI (falls back to 1 locally) so every CI APK is installable over the previous one.
+
+**Regular CI** (`.github/workflows/ci.yml`): on PRs and pushes to `main`, run `./gradlew lint testDebugUnitTest assembleDebug` and upload the debug APK as an artifact (7-day retention) so every PR has an installable build.
 
 **Play-Store readiness (do these from the start so opening up later is cheap):**
 
@@ -485,9 +521,24 @@ Use `createAndroidComposeRule<MainActivity>()` with Hilt test modules binding `F
 
 ## 18. Hand-off notes for implementing agents
 
-Suggested implementation order (each step should leave the app building and tests green):
+### 18.1 What an agent can and cannot verify
 
-1. Project skeleton: Gradle, version catalog, Hilt, Compose, Room, DataStore, CI workflow, `ManifestGuardTest`.
+An implementing agent working in a cloud environment can build the app, run all JVM unit tests, run Android Lint, and produce debug/release APKs (it needs JDK 17 and the Android SDK command-line tools; if the environment lacks them, install them, or configure the Cloud Agent environment to include them). It **cannot**:
+
+- Run Gemini Nano (not available on emulators) — the Nano path is written against the docs and verified only on the Fold 7.
+- Run the Compose UI tests or the manual checklist (§15.2, §15.3) — these need the physical device.
+- Verify Samsung Camera's `EXTRA_OUTPUT` behaviour or fold/unfold continuity.
+- Create the release keystore or GitHub secrets (§16.1).
+
+Everything else in this spec is decided; agents should not need to ask questions. Where the spec says "verify against current docs", do so with a web search rather than guessing.
+
+### 18.2 Definition of done per milestone
+
+Each milestone below is a separate PR. A milestone is done when: it builds (`assembleDebug`), lint is clean, all unit tests pass, new behaviour has unit tests where the spec lists them, and the PR description lists exactly which §15.2/§15.3 items need the owner to run on device.
+
+### 18.3 Suggested implementation order
+
+1. Project skeleton: Gradle, version catalog, Hilt, Compose, Room, DataStore, CI workflow, on-demand APK workflow (§16.1, secret-less path working), placeholder adaptive icon, `ManifestGuardTest`.
 2. Domain layer + unit tests: models, `PromptValidator`, `DayRolloverUseCase`, `StreakCalculator`, `AchievementEvaluator`, `DailyNotificationScheduler`, `FakePromptGenerator`, `LibraryPromptGenerator` + `prompt_library.json`.
 3. Persistence: Room entities/DAOs, DataStore prefs, repository layer.
 4. `NanoPromptGenerator` (behind the interface) + AI status UI. Verify on device.
