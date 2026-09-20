@@ -3,6 +3,7 @@ package app.shutterup.ui.day
 import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -45,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -56,6 +58,8 @@ import app.shutterup.domain.model.DayStatus
 import app.shutterup.domain.model.Entry
 import app.shutterup.domain.model.MediaKind
 import app.shutterup.domain.model.PromptSourceRef
+import app.shutterup.domain.share.isDayShareable
+import app.shutterup.share.ShareCopy
 import app.shutterup.ui.badges.BadgeEmblem
 import app.shutterup.ui.components.ConstraintCard
 import app.shutterup.ui.components.Kicker
@@ -79,6 +83,14 @@ fun DayRoute(
     viewModel: DayViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val dark = isSystemInDarkTheme()
+    LaunchedEffect(state.shareChooser) {
+        val intent = state.shareChooser ?: return@LaunchedEffect
+        runCatching { context.startActivity(intent) }
+            .onFailure { viewModel.onShareLaunchFailed() }
+        viewModel.consumeShareChooser()
+    }
     DayScreen(
         state = state,
         onBack = onBack,
@@ -87,6 +99,7 @@ fun DayRoute(
         onOpenCompletion = { onOpenCompletion(state.date.toString()) },
         onNoteChange = viewModel::updateNote,
         onDelete = viewModel::onDeleteClicked,
+        onShare = { viewModel.share(darkTheme = dark) },
         onDeleteShutterUp = { viewModel.confirmDelete(alsoGallery = false) },
         onDeleteGallery = { viewModel.confirmDelete(alsoGallery = true) },
         onDeleteDismiss = viewModel::dismissDelete,
@@ -104,6 +117,7 @@ fun DayScreen(
     onOpenCompletion: () -> Unit = {},
     onNoteChange: (String) -> Unit = {},
     onDelete: () -> Unit = {},
+    onShare: () -> Unit = {},
     onDeleteShutterUp: () -> Unit = {},
     onDeleteGallery: () -> Unit = {},
     onDeleteDismiss: () -> Unit = {},
@@ -116,7 +130,7 @@ fun DayScreen(
         snackbarHost.showSnackbar(message)
         onSnackbarShown()
     }
-    val dark = androidx.compose.foundation.isSystemInDarkTheme()
+    val dark = isSystemInDarkTheme()
     ProvideThemeTint(theme = prompt?.theme.orEmpty(), darkTheme = dark) {
         Scaffold(
             topBar = {
@@ -210,19 +224,16 @@ fun DayScreen(
                     val canShoot = state.isToday && prompt.status == DayStatus.PENDING
                     val canRetake = state.isToday &&
                         (prompt.status == DayStatus.COMPLETED || prompt.status == DayStatus.COMPLETED_NO_PHOTO)
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        if (state.entries.isNotEmpty()) {
-                            TextButton(onClick = onDelete) { Text("Delete") }
-                        }
-                        Spacer(Modifier.weight(1f))
-                        if (canRetake) {
-                            TextButton(onClick = onRetake) { Text("Retake") }
-                            TextButton(onClick = onOpenCompletion) { Text("Done") }
-                        }
-                    }
+                    val canShare = isDayShareable(prompt.status, state.entries)
+                    DayActionRow(
+                        canDelete = state.entries.isNotEmpty(),
+                        canShare = canShare,
+                        canRetake = canRetake,
+                        onDelete = onDelete,
+                        onShare = onShare,
+                        onRetake = onRetake,
+                        onDone = onOpenCompletion,
+                    )
                     if (canShoot) {
                         ShootButton(onClick = onShoot)
                     }
@@ -246,6 +257,36 @@ fun DayScreen(
                 }
             },
         )
+    }
+}
+
+@Composable
+internal fun DayActionRow(
+    canDelete: Boolean,
+    canShare: Boolean,
+    canRetake: Boolean,
+    onDelete: () -> Unit = {},
+    onShare: () -> Unit = {},
+    onRetake: () -> Unit = {},
+    onDone: () -> Unit = {},
+    modifier: Modifier = Modifier,
+) {
+    if (!canDelete && !canShare && !canRetake) return
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (canDelete) {
+            TextButton(onClick = onDelete) { Text("Delete") }
+        }
+        if (canShare) {
+            TextButton(onClick = onShare) { Text(ShareCopy.BUTTON) }
+        }
+        Spacer(Modifier.weight(1f))
+        if (canRetake) {
+            TextButton(onClick = onRetake) { Text("Retake") }
+            TextButton(onClick = onDone) { Text("Done") }
+        }
     }
 }
 
@@ -401,5 +442,40 @@ private fun DayPreviewLight() {
 private fun DayPreviewDark() {
     ShutterUpTheme(darkTheme = true) {
         Surface { DayScreen(state = sampleDayState(status = DayStatus.MISSED, frozen = true)) }
+    }
+}
+
+@Preview(name = "Action row light", showBackground = true, widthDp = 360)
+@Composable
+private fun DayActionRowPreviewLight() {
+    ShutterUpTheme(darkTheme = false) {
+        Surface {
+            DayActionRow(
+                canDelete = true,
+                canShare = true,
+                canRetake = true,
+                modifier = Modifier.padding(horizontal = 20.dp),
+            )
+        }
+    }
+}
+
+@Preview(
+    name = "Action row dark",
+    showBackground = true,
+    widthDp = 360,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+)
+@Composable
+private fun DayActionRowPreviewDark() {
+    ShutterUpTheme(darkTheme = true) {
+        Surface {
+            DayActionRow(
+                canDelete = true,
+                canShare = true,
+                canRetake = true,
+                modifier = Modifier.padding(horizontal = 20.dp),
+            )
+        }
     }
 }
