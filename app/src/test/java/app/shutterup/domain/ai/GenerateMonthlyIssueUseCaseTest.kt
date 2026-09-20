@@ -177,9 +177,9 @@ class GenerateMonthlyIssueUseCaseTest {
     )
 
     private fun seedSeptember(prompts: MemoryDays) {
-        prompts.upsert(completedDay(LocalDate.of(2026, 9, 4), "Puddle sky", "Reflections"))
-        prompts.upsert(completedDay(LocalDate.of(2026, 9, 12), "Ceiling lamp", "Looking up"))
-        prompts.upsert(completedDay(LocalDate.of(2026, 9, 20), "Shop window", "Reflections"))
+        prompts.put(completedDay(LocalDate.of(2026, 9, 4), "Puddle sky", "Reflections"))
+        prompts.put(completedDay(LocalDate.of(2026, 9, 12), "Ceiling lamp", "Looking up"))
+        prompts.put(completedDay(LocalDate.of(2026, 9, 20), "Shop window", "Reflections"))
     }
 }
 
@@ -245,6 +245,9 @@ private class MemoryDays : DayPromptRepository {
     override suspend fun upsert(prompt: DayPrompt) {
         days[prompt.date] = prompt
     }
+    fun put(prompt: DayPrompt) {
+        days[prompt.date] = prompt
+    }
     override suspend fun recordSuperseded(prompt: SupersededPrompt) = Unit
     override suspend fun recentTitles(limit: Int) = emptyList<String>()
     override suspend fun recentThemes(limit: Int) = emptyList<String>()
@@ -273,7 +276,7 @@ private class MemoryEntries : EntryRepository {
 private class MemoryIssues : MonthlyIssueRepository {
     private val rows = linkedMapOf<String, MonthlyIssue>()
     private var nextId = 1L
-    override fun observeAll(): Flow<List<MonthlyIssue>> = flowOf(all())
+    override fun observeAll(): Flow<List<MonthlyIssue>> = flowOf(rows.values.sortedByDescending { it.yearMonth })
     override fun observe(yearMonth: String): Flow<MonthlyIssue?> = flowOf(rows[yearMonth])
     override suspend fun get(yearMonth: String) = rows[yearMonth]
     override suspend fun all() = rows.values.sortedByDescending { it.yearMonth }

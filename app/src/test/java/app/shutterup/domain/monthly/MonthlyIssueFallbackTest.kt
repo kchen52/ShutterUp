@@ -55,7 +55,7 @@ class MonthlyIssueFallbackTest {
         )
         assertEquals("Reflections.", copy.headline)
         assertEquals(
-            "Eighteen days of reflections. You wrote on two of them. You kept returning to the same kind of looking.",
+            "Eighteen days of reflections. You wrote on two of them. The longest stretch was seven days.",
             copy.body,
         )
         assertValid(copy)
@@ -156,7 +156,7 @@ class MonthlyIssueFallbackTest {
     @Test
     fun allFixturesPassTheValidator() {
         val fixtures = listOf(
-            snapshot(24, listOf("Reflections" to 14, "Looking up" to 6), 9, 11),
+            snapshot(24, listOf("Reflections" to 14, "Looking up" to 6, "Low light" to 4), 9, 11),
             snapshot(3, listOf("Reflections" to 2, "Quiet hours" to 1), 0, 1),
             snapshot(18, listOf("Reflections" to 18), 2, 7),
             snapshot(12, listOf("Light" to 7, "Glass" to 5), 11, 4),

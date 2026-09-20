@@ -40,8 +40,8 @@ class MonthlyIssueWorkerTest {
     @Test
     fun doWork_writesTheFinishedMonthOnce() = runBlocking {
         val prompts = MemoryDays()
-        prompts.upsert(completed(LocalDate.of(2026, 9, 4), "Puddle", "Reflections"))
-        prompts.upsert(completed(LocalDate.of(2026, 9, 12), "Lamp", "Looking up"))
+        prompts.put(completed(LocalDate.of(2026, 9, 4), "Puddle", "Reflections"))
+        prompts.put(completed(LocalDate.of(2026, 9, 12), "Lamp", "Looking up"))
         val issues = MemoryIssues()
         val worker = workerFor(prompts, issues)
         assertEquals(ListenableWorker.Result.success(), worker.doWork())
@@ -136,6 +136,9 @@ private class MemoryDays : DayPromptRepository {
     override suspend fun upsert(prompt: DayPrompt) {
         days[prompt.date] = prompt
     }
+    fun put(prompt: DayPrompt) {
+        days[prompt.date] = prompt
+    }
     override suspend fun recordSuperseded(prompt: SupersededPrompt) = Unit
     override suspend fun recentTitles(limit: Int) = emptyList<String>()
     override suspend fun recentThemes(limit: Int) = emptyList<String>()
@@ -161,7 +164,7 @@ private object EmptyEntries : EntryRepository {
 private class MemoryIssues : MonthlyIssueRepository {
     private val rows = linkedMapOf<String, MonthlyIssue>()
     private var nextId = 1L
-    override fun observeAll() = flowOf(all())
+    override fun observeAll() = flowOf(rows.values.sortedByDescending { it.yearMonth })
     override fun observe(yearMonth: String) = flowOf(rows[yearMonth])
     override suspend fun get(yearMonth: String) = rows[yearMonth]
     override suspend fun all() = rows.values.sortedByDescending { it.yearMonth }
