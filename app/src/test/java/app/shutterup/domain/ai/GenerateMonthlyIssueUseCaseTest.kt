@@ -87,7 +87,7 @@ class GenerateMonthlyIssueUseCaseTest {
         assertEquals(3, primary.calls)
         val stored = issues.get("2026-09")!!
         assertEquals(PromptSourceRef.LIBRARY, stored.source)
-        assertEquals("Reflections and looking up.", stored.headline)
+        assertEquals("Glass looking back.", stored.headline)
         assertTrue(stored.body.contains("Three days"))
     }
 
@@ -112,7 +112,7 @@ class GenerateMonthlyIssueUseCaseTest {
         assertEquals(listOf("2026-09"), useCase.generateDue())
         assertEquals(emptyList<String>(), useCase.generateDue())
         assertEquals(1, issues.all().size)
-        assertEquals("Reflections and looking up.", issues.get("2026-09")!!.headline)
+        assertEquals("Glass looking back.", issues.get("2026-09")!!.headline)
     }
 
     @Test

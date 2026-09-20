@@ -8,6 +8,7 @@ import app.shutterup.domain.ai.GenerationRequest
 import app.shutterup.domain.ai.MonthlyIssueRequest
 import app.shutterup.domain.ai.PromptGenerator
 import app.shutterup.domain.ai.PromptSource
+import app.shutterup.domain.monthly.MonthlyIssueHeadlines
 import javax.inject.Inject
 
 class FakePromptGenerator @Inject constructor() : PromptGenerator {
@@ -56,21 +57,14 @@ class FakePromptGenerator @Inject constructor() : PromptGenerator {
 
     override suspend fun generateMonthlyIssue(request: MonthlyIssueRequest): Result<GeneratedMonthlyIssue> {
         val theme = request.themeCounts.firstOrNull()?.first ?: "Looking"
-        val second = request.themeCounts.getOrNull(1)?.first
-        val headline = if (second == null) {
-            "${theme.take(28)}."
-        } else {
-            val joined = "$theme and ${second.replaceFirstChar { it.lowercase() }}"
-            if (joined.length <= 29) "$joined." else "${theme.take(28)}."
-        }
+        val headline = MonthlyIssueHeadlines.phraseFor(theme, variantIndex = request.completedCount)
         val body = buildString {
-            append("You spent ${request.completedCount} days with ${theme.lowercase()}")
-            if (second != null) append(" and ${second.lowercase()}")
-            append(". ")
+            val n = request.completedCount
+            if (n == 1) append("One day. ") else append("$n days. ")
             if (request.notes.isNotEmpty()) {
                 append("You wrote on ${request.notes.size} of them.")
             } else {
-                append("The longest stretch was ${request.longestRun} days.")
+                append("The longest stretch was ${request.longestRun}.")
             }
         }
         return Result.success(GeneratedMonthlyIssue(headline = headline, body = body))

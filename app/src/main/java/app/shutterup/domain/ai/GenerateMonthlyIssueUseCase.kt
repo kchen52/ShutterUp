@@ -14,6 +14,7 @@ import app.shutterup.domain.repository.EntryRepository
 import app.shutterup.domain.repository.MonthlyIssueRepository
 import java.time.Clock
 import java.time.LocalDate
+import java.time.YearMonth
 import java.time.ZoneId
 import java.time.format.TextStyle
 import java.util.Locale
@@ -51,7 +52,11 @@ open class GenerateMonthlyIssueUseCase @Inject constructor(
         for (month in MonthlyIssueCalendar.dueMonths(today, earliest)) {
             val yearMonth = month.toString()
             if (issues.get(yearMonth) != null) continue
-            val snapshot = MonthlyIssueSnapshot.of(month, days) ?: continue
+            val snapshot = MonthlyIssueSnapshot.of(
+                month,
+                days,
+                previousCompletedCount = days.count { YearMonth.from(it.date) == month.minusMonths(1) },
+            ) ?: continue
             val written = writeCopy(snapshot)
             val inserted = persist(snapshot, written)
             if (inserted) created += yearMonth
@@ -65,7 +70,12 @@ open class GenerateMonthlyIssueUseCase @Inject constructor(
             repeat(ATTEMPTS) {
                 val candidate = primary.generateMonthlyIssue(request).getOrNull() ?: return@repeat
                 val copy = MonthlyIssueCopy(candidate.headline, candidate.body)
-                if (validator.validate(copy, snapshot.notes) is ValidationResult.Valid) {
+                if (validator.validate(
+                        copy,
+                        snapshot.notes,
+                        ThemeRanking.loudest(snapshot.rankedThemes, 2),
+                    ) is ValidationResult.Valid
+                ) {
                     return WrittenCopy(
                         copy = copy,
                         source = PromptSourceRef.ON_DEVICE_AI,

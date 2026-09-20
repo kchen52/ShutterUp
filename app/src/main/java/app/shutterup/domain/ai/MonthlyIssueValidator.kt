@@ -6,12 +6,14 @@ import javax.inject.Inject
 /**
  * Post-filter for a month's headline and body (SPEC §7.9). First failing
  * check wins. Rejects length, punctuation, emoji, hashtags, URLs, praise,
- * guilt, invented visual detail, and verbatim notes.
+ * guilt, invented visual detail, verbatim notes, and a body that restates
+ * the dominant theme names.
  */
 class MonthlyIssueValidator @Inject constructor() {
     fun validate(
         copy: MonthlyIssueCopy,
         notes: List<String> = emptyList(),
+        themes: List<String> = emptyList(),
     ): ValidationResult {
         headlineCheck(copy.headline)?.let { return it }
         bodyCheck(copy.body)?.let { return it }
@@ -23,6 +25,7 @@ class MonthlyIssueValidator @Inject constructor() {
         guiltCheck(copy)?.let { return it }
         visualDetailCheck(copy)?.let { return it }
         verbatimNoteCheck(copy, notes)?.let { return it }
+        themeRestatementCheck(copy.body, themes)?.let { return it }
         return ValidationResult.Valid
     }
 
@@ -113,6 +116,21 @@ class MonthlyIssueValidator @Inject constructor() {
             if (snippet.length < 8) continue
             if (haystack.contains(snippet.lowercase())) {
                 return ValidationResult.Invalid("verbatim note")
+            }
+        }
+        return null
+    }
+
+    private fun themeRestatementCheck(
+        body: String,
+        themes: List<String>,
+    ): ValidationResult.Invalid? {
+        for (theme in themes) {
+            val trimmed = theme.trim()
+            if (trimmed.length < 3) continue
+            val pattern = Regex("""(?i)(?<!\p{L})${Regex.escape(trimmed)}(?!\p{L})""")
+            if (pattern.containsMatchIn(body)) {
+                return ValidationResult.Invalid("theme restatement")
             }
         }
         return null

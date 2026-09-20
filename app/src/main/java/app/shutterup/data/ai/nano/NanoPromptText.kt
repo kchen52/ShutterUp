@@ -84,8 +84,8 @@ object NanoPromptText {
             $notesBlock
             You cannot see the photographs. Do not invent what they look like. Do not mention blur, colour, exposure, composition as if you had seen the files.
             Write:
-            - headline: a short phrase, at most 30 characters, sentence case, ending with a full stop. Example: Light and glass.
-            - body: two or three sentences, second person, present tense. Warm, quiet, editorial. No exclamation marks, no emoji, no hashtags, no URLs.
+            - headline: a short evocative phrase, at most 30 characters, sentence case, ending with a full stop. Not a list of the month's themes. Example: Light and glass. Example: Second skies.
+            - body: two or three sentences, second person, present tense. Warm, quiet, editorial. Spend the sentences on the shape of the month — the days, whether notes were written, the longest stretch. Do not re-list the theme names; they already appear as a kicker on the page. No exclamation marks, no emoji, no hashtags, no URLs.
             Do not praise ("Great work", "Amazing month"). Do not mention missed, skipped, or unfinished days. Do not guilt. Do not quote a note verbatim.
             Register: "You looked up more than usual, and you kept going through a grey week."
             Return only the requested structured fields.

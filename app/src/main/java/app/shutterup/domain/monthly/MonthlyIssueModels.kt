@@ -25,6 +25,7 @@ data class MonthlyIssueSnapshot(
     val days: List<CompletedDayForIssue>,
     val rankedThemes: List<ThemeCount>,
     val longestRun: Int,
+    val previousCompletedCount: Int? = null,
 ) {
     val completedCount: Int get() = days.size
     val notesCount: Int get() = days.count { !it.note.isNullOrBlank() }
@@ -33,7 +34,11 @@ data class MonthlyIssueSnapshot(
 
     companion object {
         /** Null when the month has no completed days — no issue at all. */
-        fun of(yearMonth: YearMonth, days: List<CompletedDayForIssue>): MonthlyIssueSnapshot? {
+        fun of(
+            yearMonth: YearMonth,
+            days: List<CompletedDayForIssue>,
+            previousCompletedCount: Int? = null,
+        ): MonthlyIssueSnapshot? {
             val inMonth = days.filter { YearMonth.from(it.date) == yearMonth }.sortedBy { it.date }
             if (inMonth.isEmpty()) return null
             return MonthlyIssueSnapshot(
@@ -41,6 +46,7 @@ data class MonthlyIssueSnapshot(
                 days = inMonth,
                 rankedThemes = ThemeRanking.rank(inMonth.map { it.theme }),
                 longestRun = MonthlyIssueCalendar.longestRun(inMonth.map { it.date }),
+                previousCompletedCount = previousCompletedCount?.takeIf { it > 0 },
             )
         }
     }

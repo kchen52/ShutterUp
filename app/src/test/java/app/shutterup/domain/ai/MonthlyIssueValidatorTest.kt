@@ -13,7 +13,7 @@ class MonthlyIssueValidatorTest {
         val result = validator.validate(
             MonthlyIssueCopy(
                 headline = "Light and glass.",
-                body = "You looked up more than usual, and you kept going through a grey week. Twenty-four days, mostly reflections.",
+                body = "You looked up more than usual, and you kept going through a grey week. Twenty-four days, and you wrote on nine of them.",
             ),
         )
         assertEquals(ValidationResult.Valid, result)
@@ -129,9 +129,27 @@ class MonthlyIssueValidatorTest {
         assertEquals(ValidationResult.Valid, result)
     }
 
+    @Test
+    fun rejectsBodyThatRestatesDominantThemes() {
+        val result = validator.validate(
+            goodCopy(body = "Twenty-four days, mostly reflections. You wrote on nine of them."),
+            themes = listOf("Reflections", "Looking up"),
+        )
+        assertInvalid(result, "theme restatement")
+    }
+
+    @Test
+    fun acceptsBodyThatDoesNotNameTheThemes() {
+        val result = validator.validate(
+            goodCopy(),
+            themes = listOf("Reflections", "Looking up"),
+        )
+        assertEquals(ValidationResult.Valid, result)
+    }
+
     private fun goodCopy(
         headline: String = "Light and glass.",
-        body: String = "You looked up more than usual, and you kept going through a grey week. Twenty-four days, mostly reflections.",
+        body: String = "You looked up more than usual, and you kept going through a grey week. Twenty-four days, and you wrote on nine of them.",
     ) = MonthlyIssueCopy(headline, body)
 
     private fun assertInvalid(result: ValidationResult, token: String) {

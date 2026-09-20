@@ -322,7 +322,8 @@ Compact:
 Rules:
 
 - The contact sheet is the hero. 1:1 centre crops, date order, 12 dp corners, hairline outline. Tapping a thumb opens the Day screen for that date.
-- Exactly one Fraunces headline — the short on-device phrase.
+- On the dedicated issue page the sheet fills the space between headline and body: larger cells, full content width, as many rows as the month deserves. The Feed card keeps the compact six-column sheet.
+- Exactly one Fraunces headline — a short evocative phrase, not a list of themes. Themes belong in the kicker at the foot of the page.
 - Page tint from `themeTint` keyed on the month's dominant theme. Low alpha only. Never red.
 - A month with very few photographs still uses the six-column sheet; empty cells are paper, not placeholders. A month with zero completed days produces no issue.
 - Expanded: the page is centred at max 600 dp.
@@ -457,6 +458,11 @@ Second person, present tense, short. Warm but not chirpy. Never exclamation mark
 | Monthly list title | `The Monthly` |
 | Monthly page kicker | `{MONTH} · {n} DAYS` e.g. `SEPTEMBER · 24 DAYS` |
 | Monthly themes kicker | `{THEME} · {THEME}` e.g. `REFLECTIONS · LOOKING UP` |
+| Monthly fallback headline | From the theme bank, two variants, e.g. Reflections → `Second skies.` / `Glass looking back.` Unknown theme → the theme as a bare phrase, `Steam.` |
+| Monthly fallback, full | `Twenty-four days. You wrote on nine of them, and the longest stretch was eleven.` |
+| Monthly fallback, sparse | `Three days. A small set, held still.` |
+| Monthly fallback, one day | `One day. You wrote a note that day.` / `One day. The rest of the month is paper.` |
+| Monthly fallback, notes | `Twelve days. You wrote through most of the month.` |
 
 ---
 

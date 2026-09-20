@@ -113,7 +113,7 @@ class NanoPromptTextTest {
         assertTrue(text.contains("the glass in the stairwell again"))
         assertTrue(text.contains("cannot see the photographs"))
         assertTrue(text.contains("never quote"))
-        assertTrue(text.contains("No exclamation"))
+        assertTrue(text.contains("Do not re-list"))
     }
 
     @Test

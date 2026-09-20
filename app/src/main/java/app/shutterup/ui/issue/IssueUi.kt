@@ -88,11 +88,11 @@ internal fun sampleIssuePage(sparse: Boolean = false): IssuePageUi {
     return IssuePageUi(
         yearMonth = "2026-09",
         kicker = if (sparse) "SEPTEMBER · 3 DAYS" else "SEPTEMBER · 24 DAYS",
-        headline = if (sparse) "A quiet month." else "Light and glass.",
+        headline = if (sparse) "Second skies." else "Light and glass.",
         body = if (sparse) {
-            "Three days, mostly reflections and quiet hours. A small set, held still."
+            "Three days. A small set, held still."
         } else {
-            "You looked up more than usual, and you kept going through a grey week. Twenty-four days, mostly reflections and looking up."
+            "You looked up more than usual, and you kept going through a grey week. Twenty-four days, and you wrote on nine of them."
         },
         theme = "Reflections",
         themesKicker = if (sparse) "REFLECTIONS · QUIET HOURS" else "REFLECTIONS · LOOKING UP",
