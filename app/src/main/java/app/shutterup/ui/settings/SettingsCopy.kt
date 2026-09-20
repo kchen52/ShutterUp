@@ -16,7 +16,10 @@ object SettingsCopy {
     const val SERIES = "Series"
 
     const val SERIES_SUPPORTING =
-        "Some weeks arrive as a set of seven related prompts instead of seven separate ones."
+        "Some weeks arrive as a set of seven related prompts instead of seven separate ones. Turning this on starts a series tomorrow. Today's prompt stays."
+
+    const val SERIES_SUPPORTING_ON =
+        "Some weeks arrive as a set of seven related prompts instead of seven separate ones. The current series finishes even if you turn this off."
 
     const val WHERE_YOU_ARE = "Where you are"
 

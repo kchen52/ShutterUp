@@ -263,6 +263,7 @@ Composite implementation: `NanoPromptGenerator` (real) → on failure/unavailabl
 - Text-only input in v1 (no image input).
 - Set a hard timeout (20 s) per attempt; max 3 attempts per generation (2 regenerations on validation failure), then fall back.
 - Read `getBaseModelName()` and show it in Settings → AI status (helps debugging).
+- Keep Nano loaded only while generating: `warmup()` before the first inference of a batch, then `GenerativeModel.close()` when the batch finishes so the inference engine is not held in memory. Status and download checks use a short-lived client and close immediately.
 - Never call Nano while the device reports low battery (< 15 %) or when the app is in the background beyond the WorkManager job described in §7.6.
 
 ### 7.3 System prompt guidelines (content contract)
@@ -297,7 +298,7 @@ Settings → "Theme focus (optional)". Free text, ≤ 60 chars. Applied to all s
 
 Generation must never block the notification. Strategy: keep a **buffer of prompts for today + next 2 days**.
 
-1. **Foreground top-up** — whenever the app is opened, if the buffer has < 3 future days, generate until full (with a small in-app "Preparing prompts…" indicator; never blocks the UI).
+1. **Foreground top-up** — whenever the app is opened, if the buffer has < 3 future days, generate until full. A slim in-app status bar shows `Generating prompts for Tuesday` (or `Generating prompts for a seven-day series`); it never blocks the UI.
 2. **Overnight top-up** — a periodic WorkManager job (once per 24 h, constraints: charging, battery-not-low) tops up the buffer. Timeout 3 minutes total; whatever it finishes is kept.
 3. **Notification worker** — when firing today's notification, if today has no prompt, take it from the buffer; if the buffer is empty, use the **library** immediately (do not attempt Nano here; job quota is tight).
 4. On **theme-focus change** or **reroll**, generation happens in the foreground.
@@ -313,13 +314,13 @@ All generated prompts are persisted immediately with `date` assignments, so a pr
 
 ### 7.8 Series (opt-in weekly arc)
 
-Settings → Prompts → **Series** (switch, default off). Supporting text: "Some weeks arrive as a set of seven related prompts instead of seven separate ones."
+Settings → Prompts → **Series** (switch, default off). Supporting text when off: "Some weeks arrive as a set of seven related prompts instead of seven separate ones. Turning this on starts a series tomorrow. Today's prompt stays." When on: "Some weeks arrive as a set of seven related prompts instead of seven separate ones. The current series finishes even if you turn this off."
 
 When the setting is on, generation produces a seven-day themed run rather than independent daily prompts. The daily loop is unchanged: still one prompt a day, still one photo a day, still the same Shoot button. A series only changes how the next seven days' prompts are chosen and adds a quiet progress affordance (kicker + seven-dot row). This is not a new mode with new screens.
 
 A series has a **title** (e.g. "A Week of Hands") and seven prompts belonging to it, pinned to seven consecutive dates. Each prompt must still satisfy §7.3 and pass `PromptValidator`. They must vary within the series, not restate each other. At least four of the seven must work indoors.
 
-- **When a series starts.** Enabling the setting does not change today's prompt. The next series begins on the next date that has no prompt generated yet, and each subsequent series begins the day after the previous one ends. Turning the setting off lets the current series finish, then returns to single daily prompts — already-generated prompts are never deleted.
+- **When a series starts.** Enabling the setting does not change today's prompt. Independent (non-series) buffer prompts after today are replaced, and the next series begins tomorrow. Each subsequent series begins the day after the previous one ends. Turning the setting off lets the current series finish, then returns to single daily prompts — already-generated prompts are never deleted.
 - **Nano path.** The system prompt asks for a series (title + unifying theme + seven prompts) as structured output. Existing defensive parsing, validation, and the 3-attempt budget still apply. If series generation fails validation after that budget, fall back to the library path.
 - **Library path.** Pick a theme with at least seven unused prompts (180-day exclusion), take seven of them, and derive the series title from the theme (`A Week of {theme}`). Library series render with the existing "From the library" tag. `themeFocus` is respected the same way as for single prompts.
 - **Reroll.** The one-reroll-a-day rule is unchanged. A reroll inside a series stays within the series' theme. The rerolled-away prompt goes to `superseded_prompts`.
@@ -522,7 +523,7 @@ Pure-Kotlin domain must reach high coverage. Required suites:
 
 - `PromptParserTest` — valid JSON, missing fields, over-length fields, extra fields, non-JSON garbage.
 - `PromptValidatorTest` — blocklist hits, gear mentions, dedup by title/theme, URL/emoji rejection, accepts a corpus of good prompts.
-- `GeneratePromptUseCaseTest` — retries on validation failure, falls back to library after 3 attempts, respects theme focus, never generates twice for one date, buffer top-up to 3 days, theme-focus change discards un-shown future buffer (today kept), series generation of seven days, series does not replace today's prompt, in-series reroll stays on theme, library series fallback, reroll of a second take clears `repeatsDate`.
+- `GeneratePromptUseCaseTest` — retries on validation failure, falls back to library after 3 attempts, respects theme focus, never generates twice for one date, buffer top-up to 3 days, theme-focus change discards un-shown future buffer (today kept), series generation of seven days, series does not replace today's prompt, enabling series starts tomorrow and replaces independent buffer, in-series reroll stays on theme, library series fallback, reroll of a second take clears `repeatsDate`.
 - `SeriesCalendarTest` / `SeriesProgressCalculatorTest` — next series start, enabling does not disrupt today, dots for completed / current / missed.
 - `SecondTakeCalendarTest` / `TakeChainTest` / `TakeIntervalTest` / `StartSecondTakeUseCaseTest` — landing today when pending vs tomorrow when completed/skipped/paused; chain of two and of five; interval phrasing across days / a month / a year; series detachment of only the target day; reroll clears the repeat link.
 - `GenerateMonthlyIssueUseCaseTest` — finished-month windows across timezones and year boundaries, mid-month install, zero completed days, Nano validation retry then fallback, idempotent regeneration, catch-up of skipped empty months.

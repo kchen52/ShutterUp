@@ -24,17 +24,36 @@ class SwitchingPromptGenerator(
     private val fake: PromptGenerator?,
     private val preferences: PreferencesRepository,
 ) : PromptGenerator {
-    override suspend fun availability(): Availability = active().availability()
+    private var held: PromptGenerator? = null
+    private var holds: Int = 0
+
+    override suspend fun availability(): Availability = current().availability()
 
     override suspend fun generate(request: GenerationRequest): Result<GeneratedPrompt> =
-        active().generate(request)
+        current().generate(request)
 
     override suspend fun generateSeries(request: GenerationRequest): Result<GeneratedSeries> =
-        active().generateSeries(request)
+        current().generateSeries(request)
 
     override suspend fun generateMonthlyIssue(
         request: MonthlyIssueRequest,
-    ): Result<GeneratedMonthlyIssue> = active().generateMonthlyIssue(request)
+    ): Result<GeneratedMonthlyIssue> = current().generateMonthlyIssue(request)
+
+    override suspend fun holdEngine() {
+        val generator = held ?: active()
+        held = generator
+        holds += 1
+        generator.holdEngine()
+    }
+
+    override suspend fun releaseEngine() {
+        val generator = held ?: active()
+        if (holds > 0) holds -= 1
+        if (holds == 0) held = null
+        generator.releaseEngine()
+    }
+
+    private suspend fun current(): PromptGenerator = held ?: active()
 
     private suspend fun active(): PromptGenerator {
         val useFake = fake != null && preferences.observeDebugUseFakeAi().first()

@@ -22,6 +22,7 @@ import com.google.mlkit.genai.prompt.GenerativeModel
 import com.google.mlkit.genai.prompt.TextPart
 import com.google.mlkit.genai.prompt.generateTypedContentRequest
 import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withTimeout
@@ -39,17 +40,37 @@ sealed interface NanoDownloadState {
  * Real on-device generator over Gemini Nano (SPEC §7.2). Written against the ML Kit
  * GenAI Prompt API docs (genai-prompt 1.0.0-beta4); device-verified only on the Fold 7.
  * Always behind [PromptGenerator]; the app is fully usable without it.
+ *
+ * The inference engine is leased only while generating (or downloading) and
+ * [GenerativeModel.close]d afterward so Nano is not kept loaded in memory.
  */
-class NanoPromptGenerator @Inject constructor(
-    private val client: GenerativeModel,
-) : PromptGenerator {
+@Singleton
+class NanoPromptGenerator @Inject constructor() : PromptGenerator {
+    private var warmed: Boolean = false
+    private val lease = RefCountedLease(
+        open = { Generation.getClient() },
+        onClose = { client ->
+            warmed = false
+            client.close()
+        },
+    )
+
+    override suspend fun holdEngine() {
+        lease.hold()
+    }
+
+    override suspend fun releaseEngine() {
+        lease.release()
+    }
 
     override suspend fun availability(): Availability = try {
-        when (client.checkStatus()) {
-            FeatureStatus.AVAILABLE -> Availability.AVAILABLE
-            FeatureStatus.DOWNLOADABLE -> Availability.DOWNLOADABLE
-            FeatureStatus.DOWNLOADING -> Availability.DOWNLOADING
-            else -> Availability.UNAVAILABLE
+        lease.use { client ->
+            when (client.checkStatus()) {
+                FeatureStatus.AVAILABLE -> Availability.AVAILABLE
+                FeatureStatus.DOWNLOADABLE -> Availability.DOWNLOADABLE
+                FeatureStatus.DOWNLOADING -> Availability.DOWNLOADING
+                else -> Availability.UNAVAILABLE
+            }
         }
     } catch (e: Exception) {
         Log.w(TAG, "checkStatus failed", e)
@@ -57,19 +78,22 @@ class NanoPromptGenerator @Inject constructor(
     }
 
     override suspend fun generate(request: GenerationRequest): Result<GeneratedPrompt> = try {
-        withTimeout(GENERATION_TIMEOUT_MS) {
-            val modelName = baseModelName()
-            if (client.isStructuredOutputFeatureAvailable()) {
-                val base = GenerateContentRequest.Builder(TextPart(NanoPromptText.systemPrompt(request))).build()
-                val typed = generateTypedContentRequest(base, NanoPromptOutput::class)
-                val response = client.generateContent(typed).candidates.firstOrNull()?.response
-                    ?: error("Nano returned no structured candidates")
-                Result.success(NanoPromptText.map(response, modelName))
-            } else {
-                val text = client.generateContent(NanoPromptText.systemPrompt(request) + "\nReturn ONLY the JSON object.")
-                    .candidates.firstOrNull()?.text
-                    ?: error("Nano returned no text")
-                PromptParser.parse(text, PromptSource.ON_DEVICE_AI).map { it.copy(modelName = modelName) }
+        lease.use { client ->
+            prepare(client)
+            withTimeout(GENERATION_TIMEOUT_MS) {
+                val modelName = modelName(client)
+                if (client.isStructuredOutputFeatureAvailable()) {
+                    val base = GenerateContentRequest.Builder(TextPart(NanoPromptText.systemPrompt(request))).build()
+                    val typed = generateTypedContentRequest(base, NanoPromptOutput::class)
+                    val response = client.generateContent(typed).candidates.firstOrNull()?.response
+                        ?: error("Nano returned no structured candidates")
+                    Result.success(NanoPromptText.map(response, modelName))
+                } else {
+                    val text = client.generateContent(NanoPromptText.systemPrompt(request) + "\nReturn ONLY the JSON object.")
+                        .candidates.firstOrNull()?.text
+                        ?: error("Nano returned no text")
+                    PromptParser.parse(text, PromptSource.ON_DEVICE_AI).map { it.copy(modelName = modelName) }
+                }
             }
         }
     } catch (e: Exception) {
@@ -78,44 +102,50 @@ class NanoPromptGenerator @Inject constructor(
     }
 
     override suspend fun generateSeries(request: GenerationRequest): Result<GeneratedSeries> = try {
-        withTimeout(GENERATION_TIMEOUT_MS) {
-            val modelName = baseModelName()
-            if (client.isStructuredOutputFeatureAvailable()) {
-                val base = GenerateContentRequest.Builder(TextPart(NanoPromptText.seriesSystemPrompt(request))).build()
-                val typed = generateTypedContentRequest(base, NanoSeriesOutput::class)
-                val response = client.generateContent(typed).candidates.firstOrNull()?.response
-                    ?: error("Nano returned no structured series candidates")
-                Result.success(NanoPromptText.mapSeries(response, modelName))
-            } else {
-                val text = client.generateContent(
-                    NanoPromptText.seriesSystemPrompt(request) + "\nReturn ONLY the JSON object.",
-                ).candidates.firstOrNull()?.text
-                    ?: error("Nano returned no series text")
-                PromptParser.parseSeries(text, PromptSource.ON_DEVICE_AI).map { series ->
-                    series.copy(prompts = series.prompts.map { it.copy(modelName = modelName) })
+        lease.use { client ->
+            prepare(client)
+            withTimeout(GENERATION_TIMEOUT_MS) {
+                val modelName = modelName(client)
+                if (client.isStructuredOutputFeatureAvailable()) {
+                    val base = GenerateContentRequest.Builder(TextPart(NanoPromptText.seriesSystemPrompt(request))).build()
+                    val typed = generateTypedContentRequest(base, NanoSeriesOutput::class)
+                    val response = client.generateContent(typed).candidates.firstOrNull()?.response
+                        ?: error("Nano returned no structured series candidates")
+                    Result.success(NanoPromptText.mapSeries(response, modelName))
+                } else {
+                    val text = client.generateContent(
+                        NanoPromptText.seriesSystemPrompt(request) + "\nReturn ONLY the JSON object.",
+                    ).candidates.firstOrNull()?.text
+                        ?: error("Nano returned no series text")
+                    PromptParser.parseSeries(text, PromptSource.ON_DEVICE_AI).map { series ->
+                        series.copy(prompts = series.prompts.map { it.copy(modelName = modelName) })
+                    }
                 }
             }
         }
-        } catch (e: Exception) {
+    } catch (e: Exception) {
         Log.w(TAG, "generateSeries failed", e)
         Result.failure(e)
     }
 
     override suspend fun generateMonthlyIssue(request: MonthlyIssueRequest): Result<GeneratedMonthlyIssue> = try {
-        withTimeout(GENERATION_TIMEOUT_MS) {
-            val modelName = baseModelName()
-            if (client.isStructuredOutputFeatureAvailable()) {
-                val base = GenerateContentRequest.Builder(TextPart(NanoPromptText.monthlySystemPrompt(request))).build()
-                val typed = generateTypedContentRequest(base, NanoMonthlyOutput::class)
-                val response = client.generateContent(typed).candidates.firstOrNull()?.response
-                    ?: error("Nano returned no structured monthly candidates")
-                Result.success(NanoPromptText.mapMonthly(response, modelName))
-            } else {
-                val text = client.generateContent(
-                    NanoPromptText.monthlySystemPrompt(request) + "\nReturn ONLY the JSON object.",
-                ).candidates.firstOrNull()?.text
-                    ?: error("Nano returned no monthly text")
-                PromptParser.parseMonthly(text).map { it.copy(modelName = modelName) }
+        lease.use { client ->
+            prepare(client)
+            withTimeout(GENERATION_TIMEOUT_MS) {
+                val modelName = modelName(client)
+                if (client.isStructuredOutputFeatureAvailable()) {
+                    val base = GenerateContentRequest.Builder(TextPart(NanoPromptText.monthlySystemPrompt(request))).build()
+                    val typed = generateTypedContentRequest(base, NanoMonthlyOutput::class)
+                    val response = client.generateContent(typed).candidates.firstOrNull()?.response
+                        ?: error("Nano returned no structured monthly candidates")
+                    Result.success(NanoPromptText.mapMonthly(response, modelName))
+                } else {
+                    val text = client.generateContent(
+                        NanoPromptText.monthlySystemPrompt(request) + "\nReturn ONLY the JSON object.",
+                    ).candidates.firstOrNull()?.text
+                        ?: error("Nano returned no monthly text")
+                    PromptParser.parseMonthly(text).map { it.copy(modelName = modelName) }
+                }
             }
         }
     } catch (e: Exception) {
@@ -125,6 +155,13 @@ class NanoPromptGenerator @Inject constructor(
 
     /** Mirrors the download flow from the get-started guide; failures stay typed, never throw. */
     fun downloadState(): Flow<NanoDownloadState> = flow {
+        val client = try {
+            lease.hold()
+        } catch (e: Exception) {
+            Log.w(TAG, "download failed", e)
+            emit(NanoDownloadState.Failed(e.message))
+            return@flow
+        }
         try {
             client.download().collect { status ->
                 emit(
@@ -139,10 +176,29 @@ class NanoPromptGenerator @Inject constructor(
         } catch (e: Exception) {
             Log.w(TAG, "download failed", e)
             emit(NanoDownloadState.Failed(e.message))
+        } finally {
+            lease.release()
         }
     }
 
     suspend fun baseModelName(): String? = try {
+        lease.use { client -> modelName(client) }
+    } catch (e: Exception) {
+        Log.w(TAG, "getBaseModelName failed", e)
+        null
+    }
+
+    private suspend fun prepare(client: GenerativeModel) {
+        if (warmed) return
+        try {
+            client.warmup()
+            warmed = true
+        } catch (e: Exception) {
+            Log.w(TAG, "warmup failed", e)
+        }
+    }
+
+    private suspend fun modelName(client: GenerativeModel): String? = try {
         client.getBaseModelName()
     } catch (e: Exception) {
         Log.w(TAG, "getBaseModelName failed", e)
@@ -152,7 +208,5 @@ class NanoPromptGenerator @Inject constructor(
     companion object {
         const val GENERATION_TIMEOUT_MS = 20_000L
         private const val TAG = "NanoPromptGenerator"
-
-        fun defaultClient(): GenerativeModel = Generation.getClient()
     }
 }

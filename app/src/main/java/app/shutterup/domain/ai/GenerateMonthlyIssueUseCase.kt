@@ -65,7 +65,11 @@ open class GenerateMonthlyIssueUseCase @Inject constructor(
     }
 
     private suspend fun writeCopy(snapshot: MonthlyIssueSnapshot): WrittenCopy {
-        if (primary.availability() == Availability.AVAILABLE) {
+        if (primary.availability() != Availability.AVAILABLE) {
+            return fallbackCopy(snapshot)
+        }
+        primary.holdEngine()
+        try {
             val request = requestFor(snapshot)
             repeat(ATTEMPTS) {
                 val candidate = primary.generateMonthlyIssue(request).getOrNull() ?: return@repeat
@@ -83,13 +87,17 @@ open class GenerateMonthlyIssueUseCase @Inject constructor(
                     )
                 }
             }
+        } finally {
+            primary.releaseEngine()
         }
-        return WrittenCopy(
-            copy = MonthlyIssueFallback.compose(snapshot),
-            source = PromptSourceRef.LIBRARY,
-            modelName = null,
-        )
+        return fallbackCopy(snapshot)
     }
+
+    private fun fallbackCopy(snapshot: MonthlyIssueSnapshot): WrittenCopy = WrittenCopy(
+        copy = MonthlyIssueFallback.compose(snapshot),
+        source = PromptSourceRef.LIBRARY,
+        modelName = null,
+    )
 
     private suspend fun persist(snapshot: MonthlyIssueSnapshot, written: WrittenCopy): Boolean {
         val (start, end) = MonthlyIssueCalendar.window(snapshot.yearMonth)

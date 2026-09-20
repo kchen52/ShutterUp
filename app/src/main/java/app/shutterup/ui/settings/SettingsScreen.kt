@@ -449,7 +449,11 @@ private fun PromptsSection(
         title = SettingsCopy.SERIES,
         checked = state.seriesEnabled,
         onCheckedChange = onSeriesEnabled,
-        supporting = SettingsCopy.SERIES_SUPPORTING,
+        supporting = if (state.seriesEnabled) {
+            SettingsCopy.SERIES_SUPPORTING_ON
+        } else {
+            SettingsCopy.SERIES_SUPPORTING
+        },
     )
     ListItem(
         headlineContent = { Text(SettingsCopy.WHERE_YOU_ARE) },
@@ -703,6 +707,7 @@ private fun SwitchRow(
 internal fun sampleSettingsState(
     coarseCityId: String? = null,
     coarseCityName: String? = null,
+    seriesEnabled: Boolean = false,
 ): SettingsUiState {
     return SettingsUiState(
         notifyTime = LocalTime.of(9, 0),
@@ -710,6 +715,7 @@ internal fun sampleSettingsState(
         exactAlarmAllowed = true,
         paused = false,
         themeFocus = "",
+        seriesEnabled = seriesEnabled,
         freezeCount = 2,
         aiStatus = SettingsCopy.AI_UNAVAILABLE_STATUS,
         aiSupporting = SettingsCopy.AI_UNAVAILABLE,

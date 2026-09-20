@@ -2,14 +2,12 @@ package app.shutterup.di
 
 import app.shutterup.data.ai.AssetLibraryPromptSource
 import app.shutterup.data.ai.BlocklistProvider
-import app.shutterup.data.ai.NanoPromptGenerator
 import app.shutterup.data.di.AiModule
 import app.shutterup.domain.ai.LibraryPromptGenerator
 import app.shutterup.domain.ai.LibraryPromptSource
 import app.shutterup.domain.ai.PromptGenerator
 import app.shutterup.domain.repository.GamificationRepository
 import app.shutterup.testutil.InstrumentationPromptGenerator
-import com.google.mlkit.genai.prompt.GenerativeModel
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.components.SingletonComponent
@@ -49,8 +47,4 @@ object TestAiModule {
     @Singleton
     @Named("primaryGenerator")
     fun providePrimaryGenerator(fake: InstrumentationPromptGenerator): PromptGenerator = fake
-
-    @Provides
-    @Singleton
-    fun provideGenerativeModel(): GenerativeModel = NanoPromptGenerator.defaultClient()
 }

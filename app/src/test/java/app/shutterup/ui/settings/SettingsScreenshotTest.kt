@@ -86,4 +86,14 @@ class SettingsScreenshotTest {
         }
         composeRule.onRoot().captureRoboImage()
     }
+
+    @Test
+    fun settingsSeriesOnLight() {
+        composeRule.setContent {
+            ShutterUpTheme(darkTheme = false) {
+                SettingsScreen(state = sampleSettingsState(seriesEnabled = true))
+            }
+        }
+        composeRule.onRoot().captureRoboImage()
+    }
 }

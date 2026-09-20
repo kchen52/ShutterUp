@@ -20,6 +20,7 @@ import app.shutterup.domain.repository.SeriesRepository
 import app.shutterup.domain.rollover.DayRolloverUseCase
 import app.shutterup.domain.series.SeriesProgress
 import app.shutterup.domain.series.SeriesProgressCalculator
+import app.shutterup.ui.components.PromptGenerationCopy
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.Clock
@@ -48,6 +49,7 @@ data class HomeUiState(
     val notificationsDenied: Boolean = false,
     val aiDownloadPercent: Int? = null,
     val preparingPrompts: Boolean = false,
+    val generationMessage: String? = null,
     val seriesProgress: SeriesProgress? = null,
 )
 
@@ -102,6 +104,7 @@ class HomeViewModel @Inject constructor(
                     notificationsDenied = _state.value.notificationsDenied,
                     aiDownloadPercent = _state.value.aiDownloadPercent,
                     preparingPrompts = _state.value.preparingPrompts,
+                    generationMessage = _state.value.generationMessage,
                     seriesProgress = series?.let {
                         SeriesProgressCalculator.progress(it, monthDays, today)
                     },
@@ -109,16 +112,25 @@ class HomeViewModel @Inject constructor(
             }.collect { next -> _state.value = next }
         }
         viewModelScope.launch {
+            generatePrompt.generation.collect { progress ->
+                val message = progress?.let { PromptGenerationCopy.message(it) }
+                _state.update {
+                    it.copy(
+                        preparingPrompts = progress != null,
+                        generationMessage = message,
+                    )
+                }
+            }
+        }
+        viewModelScope.launch {
             refreshNotifications()
             refreshAvailability()
             val paused = preferences.observePaused().first()
             rollover.rollover(today, paused)
             if (!paused) {
-                _state.update { it.copy(preparingPrompts = true) }
                 val focus = preferences.observeThemeFocus().first()
                 generatePrompt.promptFor(today, focus)
                 generatePrompt.topUpBuffer(today, focus)
-                _state.update { it.copy(preparingPrompts = false) }
             }
         }
     }

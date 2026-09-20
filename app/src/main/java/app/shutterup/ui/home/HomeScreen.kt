@@ -198,13 +198,6 @@ fun HomeScreen(
                 if (state.notificationsDenied) {
                     NotificationPermissionCard(onOpenSettings = onOpenNotificationSettings)
                 }
-                if (state.preparingPrompts) {
-                    Text(
-                        text = "Preparing prompts…",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
                 RecentStrip(entries = state.recent, onOpenDay = onOpenDay, onOpenCalendar = onOpenCalendar)
                 Spacer(Modifier.height(16.dp))
             }
@@ -245,7 +238,9 @@ private fun TodayCard(
         return
     }
     if (prompt == null) {
+        val generating = state.generationMessage
         val copy = when {
+            generating != null -> generating
             state.preparingPrompts || state.aiDownloadPercent != null -> "Preparing on-device AI"
             else -> SettingsCopy.AI_UNAVAILABLE
         }
