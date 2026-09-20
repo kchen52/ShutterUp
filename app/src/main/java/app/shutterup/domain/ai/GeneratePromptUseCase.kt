@@ -108,7 +108,9 @@ class GeneratePromptUseCase @Inject constructor(
             ),
         )
         val covering = existing.seriesId?.let { seriesRepo.get(it) } ?: seriesRepo.covering(date)
-        return if (covering != null) {
+        return if (existing.repeatsDate != null) {
+            generateFresh(date, themeFocus, rerollUsed = true, overwrite = true)
+        } else if (covering != null) {
             rerollInsideSeries(date, themeFocus, existing, covering)
         } else {
             generateFresh(date, themeFocus, rerollUsed = true, overwrite = true)
