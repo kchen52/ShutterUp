@@ -75,24 +75,21 @@ fun thumbFor(date: LocalDate, thumbPath: String?): IssueThumbUi = IssueThumbUi(
     spokenDescription = "${spokenDate(date)}, completed",
 )
 
-internal fun sampleIssuePage(sparse: Boolean = false): IssuePageUi {
-    val thumbs = if (sparse) {
-        listOf(
-            LocalDate.of(2026, 9, 4),
-            LocalDate.of(2026, 9, 12),
-            LocalDate.of(2026, 9, 20),
-        )
-    } else {
-        (1..24).map { LocalDate.of(2026, 9, it) }
-    }
+internal fun sampleIssuePage(photoCount: Int = 24): IssuePageUi {
+    val n = photoCount.coerceIn(1, 30)
+    val thumbs = (1..n).map { LocalDate.of(2026, 9, it) }
+    val sparse = n <= 3
     return IssuePageUi(
         yearMonth = "2026-09",
-        kicker = if (sparse) "SEPTEMBER · 3 DAYS" else "SEPTEMBER · 24 DAYS",
+        kicker = issueKicker(YearMonth.of(2026, 9), n),
         headline = if (sparse) "Second skies." else "Light and glass.",
-        body = if (sparse) {
-            "Three days. A small set, held still."
-        } else {
-            "You looked up more than usual, and you kept going through a grey week. Twenty-four days, and you wrote on nine of them."
+        body = when {
+            n == 1 -> "One day. You wrote a note that day."
+            n <= 3 -> "Three days. A small set, held still."
+            n <= 8 -> "Eight days. The days sat a little apart."
+            n >= 30 -> "Thirty days. You wrote on every day you shot."
+            n == 24 -> "You looked up more than usual, and you kept going through a grey week. Twenty-four days, and you wrote on nine of them."
+            else -> "You looked up more than usual, and you kept going through a grey week. You wrote on nine of them."
         },
         theme = "Reflections",
         themesKicker = if (sparse) "REFLECTIONS · QUIET HOURS" else "REFLECTIONS · LOOKING UP",

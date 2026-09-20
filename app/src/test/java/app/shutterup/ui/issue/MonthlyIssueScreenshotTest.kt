@@ -72,7 +72,7 @@ class MonthlyIssueScreenshotTest {
     fun issuePageSparseLight() {
         composeRule.setContent {
             ShutterUpTheme(darkTheme = false) {
-                IssueScreen(page = sampleIssuePage(sparse = true), onBack = {}, onOpenDay = {})
+                IssueScreen(page = sampleIssuePage(photoCount = 3), onBack = {}, onOpenDay = {})
             }
         }
         composeRule.onRoot().captureRoboImage()
@@ -82,7 +82,7 @@ class MonthlyIssueScreenshotTest {
     fun issuePageSparseDark() {
         composeRule.setContent {
             ShutterUpTheme(darkTheme = true) {
-                IssueScreen(page = sampleIssuePage(sparse = true), onBack = {}, onOpenDay = {})
+                IssueScreen(page = sampleIssuePage(photoCount = 3), onBack = {}, onOpenDay = {})
             }
         }
         composeRule.onRoot().captureRoboImage()
@@ -137,6 +137,46 @@ class MonthlyIssueScreenshotTest {
         composeRule.setContent {
             ShutterUpTheme(darkTheme = false) {
                 FeedScreen(state = sampleFeedStateWithIssue(sparse = true), onOpenDay = {})
+            }
+        }
+        composeRule.onRoot().captureRoboImage()
+    }
+
+    @Test
+    fun issuePageOneLight() {
+        composeRule.setContent {
+            ShutterUpTheme(darkTheme = false) {
+                IssueScreen(page = sampleIssuePage(photoCount = 1), onBack = {}, onOpenDay = {})
+            }
+        }
+        composeRule.onRoot().captureRoboImage()
+    }
+
+    @Test
+    fun issuePageEightLight() {
+        composeRule.setContent {
+            ShutterUpTheme(darkTheme = false) {
+                IssueScreen(page = sampleIssuePage(photoCount = 8), onBack = {}, onOpenDay = {})
+            }
+        }
+        composeRule.onRoot().captureRoboImage()
+    }
+
+    @Test
+    fun issuePageFifteenLight() {
+        composeRule.setContent {
+            ShutterUpTheme(darkTheme = false) {
+                IssueScreen(page = sampleIssuePage(photoCount = 15), onBack = {}, onOpenDay = {})
+            }
+        }
+        composeRule.onRoot().captureRoboImage()
+    }
+
+    @Test
+    fun issuePageThirtyLight() {
+        composeRule.setContent {
+            ShutterUpTheme(darkTheme = false) {
+                IssueScreen(page = sampleIssuePage(photoCount = 30), onBack = {}, onOpenDay = {})
             }
         }
         composeRule.onRoot().captureRoboImage()

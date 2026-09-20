@@ -289,7 +289,7 @@ internal fun sampleFeedState(): FeedUiState = FeedUiState(
 )
 
 internal fun sampleFeedStateWithIssue(sparse: Boolean = false): FeedUiState = sampleFeedState().copy(
-    featuredIssue = sampleIssuePage(sparse = sparse),
+    featuredIssue = sampleIssuePage(photoCount = if (sparse) 3 else 24),
     hasPastIssues = true,
 )
 

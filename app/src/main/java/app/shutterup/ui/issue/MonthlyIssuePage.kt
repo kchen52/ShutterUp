@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
@@ -53,10 +54,11 @@ fun MonthlyIssuePage(
 ) {
     val dark = isSystemInDarkTheme()
     val tint = themeTint(page.theme, MaterialTheme.colorScheme, dark)
+    val stretch = fillSheet && pageSheetFillsViewport(page.thumbs.size)
     val content: @Composable () -> Unit = {
         Column(
             modifier = Modifier
-                .then(if (fillSheet) Modifier.fillMaxSize() else Modifier)
+                .then(if (stretch) Modifier.fillMaxSize() else Modifier)
                 .padding(20.dp),
         ) {
             Row(verticalAlignment = Alignment.Top) {
@@ -86,7 +88,7 @@ fun MonthlyIssuePage(
                 thumbs = page.thumbs,
                 onOpenDay = onOpenDay,
                 fill = fillSheet,
-                modifier = if (fillSheet) {
+                modifier = if (stretch) {
                     Modifier
                         .weight(1f)
                         .fillMaxWidth()
@@ -111,7 +113,7 @@ fun MonthlyIssuePage(
     }
     val pageModifier = modifier
         .fillMaxWidth()
-        .then(if (fillSheet) Modifier.fillMaxHeight() else Modifier)
+        .then(if (stretch) Modifier.fillMaxHeight() else Modifier.wrapContentHeight())
         .semantics { contentDescription = page.kicker }
     if (onOpenIssue != null) {
         Surface(
@@ -142,9 +144,19 @@ fun ContactSheet(
         Spacer(modifier = modifier.fillMaxWidth())
         return
     }
-    if (fill) {
+    if (!fill) {
+        SheetGrid(
+            thumbs = thumbs,
+            columns = SHEET_COLUMNS,
+            cell = null,
+            onOpenDay = onOpenDay,
+            modifier = modifier.fillMaxWidth(),
+        )
+        return
+    }
+    val columns = pageSheetColumns(thumbs.size)
+    if (pageSheetFillsViewport(thumbs.size)) {
         BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
-            val columns = chooseSheetColumns(thumbs.size, maxWidth, maxHeight)
             val cell = sheetCellSize(columns, thumbs.size, maxWidth, maxHeight)
             SheetGrid(
                 thumbs = thumbs,
@@ -153,15 +165,15 @@ fun ContactSheet(
                 onOpenDay = onOpenDay,
             )
         }
-        return
+    } else {
+        SheetGrid(
+            thumbs = thumbs,
+            columns = columns,
+            cell = null,
+            onOpenDay = onOpenDay,
+            modifier = modifier.fillMaxWidth(),
+        )
     }
-    SheetGrid(
-        thumbs = thumbs,
-        columns = SHEET_COLUMNS,
-        cell = null,
-        onOpenDay = onOpenDay,
-        modifier = modifier.fillMaxWidth(),
-    )
 }
 
 @Composable
@@ -205,17 +217,19 @@ private fun SheetGrid(
     }
 }
 
-internal fun chooseSheetColumns(count: Int, width: Dp, height: Dp): Int {
-    if (count <= 6) return SHEET_COLUMNS
-    val gutter = 4.dp
-    for (cols in 3..SHEET_COLUMNS) {
-        val cell = (width - gutter * (cols - 1)) / cols
-        if (cell <= 0.dp) continue
-        val rows = (count + cols - 1) / cols
-        val needed = cell * rows + gutter * (rows - 1)
-        if (needed <= height) return cols
-    }
-    return SHEET_COLUMNS
+internal fun pageSheetColumns(count: Int): Int = when {
+    count <= 1 -> 1
+    count == 2 -> 2
+    count == 3 -> 3
+    count == 4 -> 2
+    else -> 3
+}
+
+internal fun pageSheetFillsViewport(count: Int): Boolean {
+    if (count <= 0) return false
+    val columns = pageSheetColumns(count)
+    val rows = (count + columns - 1) / columns
+    return rows >= 7
 }
 
 internal fun sheetCellSize(columns: Int, count: Int, width: Dp, height: Dp): Dp {
@@ -323,10 +337,33 @@ private fun MonthlyIssuePagePreviewFontScale() {
 private fun MonthlyIssuePagePreviewSparse() {
     ShutterUpTheme(darkTheme = false) {
         MonthlyIssuePage(
-            page = sampleIssuePage(sparse = true),
+            page = sampleIssuePage(photoCount = 3),
             onOpenDay = {},
             fillSheet = true,
-            modifier = Modifier.fillMaxSize(),
+        )
+    }
+}
+
+@Preview(name = "one-photo-light", showBackground = true, widthDp = 400, heightDp = 900)
+@Composable
+private fun MonthlyIssuePagePreviewOne() {
+    ShutterUpTheme(darkTheme = false) {
+        MonthlyIssuePage(
+            page = sampleIssuePage(photoCount = 1),
+            onOpenDay = {},
+            fillSheet = true,
+        )
+    }
+}
+
+@Preview(name = "eight-photo-light", showBackground = true, widthDp = 400, heightDp = 1100)
+@Composable
+private fun MonthlyIssuePagePreviewEight() {
+    ShutterUpTheme(darkTheme = false) {
+        MonthlyIssuePage(
+            page = sampleIssuePage(photoCount = 8),
+            onOpenDay = {},
+            fillSheet = true,
         )
     }
 }

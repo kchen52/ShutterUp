@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -72,9 +74,11 @@ fun IssueScreen(
         ) {
             val expanded = maxWidth >= 600.dp
             val horizontal = if (expanded) 24.dp else 16.dp
+            val stretch = page != null && pageSheetFillsViewport(page.thumbs.size)
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+                    .then(if (stretch) Modifier else Modifier.verticalScroll(rememberScrollState()))
                     .padding(horizontal = horizontal, vertical = 8.dp),
                 contentAlignment = if (expanded) Alignment.TopCenter else Alignment.TopStart,
             ) {
@@ -86,7 +90,7 @@ fun IssueScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .widthIn(max = 600.dp)
-                            .fillMaxHeight(),
+                            .then(if (stretch) Modifier.fillMaxHeight() else Modifier),
                     )
                 }
             }
@@ -136,6 +140,6 @@ private fun IssueScreenPreviewFontScale() {
 @Composable
 private fun IssueScreenPreviewSparse() {
     ShutterUpTheme(darkTheme = false) {
-        IssueScreen(page = sampleIssuePage(sparse = true), onBack = {}, onOpenDay = {})
+        IssueScreen(page = sampleIssuePage(photoCount = 3), onBack = {}, onOpenDay = {})
     }
 }

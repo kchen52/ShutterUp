@@ -322,10 +322,10 @@ Compact:
 Rules:
 
 - The contact sheet is the hero. 1:1 centre crops, date order, 12 dp corners, hairline outline. Tapping a thumb opens the Day screen for that date.
-- On the dedicated issue page the sheet fills the space between headline and body: larger cells, full content width, as many rows as the month deserves. The Feed card keeps the compact six-column sheet.
+- On the dedicated issue page a full month fills the space between headline and body in three columns of larger 1:1 cells. A sparse month wraps: the card is as tall as its photographs, and unused space sits below it, not inside the tint. Column count follows the month — one photograph is a single plate, three sit in a short row of generous squares. The Feed card keeps the compact six-column sheet.
 - Exactly one Fraunces headline — a short evocative phrase, not a list of themes. Themes belong in the kicker at the foot of the page.
 - Page tint from `themeTint` keyed on the month's dominant theme. Low alpha only. Never red.
-- A month with very few photographs still uses the six-column sheet; empty cells are paper, not placeholders. A month with zero completed days produces no issue.
+- A month with very few photographs is a short, composed card, not a tall empty one. A month with zero completed days produces no issue.
 - Expanded: the page is centred at max 600 dp.
 
 Past issues: `LargeTopAppBar` title "The Monthly", a quiet list of month kickers and headlines. Tap opens this page.
