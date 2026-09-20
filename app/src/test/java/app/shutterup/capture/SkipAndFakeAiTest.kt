@@ -5,8 +5,11 @@ import app.shutterup.data.ai.FakePromptGenerator
 import app.shutterup.data.notifications.NotificationHelper
 import app.shutterup.di.SwitchingPromptGenerator
 import app.shutterup.domain.ai.Availability
+import app.shutterup.domain.ai.GeneratedMonthlyIssue
 import app.shutterup.domain.ai.GeneratedPrompt
+import app.shutterup.domain.ai.GeneratedSeries
 import app.shutterup.domain.ai.GenerationRequest
+import app.shutterup.domain.ai.MonthlyIssueRequest
 import app.shutterup.domain.ai.PromptGenerator
 import app.shutterup.domain.ai.PromptSource
 import app.shutterup.domain.ai.Season
@@ -156,6 +159,43 @@ class SwitchingPromptGeneratorTest {
         assertEquals("nano", switcher.generate(request).getOrThrow().title)
     }
 
+    /**
+     * The interface defaults for series and monthly generation return failure, so a
+     * delegate that forgets to forward them silently strands Nano on the library path
+     * instead of failing to compile (SPEC §7.1).
+     */
+    @Test
+    fun forwardsSeriesToTheActiveGenerator() = runTest {
+        val prefs = FakePrefs()
+        val switcher = SwitchingPromptGenerator(
+            onDevice = ScriptedGenerator("nano"),
+            fake = FakePromptGenerator(),
+            preferences = prefs,
+        )
+        assertEquals("nano series", switcher.generateSeries(request).getOrThrow().title)
+    }
+
+    @Test
+    fun forwardsMonthlyIssueToTheActiveGenerator() = runTest {
+        val prefs = FakePrefs()
+        val switcher = SwitchingPromptGenerator(
+            onDevice = ScriptedGenerator("nano"),
+            fake = FakePromptGenerator(),
+            preferences = prefs,
+        )
+        val issue = switcher.generateMonthlyIssue(monthlyRequest).getOrThrow()
+        assertEquals("nano headline", issue.headline)
+    }
+
+    private val monthlyRequest = MonthlyIssueRequest(
+        monthLabel = "September",
+        completedCount = 24,
+        titles = emptyList(),
+        themeCounts = emptyList(),
+        notes = emptyList(),
+        longestRun = 11,
+    )
+
     private class ScriptedGenerator(private val title: String) : PromptGenerator {
         override suspend fun availability() = Availability.AVAILABLE
         override suspend fun generate(request: GenerationRequest) = Result.success(
@@ -168,6 +208,18 @@ class SwitchingPromptGeneratorTest {
                 theme = "Theme",
                 source = PromptSource.ON_DEVICE_AI,
             ),
+        )
+
+        override suspend fun generateSeries(request: GenerationRequest) = Result.success(
+            GeneratedSeries(
+                title = "$title series",
+                theme = "Theme",
+                prompts = emptyList(),
+            ),
+        )
+
+        override suspend fun generateMonthlyIssue(request: MonthlyIssueRequest) = Result.success(
+            GeneratedMonthlyIssue(headline = "$title headline", body = "body"),
         )
     }
 }
