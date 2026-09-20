@@ -117,6 +117,26 @@ class DayPromptDaoTest {
         assertEquals(listOf("S1", "S2"), days.map { it.title })
     }
 
+    @Test
+    fun repeatsOf_returnsLaterTakesOfTheOriginal() = runTest {
+        val original = LocalDate.of(2024, 6, 15)
+        dao.upsert(dayPrompt(original, title = "First"))
+        dao.upsert(
+            dayPrompt(LocalDate.of(2024, 9, 19), title = "Second").copy(repeatsDate = original),
+        )
+        dao.upsert(
+            dayPrompt(LocalDate.of(2024, 12, 11), title = "Third").copy(repeatsDate = original),
+        )
+        dao.upsert(
+            dayPrompt(LocalDate.of(2024, 7, 1), title = "Other").copy(
+                repeatsDate = LocalDate.of(2024, 1, 1),
+            ),
+        )
+        val repeats = dao.repeatsOf(original)
+        assertEquals(listOf("Second", "Third"), repeats.map { it.title })
+        assertEquals(listOf("Second", "Third"), dao.observeRepeatsOf(original).first().map { it.title })
+    }
+
     private fun dayPrompt(
         date: LocalDate,
         title: String,

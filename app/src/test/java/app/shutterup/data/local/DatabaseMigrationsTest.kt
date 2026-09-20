@@ -248,4 +248,105 @@ class DatabaseMigrationsTest {
         }
         sqlite.close()
     }
+
+    @Test
+    fun migrate4to5_addsRepeatsDateColumn() {
+        val context = RuntimeEnvironment.getApplication()
+        context.deleteDatabase("mig-4-5.db")
+        val config = SupportSQLiteOpenHelper.Configuration.builder(context)
+            .name("mig-4-5.db")
+            .callback(
+                object : SupportSQLiteOpenHelper.Callback(4) {
+                    override fun onCreate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                        db.execSQL(
+                            """
+                            CREATE TABLE IF NOT EXISTS `day_prompts` (
+                                `date` INTEGER NOT NULL,
+                                `title` TEXT NOT NULL,
+                                `oneLiner` TEXT NOT NULL,
+                                `details` TEXT NOT NULL,
+                                `constraint` TEXT,
+                                `theme` TEXT NOT NULL,
+                                `tips` TEXT NOT NULL,
+                                `source` TEXT NOT NULL,
+                                `libraryId` TEXT,
+                                `modelName` TEXT,
+                                `generatedAt` INTEGER NOT NULL,
+                                `status` TEXT NOT NULL,
+                                `frozen` INTEGER NOT NULL,
+                                `rerollUsed` INTEGER NOT NULL,
+                                `seriesId` INTEGER,
+                                `seriesIndex` INTEGER,
+                                PRIMARY KEY(`date`)
+                            )
+                            """.trimIndent(),
+                        )
+                        db.execSQL(
+                            "CREATE INDEX IF NOT EXISTS `index_day_prompts_seriesId` ON `day_prompts` (`seriesId`)",
+                        )
+                        db.execSQL(
+                            """
+                            CREATE TABLE IF NOT EXISTS `monthly_issues` (
+                                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                                `yearMonth` TEXT NOT NULL,
+                                `startDate` INTEGER NOT NULL,
+                                `endDate` INTEGER NOT NULL,
+                                `completedDayCount` INTEGER NOT NULL,
+                                `headline` TEXT NOT NULL,
+                                `body` TEXT NOT NULL,
+                                `dominantTheme` TEXT NOT NULL,
+                                `loudestThemes` TEXT NOT NULL,
+                                `source` TEXT NOT NULL,
+                                `generatedAt` INTEGER NOT NULL,
+                                `dismissedFromFeed` INTEGER NOT NULL,
+                                `modelName` TEXT
+                            )
+                            """.trimIndent(),
+                        )
+                    }
+
+                    override fun onUpgrade(
+                        db: androidx.sqlite.db.SupportSQLiteDatabase,
+                        oldVersion: Int,
+                        newVersion: Int,
+                    ) = Unit
+                },
+            )
+            .build()
+        val helper = FrameworkSQLiteOpenHelperFactory().create(config)
+        val sqlite = helper.writableDatabase
+        val epoch = LocalDate.of(2026, 9, 19).toEpochDay()
+        sqlite.execSQL(
+            """
+            INSERT INTO day_prompts (
+                date, title, oneLiner, details, `constraint`, theme, tips, source,
+                libraryId, modelName, generatedAt, status, frozen, rerollUsed,
+                seriesId, seriesIndex
+            ) VALUES (
+                $epoch, 'Window light', 'Find a slice of window light.', 'Details here.',
+                NULL, 'Light', 'tip', 'LIBRARY', NULL, NULL, 0, 'PENDING', 0, 0, NULL, NULL
+            )
+            """.trimIndent(),
+        )
+        MIGRATION_4_5.migrate(sqlite)
+        val columns = mutableListOf<String>()
+        sqlite.query("PRAGMA table_info(day_prompts)").use { cursor ->
+            val nameIndex = cursor.getColumnIndex("name")
+            while (cursor.moveToNext()) {
+                columns += cursor.getString(nameIndex)
+            }
+        }
+        assertTrue(columns.contains("repeatsDate"))
+        sqlite.query("SELECT title, repeatsDate FROM day_prompts").use { cursor ->
+            assertTrue(cursor.moveToFirst())
+            assertEquals("Window light", cursor.getString(0))
+            assertTrue(cursor.isNull(1))
+        }
+        sqlite.query(
+            "SELECT name FROM sqlite_master WHERE type='index' AND name='index_day_prompts_repeatsDate'",
+        ).use { cursor ->
+            assertTrue(cursor.moveToFirst())
+        }
+        sqlite.close()
+    }
 }

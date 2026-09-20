@@ -42,6 +42,12 @@ interface DayPromptDao {
     @Query("SELECT * FROM day_prompts WHERE seriesId = :seriesId ORDER BY date ASC")
     suspend fun daysInSeries(seriesId: Long): List<DayPromptEntity>
 
+    @Query("SELECT * FROM day_prompts WHERE repeatsDate = :original ORDER BY date ASC")
+    fun observeRepeatsOf(original: LocalDate): Flow<List<DayPromptEntity>>
+
+    @Query("SELECT * FROM day_prompts WHERE repeatsDate = :original ORDER BY date ASC")
+    suspend fun repeatsOf(original: LocalDate): List<DayPromptEntity>
+
     @Insert
     suspend fun recordSuperseded(prompt: SupersededPromptEntity)
 }

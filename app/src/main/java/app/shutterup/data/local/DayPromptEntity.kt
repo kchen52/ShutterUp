@@ -10,7 +10,10 @@ import java.time.LocalDate
 
 @Entity(
     tableName = "day_prompts",
-    indices = [Index(value = ["seriesId"])],
+    indices = [
+        Index(value = ["seriesId"]),
+        Index(value = ["repeatsDate"]),
+    ],
 )
 data class DayPromptEntity(
     @PrimaryKey val date: LocalDate,
@@ -29,4 +32,5 @@ data class DayPromptEntity(
     val rerollUsed: Boolean,
     val seriesId: Long? = null,
     val seriesIndex: Int? = null,
+    val repeatsDate: LocalDate? = null,
 )

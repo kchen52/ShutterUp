@@ -34,6 +34,7 @@ internal fun DayPromptEntity.toDomain(): DayPrompt = DayPrompt(
     rerollUsed = rerollUsed,
     seriesId = seriesId,
     seriesIndex = seriesIndex,
+    repeatsDate = repeatsDate,
 )
 
 internal fun DayPrompt.toEntity(): DayPromptEntity = DayPromptEntity(
@@ -53,6 +54,7 @@ internal fun DayPrompt.toEntity(): DayPromptEntity = DayPromptEntity(
     rerollUsed = rerollUsed,
     seriesId = seriesId,
     seriesIndex = seriesIndex,
+    repeatsDate = repeatsDate,
 )
 
 internal fun SeriesEntity.toDomain(): Series = Series(

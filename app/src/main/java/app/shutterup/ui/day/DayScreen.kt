@@ -2,11 +2,14 @@ package app.shutterup.ui.day
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,6 +37,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -46,6 +51,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -59,7 +66,10 @@ import app.shutterup.domain.model.Entry
 import app.shutterup.domain.model.MediaKind
 import app.shutterup.domain.model.PromptSourceRef
 import app.shutterup.domain.share.isDayShareable
+import app.shutterup.domain.take.DiptychCrop
+import app.shutterup.domain.take.TakeInterval
 import app.shutterup.share.ShareCopy
+import app.shutterup.ui.adaptive.isExpandedWidth
 import app.shutterup.ui.badges.BadgeEmblem
 import app.shutterup.ui.components.ConstraintCard
 import app.shutterup.ui.components.Kicker
@@ -71,20 +81,24 @@ import app.shutterup.ui.theme.ShutterUpTheme
 import coil3.compose.AsyncImage
 import java.io.File
 import java.time.Instant
+import java.time.LocalDate
 
 /**
  * Single-day view. Shoot / Retake open Prompt Detail; delete keeps the day complete.
  */
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun DayRoute(
     onBack: () -> Unit,
     onOpenDetail: (dateIso: String, autoLaunchCamera: Boolean) -> Unit,
     onOpenCompletion: (dateIso: String) -> Unit,
+    onOpenDay: (dateIso: String) -> Unit = {},
     viewModel: DayViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val dark = isSystemInDarkTheme()
+    val expanded = isExpandedWidth(currentWindowAdaptiveInfo().windowSizeClass.minWidthDp)
     LaunchedEffect(state.shareChooser) {
         val intent = state.shareChooser ?: return@LaunchedEffect
         runCatching { context.startActivity(intent) }
@@ -93,13 +107,18 @@ fun DayRoute(
     }
     DayScreen(
         state = state,
+        expanded = expanded,
         onBack = onBack,
         onShoot = { onOpenDetail(state.date.toString(), true) },
         onRetake = { onOpenDetail(state.date.toString(), true) },
         onOpenCompletion = { onOpenCompletion(state.date.toString()) },
+        onOpenDay = onOpenDay,
         onNoteChange = viewModel::updateNote,
         onDelete = viewModel::onDeleteClicked,
         onShare = { viewModel.share(darkTheme = dark) },
+        onShootAgain = viewModel::onShootAgainClicked,
+        onConfirmSecondTake = viewModel::confirmSecondTake,
+        onDismissSecondTake = viewModel::dismissSecondTake,
         onDeleteShutterUp = { viewModel.confirmDelete(alsoGallery = false) },
         onDeleteGallery = { viewModel.confirmDelete(alsoGallery = true) },
         onDeleteDismiss = viewModel::dismissDelete,
@@ -107,17 +126,22 @@ fun DayRoute(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun DayScreen(
     state: DayUiState,
+    expanded: Boolean = false,
     onBack: () -> Unit = {},
     onShoot: () -> Unit = {},
     onRetake: () -> Unit = {},
     onOpenCompletion: () -> Unit = {},
+    onOpenDay: (String) -> Unit = {},
     onNoteChange: (String) -> Unit = {},
     onDelete: () -> Unit = {},
     onShare: () -> Unit = {},
+    onShootAgain: () -> Unit = {},
+    onConfirmSecondTake: () -> Unit = {},
+    onDismissSecondTake: () -> Unit = {},
     onDeleteShutterUp: () -> Unit = {},
     onDeleteGallery: () -> Unit = {},
     onDeleteDismiss: () -> Unit = {},
@@ -165,18 +189,42 @@ fun DayScreen(
                     .padding(padding)
                     .verticalScroll(rememberScrollState()),
             ) {
-                PhotoHeader(
-                    entries = state.entries,
-                    originalMissing = state.originalMissing ||
-                        prompt.status == DayStatus.COMPLETED_NO_PHOTO,
-                )
+                var viewerEntry by remember { mutableStateOf<Entry?>(null) }
+                if (state.diptych != null) {
+                    TakeDiptych(
+                        ui = state.diptych,
+                        expanded = expanded,
+                        onOpenPhoto = { viewerEntry = it },
+                        onOpenDay = onOpenDay,
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+                    )
+                } else {
+                    PhotoHeader(
+                        entries = state.entries,
+                        originalMissing = state.originalMissing ||
+                            prompt.status == DayStatus.COMPLETED_NO_PHOTO,
+                        onOpenPhoto = { viewerEntry = it },
+                    )
+                }
+                viewerEntry?.thumbPath?.let { path ->
+                    val file = File(path)
+                    if (file.exists()) {
+                        Dialog(
+                            onDismissRequest = { viewerEntry = null },
+                            properties = DialogProperties(usePlatformDefaultWidth = false),
+                        ) {
+                            PinchZoomViewer(file = file, onDismiss = { viewerEntry = null })
+                        }
+                    }
+                }
                 Column(
                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    Row(
+                    FlowRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        itemVerticalAlignment = Alignment.CenterVertically,
                     ) {
                         Kicker(text = "${statusLabel(prompt.status)} · ${prompt.theme}")
                         if (prompt.source == PromptSourceRef.LIBRARY) {
@@ -213,6 +261,18 @@ fun DayScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
+                    state.laterTakesLine?.let { line ->
+                        Text(
+                            text = line,
+                            modifier = Modifier.clickable(
+                                enabled = state.laterTakeDateIso != null,
+                            ) {
+                                state.laterTakeDateIso?.let(onOpenDay)
+                            },
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                     OutlinedTextField(
                         value = state.note,
                         onValueChange = onNoteChange,
@@ -229,10 +289,12 @@ fun DayScreen(
                         canDelete = state.entries.isNotEmpty(),
                         canShare = canShare,
                         canRetake = canRetake,
+                        canSecondTake = state.canSecondTake,
                         onDelete = onDelete,
                         onShare = onShare,
                         onRetake = onRetake,
                         onDone = onOpenCompletion,
+                        onShootAgain = onShootAgain,
                     )
                     if (canShoot) {
                         ShootButton(onClick = onShoot)
@@ -258,59 +320,162 @@ fun DayScreen(
             },
         )
     }
+    if (state.showSecondTakeDialog && state.secondTakeConfirmBody != null) {
+        AlertDialog(
+            onDismissRequest = onDismissSecondTake,
+            title = { Text("Shoot this again?") },
+            text = { Text(state.secondTakeConfirmBody) },
+            confirmButton = {
+                TextButton(onClick = onConfirmSecondTake) { Text("Shoot this again") }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismissSecondTake) { Text("Not now") }
+            },
+        )
+    }
 }
 
+/**
+ * Quiet text actions for the Day screen. Leading actions (Delete, Shoot this again,
+ * Share) pack from the start; Retake / Done stay together on the trailing edge when
+ * they fit. When the row cannot hold every label — compact width, large font scale —
+ * it wraps onto another line instead of clipping or scrolling.
+ */
 @Composable
 internal fun DayActionRow(
     canDelete: Boolean,
     canShare: Boolean,
     canRetake: Boolean,
+    canSecondTake: Boolean = false,
     onDelete: () -> Unit = {},
     onShare: () -> Unit = {},
     onRetake: () -> Unit = {},
     onDone: () -> Unit = {},
+    onShootAgain: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
-    if (!canDelete && !canShare && !canRetake) return
-    Row(
+    if (!canDelete && !canShare && !canRetake && !canSecondTake) return
+    val leadingCount = listOf(canDelete, canSecondTake, canShare).count { it }
+    Layout(
         modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        if (canDelete) {
-            TextButton(onClick = onDelete) { Text("Delete") }
-        }
-        if (canShare) {
-            TextButton(onClick = onShare) { Text(ShareCopy.BUTTON) }
-        }
-        Spacer(Modifier.weight(1f))
-        if (canRetake) {
-            TextButton(onClick = onRetake) { Text("Retake") }
-            TextButton(onClick = onDone) { Text("Done") }
+        content = {
+            if (canDelete) {
+                TextButton(onClick = onDelete) { Text("Delete") }
+            }
+            if (canSecondTake) {
+                TextButton(onClick = onShootAgain) {
+                    Text(
+                        text = "Shoot this again",
+                        maxLines = 2,
+                        overflow = TextOverflow.Clip,
+                    )
+                }
+            }
+            if (canShare) {
+                TextButton(onClick = onShare) { Text(ShareCopy.BUTTON) }
+            }
+            if (canRetake) {
+                TextButton(onClick = onRetake) { Text("Retake") }
+                TextButton(onClick = onDone) { Text("Done") }
+            }
+        },
+    ) { measurables, constraints ->
+        val childConstraints = constraints.copy(minWidth = 0, minHeight = 0)
+        val placeables = measurables.map { it.measure(childConstraints) }
+        val leading = placeables.take(leadingCount)
+        val trailing = placeables.drop(leadingCount)
+        val maxWidth = constraints.maxWidth
+        val leadingWidth = leading.sumOf { it.width }
+        val trailingWidth = trailing.sumOf { it.width }
+        if (leadingWidth + trailingWidth <= maxWidth) {
+            val height = placeables.maxOfOrNull { it.height } ?: 0
+            layout(maxWidth, height) {
+                var x = 0
+                leading.forEach { placeable ->
+                    placeable.placeRelative(x, (height - placeable.height) / 2)
+                    x += placeable.width
+                }
+                var trailingX = maxWidth - trailingWidth
+                trailing.forEach { placeable ->
+                    placeable.placeRelative(trailingX, (height - placeable.height) / 2)
+                    trailingX += placeable.width
+                }
+            }
+        } else {
+            val leadingLines = wrapToLines(leading, maxWidth)
+            val trailingLines = wrapToLines(trailing, maxWidth)
+            val height = lineStackHeight(leadingLines) + lineStackHeight(trailingLines)
+            layout(maxWidth, height) {
+                var y = 0
+                leadingLines.forEach { line ->
+                    val lineHeight = line.maxOf { it.height }
+                    var x = 0
+                    line.forEach { placeable ->
+                        placeable.placeRelative(x, y + (lineHeight - placeable.height) / 2)
+                        x += placeable.width
+                    }
+                    y += lineHeight
+                }
+                trailingLines.forEach { line ->
+                    val lineHeight = line.maxOf { it.height }
+                    var x = maxWidth - line.sumOf { it.width }
+                    line.forEach { placeable ->
+                        placeable.placeRelative(x, y + (lineHeight - placeable.height) / 2)
+                        x += placeable.width
+                    }
+                    y += lineHeight
+                }
+            }
         }
     }
 }
 
+private fun wrapToLines(items: List<Placeable>, maxWidth: Int): List<List<Placeable>> {
+    if (items.isEmpty()) return emptyList()
+    val lines = mutableListOf<List<Placeable>>()
+    val current = mutableListOf<Placeable>()
+    var used = 0
+    items.forEach { item ->
+        if (current.isNotEmpty() && used + item.width > maxWidth) {
+            lines += current.toList()
+            current.clear()
+            used = 0
+        }
+        current += item
+        used += item.width
+    }
+    if (current.isNotEmpty()) lines += current.toList()
+    return lines
+}
+
+private fun lineStackHeight(lines: List<List<Placeable>>): Int =
+    lines.sumOf { line -> line.maxOf { it.height } }
+
 @Composable
-private fun PhotoHeader(entries: List<Entry>, originalMissing: Boolean) {
+private fun PhotoHeader(
+    entries: List<Entry>,
+    originalMissing: Boolean,
+    onOpenPhoto: (Entry) -> Unit,
+) {
     val first = entries.firstOrNull()
     val file = first?.thumbPath?.let(::File)
     val hasFile = file != null && file.exists()
-    var viewer by remember { mutableStateOf(false) }
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(max = 420.dp),
     ) {
-        if (hasFile && !originalMissing) {
+        if (first != null && hasFile && !originalMissing) {
             AsyncImage(
                 model = file,
                 contentDescription = "Day photo",
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(max = 420.dp)
+                    .clickable { onOpenPhoto(first) }
                     .pointerInput(Unit) {
                         detectTransformGestures { _, _, zoom, _ ->
-                            if (zoom > 1.02f) viewer = true
+                            if (zoom > 1.02f) onOpenPhoto(first)
                         }
                     },
                 contentScale = ContentScale.Fit,
@@ -342,14 +507,6 @@ private fun PhotoHeader(entries: List<Entry>, originalMissing: Boolean) {
                     )
                 }
             }
-        }
-    }
-    if (viewer && hasFile) {
-        Dialog(
-            onDismissRequest = { viewer = false },
-            properties = DialogProperties(usePlatformDefaultWidth = false),
-        ) {
-            PinchZoomViewer(file = file!!, onDismiss = { viewer = false })
         }
     }
 }
@@ -423,6 +580,77 @@ fun sampleDayState(
     )
 }
 
+fun sampleDiptychState(
+    threeTakes: Boolean = false,
+    mixedAspect: Boolean = false,
+): DayUiState {
+    val firstDate = LocalDate.of(2026, 6, 28)
+    val secondDate = LocalDate.of(2026, 9, 19)
+    val thirdDate = LocalDate.of(2026, 12, 11)
+    val viewed = if (threeTakes) thirdDate else secondDate
+    val previous = if (threeTakes) secondDate else firstDate
+    val prompt = samplePrompt().copy(
+        date = viewed,
+        status = DayStatus.COMPLETED,
+        repeatsDate = firstDate,
+    )
+    val firstEntry = sampleTakeEntry(
+        date = previous,
+        width = 1200,
+        height = 1600,
+    )
+    val secondEntry = sampleTakeEntry(
+        date = viewed,
+        width = if (mixedAspect) 1600 else 1200,
+        height = if (mixedAspect) 1200 else 1600,
+    )
+    val crop = if (mixedAspect) DiptychCrop.SQUARE else DiptychCrop.NATIVE
+    return DayUiState(
+        date = viewed,
+        prompt = prompt,
+        entries = listOf(secondEntry),
+        badgeIds = emptyList(),
+        isToday = false,
+        originalMissing = false,
+        canSecondTake = true,
+        laterTakesLine = null,
+        diptych = DiptychUi(
+            first = DiptychFrame(
+                date = previous,
+                kicker = TakeInterval.dateKicker(previous),
+                entry = firstEntry,
+                originalMissing = false,
+            ),
+            second = DiptychFrame(
+                date = viewed,
+                kicker = TakeInterval.phrase(previous, viewed),
+                entry = secondEntry,
+                originalMissing = false,
+            ),
+            crop = crop,
+            rest = if (threeTakes) listOf(firstDate) else emptyList(),
+        ),
+    )
+}
+
+private fun sampleTakeEntry(
+    date: LocalDate,
+    width: Int,
+    height: Int,
+): Entry = Entry(
+    id = date.toEpochDay(),
+    date = date,
+    mediaUri = "file:///tmp/missing-$date.jpg",
+    thumbPath = "/tmp/missing-$date.jpg",
+    capturedAt = Instant.parse("2026-09-19T10:00:00Z"),
+    width = width,
+    height = height,
+    note = null,
+    importedFromGallery = false,
+    createdAt = Instant.parse("2026-09-19T10:00:00Z"),
+    mediaKind = MediaKind.PHOTO,
+)
+
 @Preview(name = "Compact light", showBackground = true, widthDp = 360, heightDp = 800)
 @Composable
 private fun DayPreviewLight() {
@@ -454,6 +682,7 @@ private fun DayActionRowPreviewLight() {
                 canDelete = true,
                 canShare = true,
                 canRetake = true,
+                canSecondTake = true,
                 modifier = Modifier.padding(horizontal = 20.dp),
             )
         }
@@ -474,8 +703,90 @@ private fun DayActionRowPreviewDark() {
                 canDelete = true,
                 canShare = true,
                 canRetake = true,
+                canSecondTake = true,
                 modifier = Modifier.padding(horizontal = 20.dp),
             )
         }
+    }
+}
+
+@Preview(
+    name = "Action row font scale 2x",
+    showBackground = true,
+    widthDp = 360,
+    fontScale = 2f,
+)
+@Composable
+private fun DayActionRowPreviewFontScale() {
+    ShutterUpTheme(darkTheme = false) {
+        Surface {
+            DayActionRow(
+                canDelete = true,
+                canShare = true,
+                canRetake = true,
+                canSecondTake = true,
+                modifier = Modifier.padding(horizontal = 20.dp),
+            )
+        }
+    }
+}
+
+@Preview(name = "Diptych compact light", showBackground = true, widthDp = 360, heightDp = 1100)
+@Composable
+private fun DayDiptychPreviewLight() {
+    ShutterUpTheme(darkTheme = false) {
+        Surface { DayScreen(state = sampleDiptychState()) }
+    }
+}
+
+@Preview(
+    name = "Diptych compact dark",
+    showBackground = true,
+    widthDp = 360,
+    heightDp = 1100,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+)
+@Composable
+private fun DayDiptychPreviewDark() {
+    ShutterUpTheme(darkTheme = true) {
+        Surface { DayScreen(state = sampleDiptychState()) }
+    }
+}
+
+@Preview(name = "Diptych expanded", showBackground = true, widthDp = 840, heightDp = 900)
+@Composable
+private fun DayDiptychPreviewExpanded() {
+    ShutterUpTheme(darkTheme = false) {
+        Surface { DayScreen(state = sampleDiptychState(), expanded = true) }
+    }
+}
+
+@Preview(
+    name = "Diptych font scale 2x",
+    showBackground = true,
+    widthDp = 360,
+    heightDp = 2800,
+    fontScale = 2f,
+)
+@Composable
+private fun DayDiptychPreviewFontScale() {
+    ShutterUpTheme(darkTheme = false) {
+        Surface { DayScreen(state = sampleDiptychState()) }
+    }
+}
+
+@Preview(name = "Diptych mixed aspect", showBackground = true, widthDp = 360, heightDp = 1100)
+@Composable
+private fun DayDiptychPreviewMixedAspect() {
+    ShutterUpTheme(darkTheme = false) {
+        Surface { DayScreen(state = sampleDiptychState(mixedAspect = true)) }
+    }
+}
+
+@Preview(name = "Diptych three takes", showBackground = true, widthDp = 360, heightDp = 1200)
+@Composable
+private fun DayDiptychPreviewThreeTakes() {
+    ShutterUpTheme(darkTheme = false) {
+        Surface { DayScreen(state = sampleDiptychState(threeTakes = true)) }
     }
 }

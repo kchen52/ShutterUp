@@ -326,9 +326,26 @@ The result should look like an abstract painting of the year that also happens t
 
 ### 4.5 Day
 
-Compact: photo full-bleed at top (edge-to-edge, 0 dp top radius, native aspect capped at 70 % height, `pinch to zoom` opens a full-screen viewer), then the same content stack as Prompt Detail (kicker with date + status, title, one-liner, details, tips, constraint), then **Note** (editable inline, autosave), then a quiet action row: `Delete`, `Share` when a photo exists, and `Retake` if today. Badges earned that day appear as small emblems (32 dp) under the kicker.
+Compact: photo full-bleed at top (edge-to-edge, 0 dp top radius, native aspect capped at 70 % height, `pinch to zoom` or a tap opens a full-screen viewer), then the same content stack as Prompt Detail (kicker with date + status, title, one-liner, details, tips, constraint), then **Note** (editable inline, autosave), then a quiet action row: `Delete`, `Share` when a photo exists, `Shoot this again` when the day is a past photograph, and `Retake` if today. When those labels cannot share one line (compact width, 200 % font scale), the row wraps onto a second line — never clips, never scrolls sideways. Badges earned that day appear as small emblems (32 dp) under the kicker.
 
 Expanded: right pane, photo top with the text below; the pane scrolls.
+
+**Second take.** No banner, no empty-state advertisement. The photographs carry the feature. On a later take the single photo becomes a diptych — the current take against the one before it. Compact stacks them; expanded places them side by side inside the Day pane so the seam between the two frames never sits on the hinge. Both frames 1:1 when orientations differ, otherwise both native. 16 dp photo corners, 8 dp gap, hairline outline. Kickers under each frame, then the shared prompt as the one headline:
+
+```
+┌──────────────────────────────┐
+│ ┌────────────┐┌────────────┐ │
+│ │ first take ││ second take│ │  both 1:1 or both native, matched
+│ └────────────┘└────────────┘ │
+│ 19 SEPTEMBER      83 DAYS ON │  kicker under each
+│                              │
+│ Find the sky in a puddle     │  the shared prompt, one headline
+└──────────────────────────────┘
+```
+
+On compact the two frames stack, kickers still under each. Three or more takes still show only this pair; a quiet `Other takes` row of date text buttons reaches the rest. On the original day's screen, a single line under the freeze line: `Shot again on 11 December.` Interval copy is factual (`83 days on`, `a month on`, `a year on`) — no praise, no judgement about which frame is better.
+
+The confirmation dialog is an M3 dialog, not a sheet: title `Shoot this again?`, body `This becomes today's prompt.` or `This becomes tomorrow's prompt.`, buttons `Shoot this again` / `Not now`.
 
 ### 4.6 Feed
 
@@ -535,6 +552,15 @@ Second person, present tense, short. Warm but not chirpy. Never exclamation mark
 | Delete dialog | Title "Delete this photo?" Body "The day stays complete." Buttons `Delete from ShutterUp` / `Also delete from Gallery` / `Cancel` |
 | Delete photo (Gallery) result | Snackbar "Deleted." |
 | Empty calendar | "Your first photo goes here." |
+| Shoot this again | `Shoot this again` |
+| Second take dialog title | `Shoot this again?` |
+| Second take dialog, today | `This becomes today's prompt.` |
+| Second take dialog, tomorrow | `This becomes tomorrow's prompt.` |
+| Second take dialog dismiss | `Not now` |
+| Second take interval | `83 days on` · `a day on` · `a month on` · `a year on` |
+| Original day, later take | `Shot again on 11 December.` |
+| Other takes | `Other takes` (date text buttons) |
+| Target already acted on | `Tomorrow is already spoken for.` |
 | Monthly Feed card dismiss | `Dismiss` |
 | Past issues | `Past issues` |
 | Monthly list title | `The Monthly` |

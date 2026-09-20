@@ -15,7 +15,7 @@ import androidx.room.TypeConverters
         SeriesEntity::class,
         MonthlyIssueEntity::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = true,
 )
 @TypeConverters(ShutterUpConverters::class)

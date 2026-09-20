@@ -40,20 +40,114 @@ class DayScreenshotTest {
     }
 
     @Test
+    @Config(qualifiers = "w360dp-h200dp")
     fun dayActionRowLight() {
         composeRule.setContent {
             ShutterUpTheme(darkTheme = false) {
-                DayActionRow(canDelete = true, canShare = true, canRetake = true)
+                DayActionRow(
+                    canDelete = true,
+                    canShare = true,
+                    canRetake = true,
+                    canSecondTake = true,
+                )
             }
         }
         composeRule.onRoot().captureRoboImage()
     }
 
     @Test
+    @Config(qualifiers = "w360dp-h200dp")
     fun dayActionRowDark() {
         composeRule.setContent {
             ShutterUpTheme(darkTheme = true) {
-                DayActionRow(canDelete = true, canShare = true, canRetake = true)
+                DayActionRow(
+                    canDelete = true,
+                    canShare = true,
+                    canRetake = true,
+                    canSecondTake = true,
+                )
+            }
+        }
+        composeRule.onRoot().captureRoboImage()
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h400dp", fontScale = 2f)
+    fun dayActionRowFontScale2() {
+        composeRule.setContent {
+            ShutterUpTheme(darkTheme = false) {
+                DayActionRow(
+                    canDelete = true,
+                    canShare = true,
+                    canRetake = true,
+                    canSecondTake = true,
+                )
+            }
+        }
+        composeRule.onRoot().captureRoboImage()
+    }
+
+    @Test
+    @Config(qualifiers = "w400dp-h1600dp")
+    fun diptychCompactLight() {
+        composeRule.setContent {
+            ShutterUpTheme(darkTheme = false) {
+                DayScreen(state = sampleDiptychState())
+            }
+        }
+        composeRule.onRoot().captureRoboImage()
+    }
+
+    @Test
+    @Config(qualifiers = "w400dp-h1600dp")
+    fun diptychCompactDark() {
+        composeRule.setContent {
+            ShutterUpTheme(darkTheme = true) {
+                DayScreen(state = sampleDiptychState())
+            }
+        }
+        composeRule.onRoot().captureRoboImage()
+    }
+
+    @Test
+    @Config(qualifiers = "w840dp-h900dp")
+    fun diptychExpanded() {
+        composeRule.setContent {
+            ShutterUpTheme(darkTheme = false) {
+                DayScreen(state = sampleDiptychState(), expanded = true)
+            }
+        }
+        composeRule.onRoot().captureRoboImage()
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h2800dp", fontScale = 2f)
+    fun diptychFontScale2() {
+        composeRule.setContent {
+            ShutterUpTheme(darkTheme = false) {
+                DayScreen(state = sampleDiptychState())
+            }
+        }
+        composeRule.onRoot().captureRoboImage()
+    }
+
+    @Test
+    @Config(qualifiers = "w400dp-h1600dp")
+    fun diptychPortraitLandscape() {
+        composeRule.setContent {
+            ShutterUpTheme(darkTheme = false) {
+                DayScreen(state = sampleDiptychState(mixedAspect = true))
+            }
+        }
+        composeRule.onRoot().captureRoboImage()
+    }
+
+    @Test
+    @Config(qualifiers = "w400dp-h1600dp")
+    fun diptychThreeTakeChain() {
+        composeRule.setContent {
+            ShutterUpTheme(darkTheme = false) {
+                DayScreen(state = sampleDiptychState(threeTakes = true))
             }
         }
         composeRule.onRoot().captureRoboImage()

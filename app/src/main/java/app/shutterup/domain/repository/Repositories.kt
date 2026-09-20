@@ -8,6 +8,7 @@ import app.shutterup.domain.model.Series
 import app.shutterup.domain.model.SupersededPrompt
 import java.time.LocalDate
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
 /** Room-backed in the persistence milestone (SPEC §10). */
 interface DayPromptRepository {
@@ -26,6 +27,12 @@ interface DayPromptRepository {
     suspend fun deleteAfter(date: LocalDate)
     fun observeDaysInSeries(seriesId: Long): Flow<List<DayPrompt>>
     suspend fun daysInSeries(seriesId: Long): List<DayPrompt>
+    /** Later takes of [original], oldest first. */
+    fun observeRepeatsOf(original: LocalDate): Flow<List<DayPrompt>> = flow {
+        emit(repeatsOf(original))
+    }
+    suspend fun repeatsOf(original: LocalDate): List<DayPrompt> =
+        allDays().filter { it.repeatsDate == original }.sortedBy { it.date }
 }
 
 interface SeriesRepository {
