@@ -37,12 +37,10 @@ sealed interface NanoDownloadState {
 }
 
 /**
- * Real on-device generator over Gemini Nano (SPEC §7.2). Written against the ML Kit
- * GenAI Prompt API docs (genai-prompt 1.0.0-beta4); device-verified only on the Fold 7.
- * Always behind [PromptGenerator]; the app is fully usable without it.
- *
- * The inference engine is leased only while generating (or downloading) and
- * [GenerativeModel.close]d afterward so Nano is not kept loaded in memory.
+ * On-device Gemini Nano generator (SPEC §7.2, deferred). Not wired into
+ * [app.shutterup.data.di.AiModule]; v1 must never construct this, because
+ * `Generation.getClient()` loads AICore and LMKs other apps on the Fold 7.
+ * Kept for a later theme-focus revisit.
  */
 @Singleton
 class NanoPromptGenerator @Inject constructor() : PromptGenerator {

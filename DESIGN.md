@@ -147,10 +147,8 @@ Rules:
 - When today is **COMPLETED**: the card becomes the photo — full-bleed inside the card with a bottom scrim, kicker and title over it in `inverseOnSurface`, and the button row becomes `Add a note` / `Retake`.
 - When today is **SKIPPED**: the card keeps the kicker, shows the title struck through in `onSurfaceVariant`, and the body reads "Skipped — see you tomorrow." (`MISSED` only ever applies to past days, so it never appears on this card.)
 - **PAUSED**: card reads "Paused" with a `Resume` button; kicker shows the resume hint.
-- **Library prompt**: a tiny `labelSmall` chip "From the library" in the kicker line, `outline` colour.
 - **Series (opt-in):** when today's prompt belongs to a seven-day series, the kicker carries the series title and position instead of weekday · theme: `A WEEK OF HANDS · 3 OF 7`. A quiet seven-dot row sits above the Shoot row: completed days filled with `primary` at low emphasis, the rest `outlineVariant`, the current day a ring rather than a fill. Never red, never animated beyond the card-reveal. Missing a day leaves that dot unfilled. When Series is off, this screen renders exactly as the wireframe above.
 - **Generating prompts**: a slim `LinearProgressIndicator` on a `surfaceContainer` strip, `labelMedium` copy such as `Generating prompts for Tuesday` or `Generating prompts for a seven-day series`. Sits above the compact navigation bar (or at the bottom of the rail pane; top of overlay screens). Disappears when done. Never blocks the UI.
-- **AI downloading**: a slim `LinearProgressIndicator` under the status row with "Preparing on-device AI · 43 %". Disappears when done.
 - **Notification permission denied**: an M3 `Card` (tonal, `errorContainer` is *not* used; use `secondaryContainer`) under the status row: "Turn on notifications to get your daily prompt" with an `Open settings` text button.
 
 Expanded: list-detail. Left pane (40 %) = the compact Today content minus the card's detail text; right pane (60 %) = Prompt Detail (§4.2) for today, always visible.
@@ -405,19 +403,18 @@ Sections in order: **Streaks · Count · Explorer · Time of day · Special**. T
 Standard M3 list, grouped:
 
 - **Daily prompt** — Notification time (time picker), Precise timing (switch + explanatory supporting text + status line "Allowed" / "Needs permission → Open settings"), Pause (switch).
-- **Prompts** — Series (switch; off supporting text "Some weeks arrive as a set of seven related prompts instead of seven separate ones. Turning this on starts a series tomorrow. Today's prompt stays."; on supporting text "Some weeks arrive as a set of seven related prompts instead of seven separate ones. The current series finishes even if you turn this off."), Where you are (city picker from a bundled list; value "Not set" until chosen; supporting text as in §7), Theme focus (text field, supporting text "Leave blank to be surprised"), On-device AI status (read-only row: "Ready · Gemini Nano v2" / "Downloading 43 %" / "Unavailable — using the built-in library").
+- **Prompts** — Series (switch; off supporting text "Some weeks arrive as a set of seven related prompts instead of seven separate ones. Turning this on starts a series tomorrow. Today's prompt stays."; on supporting text "Some weeks arrive as a set of seven related prompts instead of seven separate ones. The current series finishes even if you turn this off."), Where you are (city picker from a bundled list; value "Not set" until chosen; supporting text as in §7), Built-in library (read-only row: "Daily prompts come from a curated bank on this phone.").
 - **Photos** — Save location (read-only "Pictures/ShutterUp"), Storage used.
 - **About** — version, "Everything stays on your phone. ShutterUp has no internet access.", licences.
 - **Debug** (debug builds only) — Use fake AI (switch), Force day rollover, Seed 60 days of history, Reset all data.
 
 ### 4.9 Onboarding
 
-Four full-screen pages, single column, max width 480 dp, swipe or `Next`:
+Three full-screen pages, single column, max width 480 dp, swipe or `Next`:
 
 1. Wordmark + one sentence. Background: a very soft theme-tinted gradient that slowly shifts hue (20 s loop, respects reduced motion).
 2. Notifications: illustration is a mock notification card (built in Compose, not an image), request button.
-3. Time picker inline + theme focus field.
-4. AI status with progress; `Get my first prompt` button.
+3. Time picker inline; `Get my first prompt` button.
 
 Illustrations throughout the app are **composed from UI elements and shapes**, never raster art, so they follow dynamic colour and dark mode.
 
@@ -537,14 +534,14 @@ Second person, present tense, short. Warm but not chirpy. Never exclamation mark
 | Comeback badge description | "Back after three or more quiet days." |
 | Pause switch supporting text | "No prompts or notifications. Paused days don't affect your streak." |
 | Precise timing supporting text | "Delivers at the exact minute. Android needs you to allow alarms and reminders for ShutterUp." |
-| Theme focus placeholder | "Leave blank and I'll surprise you" |
-| Library tag | "From the library" |
+| Built-in library | "Built-in library" |
+| Library supporting | "Daily prompts come from a curated bank on this phone." |
+| Choosing prompt | "Choosing today's prompt." |
 | Series switch | `Series` |
 | Series supporting, off | "Some weeks arrive as a set of seven related prompts instead of seven separate ones. Turning this on starts a series tomorrow. Today's prompt stays." |
 | Series supporting, on | "Some weeks arrive as a set of seven related prompts instead of seven separate ones. The current series finishes even if you turn this off." |
 | Generating prompts | `Generating prompts for Tuesday` / `Generating prompts for a seven-day series` |
 | Series kicker | `{title} · {n} OF 7` e.g. `A WEEK OF HANDS · 3 OF 7` |
-| AI unavailable | "On-device AI isn't available on this phone right now. ShutterUp is using its built-in prompt library." |
 | About line | "Everything stays on your phone. ShutterUp has no internet access." |
 | Where you are | `Where you are` |
 | Where you are, unset | `Not set` |

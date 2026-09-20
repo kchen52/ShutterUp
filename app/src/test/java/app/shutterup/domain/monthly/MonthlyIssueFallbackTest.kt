@@ -282,7 +282,7 @@ class MonthlyIssueHeadlinesTest {
 
     @Test
     fun libraryThemes_haveTwoValidVariants() {
-        assertEquals(27, MonthlyIssueHeadlines.BANK.size)
+        assertEquals(45, MonthlyIssueHeadlines.BANK.size)
         for ((theme, variants) in MonthlyIssueHeadlines.BANK) {
             assertEquals("two variants for $theme", 2, variants.size)
             for (headline in variants) {

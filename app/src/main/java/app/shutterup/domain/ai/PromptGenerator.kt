@@ -4,11 +4,11 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 
 /**
- * AI prompt-generation contract (SPEC §7.1). Every implementation —
- * [NanoPromptGenerator][app.shutterup.data.ai.NanoPromptGenerator] (real),
- * [LibraryPromptGenerator][app.shutterup.domain.ai.LibraryPromptGenerator] (fallback bank),
- * `FakePromptGenerator` (deterministic, debug source set) — is used through this interface,
- * so the app stays fully usable when Nano is unavailable.
+ * Prompt-generation contract (SPEC §7.1). v1 ships
+ * [LibraryPromptGenerator][app.shutterup.domain.ai.LibraryPromptGenerator] as
+ * the runtime primary. [NanoPromptGenerator][app.shutterup.data.ai.NanoPromptGenerator]
+ * remains in the tree for a later theme-focus revisit and is not wired.
+ * `FakePromptGenerator` (deterministic, debug source set) is selectable in Debug settings.
  */
 interface PromptGenerator {
     suspend fun availability(): Availability

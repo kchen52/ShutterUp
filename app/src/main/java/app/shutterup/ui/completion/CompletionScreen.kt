@@ -56,7 +56,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.shutterup.domain.model.DayStatus
 import app.shutterup.domain.model.Entry
 import app.shutterup.domain.model.MediaKind
-import app.shutterup.domain.model.PromptSourceRef
 import app.shutterup.domain.share.isDayShareable
 import app.shutterup.share.ShareCopy
 import app.shutterup.ui.badges.BadgeEmblem
@@ -64,7 +63,6 @@ import app.shutterup.ui.badges.badgeDescription
 import app.shutterup.ui.badges.badgeDisplayName
 import app.shutterup.ui.components.ApertureCheckMark
 import app.shutterup.ui.components.Kicker
-import app.shutterup.ui.components.LibraryTag
 import app.shutterup.ui.detail.samplePrompt
 import app.shutterup.ui.icons.SnowflakeIcon
 import app.shutterup.ui.theme.ProvideThemeTint
@@ -189,9 +187,6 @@ fun CompletionScreen(
                 }
             }
             if (kicker.isNotEmpty()) Kicker(text = kicker)
-            if (prompt?.source == PromptSourceRef.LIBRARY) {
-                LibraryTag()
-            }
             if (state.firstEver) {
                 Text("First light.", style = MaterialTheme.typography.headlineMedium)
                 Text(

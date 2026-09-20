@@ -64,7 +64,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.shutterup.domain.model.DayStatus
 import app.shutterup.domain.model.Entry
 import app.shutterup.domain.model.MediaKind
-import app.shutterup.domain.model.PromptSourceRef
 import app.shutterup.domain.share.isDayShareable
 import app.shutterup.domain.take.DiptychCrop
 import app.shutterup.domain.take.TakeInterval
@@ -73,7 +72,6 @@ import app.shutterup.ui.adaptive.isExpandedWidth
 import app.shutterup.ui.badges.BadgeEmblem
 import app.shutterup.ui.components.ConstraintCard
 import app.shutterup.ui.components.Kicker
-import app.shutterup.ui.components.LibraryTag
 import app.shutterup.ui.components.ShootButton
 import app.shutterup.ui.detail.samplePrompt
 import app.shutterup.ui.theme.ProvideThemeTint
@@ -227,9 +225,6 @@ fun DayScreen(
                         itemVerticalAlignment = Alignment.CenterVertically,
                     ) {
                         Kicker(text = "${statusLabel(prompt.status)} · ${prompt.theme}")
-                        if (prompt.source == PromptSourceRef.LIBRARY) {
-                            LibraryTag()
-                        }
                     }
                     if (state.badgeIds.isNotEmpty()) {
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

@@ -46,18 +46,13 @@ object SettingsCopy {
     const val ABOUT_LINE =
         "Everything stays on your phone. ShutterUp has no internet access."
 
-    /** DESIGN.md §7 / onboarding */
-    const val AI_UNAVAILABLE =
-        "On-device AI isn't available on this phone right now. ShutterUp is using its built-in prompt library."
-
     /** DESIGN.md §4.8 */
-    const val AI_UNAVAILABLE_STATUS = "Unavailable — using the built-in library"
+    const val LIBRARY_STATUS = "Built-in library"
 
-    /** DESIGN.md §4.8 */
-    const val AI_READY = "Ready"
+    const val LIBRARY_SUPPORTING =
+        "Daily prompts come from a curated bank on this phone."
 
-    /** SPEC §4.1 / §7.6 */
-    const val AI_PREPARING = "Preparing on-device AI"
+    const val CHOOSING_PROMPT = "Choosing today's prompt."
 
     /** SPEC §8.2 battery-restriction hint (no auto-exemption prompt). */
     const val BATTERY_HINT =
@@ -75,7 +70,6 @@ object SettingsCopy {
     const val PRECISE_TIMING = "Precise timing"
     const val PAUSE = "Pause"
     const val FREEZES = "Freezes"
-    const val AI_STATUS = "On-device AI status"
     const val SAVE_LOCATION_LABEL = "Save location"
     const val SAVE_LOCATION_VALUE = "Pictures/ShutterUp"
     const val VERSION = "Version"
@@ -97,5 +91,5 @@ object SettingsCopy {
             "No accounts, no cloud sync, no analytics, no crash reporting. " +
             "Your photos live in your Gallery (Pictures/ShutterUp). " +
             "The app's database and settings participate in Android Auto Backup like any other app data. " +
-            "The on-device AI (Gemini Nano) runs entirely on your phone."
+            "The daily prompts come from a built-in library that stays on your phone."
 }
