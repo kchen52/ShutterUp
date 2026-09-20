@@ -21,6 +21,9 @@ interface DayPromptDao {
     @Upsert
     suspend fun upsert(prompt: DayPromptEntity)
 
+    @Upsert
+    suspend fun upsertAll(prompts: List<DayPromptEntity>)
+
     @Query("SELECT title FROM day_prompts ORDER BY date DESC LIMIT :limit")
     suspend fun recentTitles(limit: Int): List<String>
 
@@ -56,4 +59,10 @@ interface DayPromptDao {
 
     @Insert
     suspend fun recordSuperseded(prompt: SupersededPromptEntity)
+
+    @Query("SELECT * FROM superseded_prompts ORDER BY id ASC")
+    suspend fun allSuperseded(): List<SupersededPromptEntity>
+
+    @Insert
+    suspend fun insertSuperseded(prompts: List<SupersededPromptEntity>)
 }

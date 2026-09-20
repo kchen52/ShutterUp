@@ -52,7 +52,7 @@ A **system share sheet** (`ACTION_SEND` of a composed card) is in v1. That is a 
 | Photo storage | `MediaStore` → `Pictures/ShutterUp/`; DB stores the content URI + a private thumbnail | Visible in Samsung Gallery / Google Photos backup, survives uninstall |
 | Photo size | Keep the original as delivered; generate ~400 px thumbnail | Storage is the user's call; grid stays fast |
 | Location | No location permission; optional city from a bundled list for daylight and hemisphere. Camera-written EXIF left untouched on the original, and shared cards are a new PNG that carries none of it | Privacy, offline. Nothing is sent anywhere |
-| Backup | Android Auto Backup for DB + prefs; photos are the user's via Gallery | Photos exceed the 25 MB backup quota |
+| Backup | Settings → Photos writes a ZIP of progress + photo copies; Android Auto Backup still covers DB + prefs; Gallery originals usually survive uninstall | Auto Backup's 25 MB quota cannot hold originals; the ZIP is on-demand for reinstalls |
 | Deletion | Ask each time whether to also delete from Gallery | Default agreed |
 | Day boundary | Local calendar date, midnight in the device's current timezone | Simple mental model |
 
@@ -368,6 +368,8 @@ Scoped storage: writing to `MediaStore` collections needs no permission on API 2
 
 One-time migration: installs that still point `Entry.mediaUri` at app-private files (`FileProvider` / `file://`) are walked on a background coroutine at process start. Each readable original is stream-copied into `Pictures/ShutterUp` with the same `DISPLAY_NAME` rule and the row is rewritten to the new `content://` URI; thumbnails are left alone. The pass is idempotent (already-migrated MediaStore URIs are skipped) and interruption-safe (a crash mid-loop resumes remaining rows on the next launch). A file that cannot be copied keeps working off its thumbnail. Settings → Photos reports `Pictures/ShutterUp` and counts Gallery originals plus private thumbnails.
 
+**Progress backup (Settings → Photos):** **Backup progress** writes a ZIP the user keeps (`progress.json` plus `thumbs/` and `photos/` copies). **Restore progress** confirms, then replaces Room + prefs, remaps MediaStore URIs (keep if still readable, else match `DISPLAY_NAME` in `Pictures/ShutterUp`, else re-insert from the ZIP), and rewrites thumbnail paths into this install. Photos already in Gallery are not overwritten. The ZIP is a local file via the system document picker; nothing is uploaded.
+
 ---
 
 ## 10. Data model
@@ -497,7 +499,7 @@ Preferences (DataStore)
 | Photo taken but app killed before save | On next launch, check `cache/pending/` for today's file and complete the save |
 | User deletes original in Gallery | Thumbnail remains; Day screen shows "Original missing" |
 | Photo Picker returns a non-today photo | Reject with clear message; day remains `PENDING` |
-| App uninstalled/reinstalled | Photos remain in Gallery; DB restored from Auto Backup if available; thumbnails regenerated lazily from URIs when possible |
+| App uninstalled/reinstalled | Photos remain in Gallery; restore from Settings → Photos backup ZIP if the user made one; otherwise DB restored from Auto Backup if available; thumbnails regenerated from URIs or the ZIP |
 | Two devices (future) | Out of scope; data model uses dates as keys so merges are conceivable |
 
 ---
@@ -530,6 +532,7 @@ Pure-Kotlin domain must reach high coverage. Required suites:
 - `SeasonTest` — northern default when unset; southern latitude flips the season.
 - `ShareCardContentTest` / `ShareableDayTest` — kicker composition, shareable-day rule (photo required; note never a field).
 - `ShareCacheTest` / `ShareIntentsTest` — PNG write, FileProvider URI, grant flags, cache prune, failure leaves no leftover file.
+- `ProgressBackupJsonTest` / `ProgressBackupStoreTest` — ZIP round-trip of prompts, notes, streaks, badges, prefs, thumbs, and Gallery originals; restore re-inserts a deleted MediaStore row; zip-slip and unknown format rejected.
 
 Use `kotlinx-coroutines-test`, `Turbine` for flows, a fake `Clock`, and `FakePromptGenerator`. Room DAOs: Robolectric-backed tests for queries used by streaks/calendar.
 
@@ -554,6 +557,7 @@ Use `createAndroidComposeRule<MainActivity>()` with Hilt test modules binding `F
 - Daily library pick succeeds; inspect prompt quality for 10 rerolls.
 - Camera round-trip on cover screen, on inner screen, and unfolding mid-capture.
 - Photo appears in Samsung Gallery under Pictures/ShutterUp; delete-from-Gallery path works.
+- Settings → Photos **Backup progress** writes a ZIP; uninstall; reinstall; **Restore progress** brings back prompts, notes, streaks, and photos.
 - Midnight rollover with the device idle overnight.
 
 ---
@@ -610,9 +614,9 @@ Until the secrets exist, the workflow's release path will produce a debug-signed
 
 ## 17. Roadmap
 
-**v1 (this spec):** onboarding, daily library prompts + buffer, optional Series weeks, WorkManager + optional exact notifications, capture pipeline, MediaStore save, calendar/feed/themes/day/badges/settings, streaks + freezes + badges + monthly ring, Glance widget, adaptive layouts, unit + UI tests, CI.
+**v1 (this spec):** onboarding, daily library prompts + buffer, optional Series weeks, WorkManager + optional exact notifications, capture pipeline, MediaStore save, calendar/feed/themes/day/badges/settings, streaks + freezes + badges + monthly ring, Glance widget, adaptive layouts, on-demand progress backup ZIP, unit + UI tests, CI.
 
-**v1.1:** tabletop posture layout; export (ZIP of photos + JSON); evening "still time" reminder toggle.
+**v1.1:** tabletop posture layout; evening "still time" reminder toggle.
 
 **Later:** dynamic themes / on-device Nano (only if it can run without LMK); one-off "theme for tomorrow"; image-input prompts; in-app social features (feeds, comments, likes), multi-device sync, Play release, other devices, Wear OS glance. System share of a composed card is already in v1 (§4.6).
 

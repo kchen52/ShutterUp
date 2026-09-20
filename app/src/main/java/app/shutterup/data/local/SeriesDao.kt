@@ -30,6 +30,9 @@ interface SeriesDao {
     @Insert
     suspend fun insert(series: SeriesEntity): Long
 
+    @Insert
+    suspend fun insertAll(rows: List<SeriesEntity>)
+
     @Update
     suspend fun update(series: SeriesEntity)
 

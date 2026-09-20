@@ -232,13 +232,23 @@ class RepositoryMappingTest {
     ) : GamificationDao {
         override fun observeAchievements(): Flow<List<AchievementEntity>> = flowOf(emptyList())
 
+        override suspend fun allAchievements(): List<AchievementEntity> = emptyList()
+
         override suspend fun unlock(achievement: AchievementEntity) = Unit
 
+        override suspend fun unlockAll(achievements: List<AchievementEntity>) = Unit
+
         override fun observeStreak(): Flow<StreakStateEntity?> = streak
+
+        override suspend fun getStreak(): StreakStateEntity? = null
 
         override suspend fun updateStreak(state: StreakStateEntity) = Unit
 
         override suspend fun recordUsage(usage: LibraryUsageEntity) = Unit
+
+        override suspend fun allLibraryUsage(): List<LibraryUsageEntity> = emptyList()
+
+        override suspend fun recordUsageAll(usage: List<LibraryUsageEntity>) = Unit
 
         override suspend fun libraryUsedSince(libraryId: String, since: LocalDate): Boolean = false
     }

@@ -23,6 +23,9 @@ interface MonthlyIssueDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(issue: MonthlyIssueEntity): Long
 
+    @Insert
+    suspend fun insertAll(issues: List<MonthlyIssueEntity>)
+
     @Query("UPDATE monthly_issues SET dismissedFromFeed = 1 WHERE yearMonth = :yearMonth")
     suspend fun dismissFromFeed(yearMonth: String)
 }

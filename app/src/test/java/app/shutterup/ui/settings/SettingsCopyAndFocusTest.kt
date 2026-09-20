@@ -3,6 +3,7 @@ package app.shutterup.ui.settings
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class SettingsCopyAndFocusTest {
@@ -61,5 +62,17 @@ class SettingsCopyAndFocusTest {
             SettingsCopy.WHERE_YOU_ARE_SUPPORTING,
         )
         assertFalse(SettingsCopy.WHERE_YOU_ARE_SUPPORTING.contains("!"))
+    }
+
+    @Test
+    fun backupCopyIsQuietAndOffline() {
+        assertEquals("Backup progress", SettingsCopy.BACKUP)
+        assertEquals("Restore progress", SettingsCopy.RESTORE)
+        assertFalse(SettingsCopy.BACKUP_SUPPORTING.contains("!"))
+        assertFalse(SettingsCopy.RESTORE_SUPPORTING.contains("!"))
+        assertFalse(SettingsCopy.RESTORE_BODY.contains("!"))
+        assertFalse(SettingsCopy.BACKUP_FAILED.contains("!"))
+        assertTrue(SettingsCopy.BACKUP_SUPPORTING.contains("Gallery"))
+        assertTrue(SettingsCopy.RESTORE_SUPPORTING.contains("Gallery"))
     }
 }
