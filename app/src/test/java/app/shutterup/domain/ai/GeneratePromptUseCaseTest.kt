@@ -163,6 +163,11 @@ class GeneratePromptUseCaseTest {
         val primary = ScriptedGenerator(
             listOf(
                 validPrompt(
+                    title = "Original Frame",
+                    oneLiner = "Capture crumbs as a leading line.",
+                    theme = "Table",
+                ),
+                validPrompt(
                     title = "Rerolled Frame",
                     oneLiner = "Turn a mug into a silhouette study.",
                     theme = "Silhouette",
@@ -173,8 +178,7 @@ class GeneratePromptUseCaseTest {
         val original = LocalDate.of(2024, 5, 1)
         val useCase = useCase(primary = primary, prompts = prompts)
         useCase.promptFor(date, null)
-        val pending = prompts.getDay(date)!!
-        prompts.upsert(pending.copy(repeatsDate = original, title = "Find the sky in a puddle"))
+        prompts.upsert(prompts.getDay(date)!!.copy(repeatsDate = original))
         val rerolled = useCase.reroll(date, null)
         assertEquals("Rerolled Frame", rerolled.title)
         assertEquals(null, prompts.getDay(date)?.repeatsDate)
