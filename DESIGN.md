@@ -188,6 +188,8 @@ Compact:
 │ └──────────────────────────┘ │
 │                              │
 │ 9 hours left today           │  labelMedium, onSurfaceVariant
+│   — or, with a city set —    │  never coloured, no icon
+│ 2 hours of good light left   │
 │                              │
 │ [ ◎ Shoot ]          Reroll  │  sticky bottom bar
 │                       Skip   │
@@ -205,6 +207,7 @@ Compact:
 
   If the series title already contains the theme (case-insensitive), drop the theme. Otherwise append ` · THEME` only when the line still fits the one-line kicker budget at 200% font scale; if it cannot fit, drop the theme. When Series is off, this screen is unchanged.
 - "N hours left" turns to "N minutes left" under an hour; never coloured.
+- With a city set, the same line reads remaining daylight instead: "N hours of good light left", minutes under an hour. After sunset, before sunrise, and polar night, it falls back to the clock line. Polar day: "Good light all day". Still never coloured, no icon, no progress bar. Prompt Detail only.
 - Deep-linked with `autoLaunchCamera` → the camera launches immediately; this screen is what the user returns to if they cancel.
 
 Expanded: same content in the right pane; bottom bar becomes an inline button row under the constraint card.
@@ -301,7 +304,7 @@ Sections in order: **Streaks · Count · Explorer · Time of day · Special**. T
 Standard M3 list, grouped:
 
 - **Daily prompt** — Notification time (time picker), Precise timing (switch + explanatory supporting text + status line "Allowed" / "Needs permission → Open settings"), Pause (switch).
-- **Prompts** — Series (switch + supporting text "Some weeks arrive as a set of seven related prompts instead of seven separate ones."), Theme focus (text field, supporting text "Leave blank to be surprised"), On-device AI status (read-only row: "Ready · Gemini Nano v2" / "Downloading 43 %" / "Unavailable — using the built-in library").
+- **Prompts** — Series (switch + supporting text "Some weeks arrive as a set of seven related prompts instead of seven separate ones."), Where you are (city picker from a bundled list; value "Not set" until chosen; supporting text as in §7), Theme focus (text field, supporting text "Leave blank to be surprised"), On-device AI status (read-only row: "Ready · Gemini Nano v2" / "Downloading 43 %" / "Unavailable — using the built-in library").
 - **Photos** — Save location (read-only "Pictures/ShutterUp"), Storage used.
 - **About** — version, "Everything stays on your phone. ShutterUp has no internet access.", licences.
 - **Debug** (debug builds only) — Use fake AI (switch), Force day rollover, Seed 60 days of history, Reset all data.
@@ -410,6 +413,12 @@ Second person, present tense, short. Warm but not chirpy. Never exclamation mark
 | Series kicker | `{title} · {n} OF 7` e.g. `A WEEK OF HANDS · 3 OF 7` |
 | AI unavailable | "On-device AI isn't available on this phone right now. ShutterUp is using its built-in prompt library." |
 | About line | "Everything stays on your phone. ShutterUp has no internet access." |
+| Where you are | `Where you are` |
+| Where you are, unset | `Not set` |
+| Where you are, supporting | `A city-level guess for daylight. No location permission, nothing leaves the phone.` |
+| Remaining daylight, hours | `2 hours of good light left` (singular `1 hour of good light left`) |
+| Remaining daylight, minutes | `40 minutes of good light left` (singular `1 minute of good light left`) |
+| Remaining daylight, polar day | `Good light all day` |
 | Delete dialog | Title "Delete this photo?" Body "The day stays complete." Buttons `Delete from ShutterUp` / `Also delete from Gallery` / `Cancel` |
 | Delete photo (Gallery) result | Snackbar "Deleted." |
 | Empty calendar | "Your first photo goes here." |

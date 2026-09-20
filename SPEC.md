@@ -44,7 +44,7 @@ ShutterUp is a single-user, fully offline Android app that sends the user one ph
 | Camera | `ACTION_IMAGE_CAPTURE` via `ActivityResultContracts.TakePicture` into a `FileProvider` URI; Photo Picker as fallback | Keeps Samsung Camera features (Pro mode, Flex mode, cover-screen preview) with a direct return to the app |
 | Photo storage | `MediaStore` → `Pictures/ShutterUp/`; DB stores the content URI + a private thumbnail | Visible in Samsung Gallery / Google Photos backup, survives uninstall |
 | Photo size | Keep the original as delivered; generate ~400 px thumbnail | Storage is the user's call; grid stays fast |
-| Location | No location permission; camera-written EXIF left untouched | Privacy, simplicity |
+| Location | No location permission; optional city from a bundled list for daylight and hemisphere. Camera-written EXIF left untouched | Privacy, offline. Nothing is sent anywhere |
 | Backup | Android Auto Backup for DB + prefs; photos are the user's via Gallery | Photos exceed the 25 MB backup quota |
 | Deletion | Ask each time whether to also delete from Gallery | Default agreed |
 | Day boundary | Local calendar date, midnight in the device's current timezone | Simple mental model |
@@ -83,11 +83,23 @@ ShutterUp is a single-user, fully offline Android app that sends the user one ph
 ### 4.2 Daily loop (happy path)
 
 1. At the user's chosen time, the notification fires with the prompt title and one-liner. Actions: **Shoot** (opens Prompt Detail with `autoLaunchCamera=true`), **Reroll** (only if a reroll remains).
-2. User taps the notification → Prompt Detail screen: title, theme chip, one-liner, details, constraint, tips, time remaining today, **Shoot** button.
+2. User taps the notification → Prompt Detail screen: title, theme chip, one-liner, details, constraint, tips, remaining time (or remaining daylight if a city is set; see §4.2.1), **Shoot** button.
 3. User taps **Shoot** → system camera opens with `EXTRA_OUTPUT` pointing at a pending private file.
 4. User takes a photo and confirms in the camera → returns to the app.
 5. App moves the file into `MediaStore` (`Pictures/ShutterUp/yyyy-MM-dd_<theme-slug>.jpg`), creates a thumbnail, creates the Entry, marks the day `COMPLETED`, evaluates achievements, and shows a Completion screen (photo, prompt, optional note field, any newly unlocked badge, streak count).
 6. Notification is dismissed automatically.
+
+### 4.2.1 Remaining light on Prompt Detail
+
+Prompt Detail shows one remaining-time line, never coloured, Prompt Detail only (not Home, the widget, or the notification).
+
+- Default (no city chosen): `"N hours left today"`, switching to minutes under an hour. Unchanged from v1.
+- With a city chosen, and while the sun is up: `"N hours of good light left"` (minutes when under an hour). Sunrise/sunset are computed on-device from the date and the city's latitude/longitude (NOAA solar calculator). The device `ZoneId` is used, not a city timezone, so travelling still reads as local clock time.
+- After sunset, before sunrise, and during polar night: fall back to the clock line. Do not comment on the light being gone.
+- Polar day (sun does not set): `"Good light all day"`.
+- City list is bundled. No `ACCESS_COARSE_LOCATION`, no `INTERNET`, no geocoding.
+
+The city is chosen once in Settings → Prompts → "Where you are", and can be returned to unset. Changing city only regenerates the un-shown future prompt buffer when the hemisphere changes (today's prompt is kept).
 
 ### 4.3 Alternate paths
 
@@ -186,7 +198,7 @@ data class GenerationRequest(
     val recentTitles: List<String>,   // last 30 shown prompt titles (dedup)
     val recentThemes: List<String>,   // last 14 themes (variety)
     val dayOfWeek: DayOfWeek,
-    val season: Season,               // derived from date + hemisphere assumption (northern; settings later)
+    val season: Season,               // derived from date; southern hemisphere when a city south of the equator is set, otherwise northern
     val excludeConstraintKinds: Set<String> = emptySet(),
 )
 
@@ -364,7 +376,8 @@ LibraryUsage
 Preferences (DataStore)
   notifyTime (LocalTime), preciseTiming (Boolean), themeFocus (String?),
   seriesEnabled (Boolean, default false), paused (Boolean), onboardingComplete (Boolean),
-  debugUseFakeAi (Boolean, debug only)
+  debugUseFakeAi (Boolean, debug only),
+  coarseCityId (String?, default unset) -- id from the bundled city list; lat/lon are not stored
 ```
 
 ---
@@ -380,6 +393,7 @@ Preferences (DataStore)
 | `CAMERA` | **Not requested** | `ACTION_IMAGE_CAPTURE` doesn't need it; declaring it is unnecessary. Do not declare `<uses-feature android:name="android.hardware.camera" android:required="true">` |
 | `INTERNET` | **Never** | Hard rule; add a unit test that asserts the merged manifest lacks it |
 | Storage permissions | **None** | MediaStore write + Photo Picker |
+| Location permissions | **Never** | Daylight uses a bundled city list |
 | `FOREGROUND_SERVICE` | Not in v1 | Generation runs inside WorkManager limits |
 
 ---
@@ -452,7 +466,10 @@ Pure-Kotlin domain must reach high coverage. Required suites:
 - `AchievementEvaluatorTest` — each badge in §6.2 unlocks exactly once at the right moment.
 - `CaptureDateValidatorTest` — today vs. yesterday vs. timezone edge (photo at 23:50 vs 00:10).
 - `MediaNamingTest` — filename slug generation.
-- `ManifestGuardTest` — parses the merged debug manifest and asserts no `INTERNET`, `READ_MEDIA_IMAGES`, `USE_EXACT_ALARM`.
+- `ManifestGuardTest` — parses the merged debug manifest and asserts no `INTERNET`, `READ_MEDIA_IMAGES`, `USE_EXACT_ALARM`, or location permissions.
+- `SunTimesTest` — NOAA sunrise/sunset against published times across both hemispheres, an equinox, both solstices, the equator, and Tromsø polar day/night.
+- `DaylightRemainingTest` — copy at the hour/minute threshold, fallback when unset / after sunset / polar night, polar-day copy.
+- `SeasonTest` — northern default when unset; southern latitude flips the season.
 
 Use `kotlinx-coroutines-test`, `Turbine` for flows, a fake `Clock`, and `FakePromptGenerator`. Room DAOs: Robolectric-backed tests for queries used by streaks/calendar.
 
@@ -536,7 +553,7 @@ Until the secrets exist, the workflow's release path will produce a debug-signed
 
 **v1 (this spec):** onboarding, daily generation + buffer, library fallback, optional Series weeks, WorkManager + optional exact notifications, capture pipeline, MediaStore save, calendar/feed/themes/day/badges/settings, streaks + freezes + badges + monthly ring, Glance widget, adaptive layouts, unit + UI tests, CI.
 
-**v1.1:** tabletop posture layout; one-off "theme for tomorrow"; export (ZIP of photos + JSON); evening "still time" reminder toggle; hemisphere/season setting; image-input prompts ("build on yesterday's shot").
+**v1.1:** tabletop posture layout; one-off "theme for tomorrow"; export (ZIP of photos + JSON); evening "still time" reminder toggle; image-input prompts ("build on yesterday's shot").
 
 **Later:** social features, sharing, multi-device sync, Play release, other devices, Wear OS glance.
 
