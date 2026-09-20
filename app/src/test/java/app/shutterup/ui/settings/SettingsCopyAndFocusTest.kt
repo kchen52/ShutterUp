@@ -2,6 +2,7 @@ package app.shutterup.ui.settings
 
 import app.shutterup.domain.ai.Availability
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Test
 
@@ -41,5 +42,16 @@ class SettingsCopyAndFocusTest {
             "Some weeks arrive as a set of seven related prompts instead of seven separate ones.",
             SettingsCopy.SERIES_SUPPORTING,
         )
+    }
+
+    @Test
+    fun whereYouAreCopyIsPlainAndOffline() {
+        assertEquals("Where you are", SettingsCopy.WHERE_YOU_ARE)
+        assertEquals("Not set", SettingsCopy.WHERE_YOU_ARE_UNSET)
+        assertEquals(
+            "A city-level guess for daylight. No location permission, nothing leaves the phone.",
+            SettingsCopy.WHERE_YOU_ARE_SUPPORTING,
+        )
+        assertFalse(SettingsCopy.WHERE_YOU_ARE_SUPPORTING.contains("!"))
     }
 }

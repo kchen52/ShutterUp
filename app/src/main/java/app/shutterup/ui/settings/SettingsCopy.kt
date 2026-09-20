@@ -18,6 +18,13 @@ object SettingsCopy {
     const val SERIES_SUPPORTING =
         "Some weeks arrive as a set of seven related prompts instead of seven separate ones."
 
+    const val WHERE_YOU_ARE = "Where you are"
+
+    const val WHERE_YOU_ARE_UNSET = "Not set"
+
+    const val WHERE_YOU_ARE_SUPPORTING =
+        "A city-level guess for daylight. No location permission, nothing leaves the phone."
+
     /** DESIGN.md §7 */
     const val PAUSE_SUPPORTING =
         "No prompts or notifications. Paused days don't affect your streak."

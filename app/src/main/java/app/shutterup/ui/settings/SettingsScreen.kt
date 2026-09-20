@@ -52,6 +52,7 @@ import androidx.window.core.layout.WindowSizeClass
 import app.shutterup.ui.components.Kicker
 import app.shutterup.ui.icons.SnowflakeIcon
 import app.shutterup.ui.theme.ShutterUpTheme
+import app.shutterup.domain.geo.CityCatalog
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -74,6 +75,7 @@ fun SettingsRoute(
         onPaused = viewModel::setPaused,
         onThemeFocus = viewModel::setThemeFocus,
         onSeriesEnabled = viewModel::setSeriesEnabled,
+        onCoarseCity = viewModel::setCoarseCityId,
         onDebugUseFakeAi = viewModel::setDebugUseFakeAi,
         onForceRollover = viewModel::forceDayRollover,
         onSeedHistory = viewModel::seedSixtyDays,
@@ -127,6 +129,7 @@ fun SettingsScreen(
     onPaused: (Boolean) -> Unit = {},
     onThemeFocus: (String) -> Unit = {},
     onSeriesEnabled: (Boolean) -> Unit = {},
+    onCoarseCity: (String?) -> Unit = {},
     onDebugUseFakeAi: (Boolean) -> Unit = {},
     onForceRollover: () -> Unit = {},
     onSeedHistory: () -> Unit = {},
@@ -181,6 +184,7 @@ fun SettingsScreen(
                         onPaused = onPaused,
                         onThemeFocus = onThemeFocus,
                         onSeriesEnabled = onSeriesEnabled,
+                        onCoarseCity = onCoarseCity,
                         onDebugUseFakeAi = onDebugUseFakeAi,
                         onForceRollover = onForceRollover,
                         onSeedHistory = onSeedHistory,
@@ -215,6 +219,7 @@ fun SettingsScreen(
                         onPaused = onPaused,
                         onThemeFocus = onThemeFocus,
                         onSeriesEnabled = onSeriesEnabled,
+                        onCoarseCity = onCoarseCity,
                         onDebugUseFakeAi = onDebugUseFakeAi,
                         onForceRollover = onForceRollover,
                         onSeedHistory = onSeedHistory,
@@ -282,6 +287,7 @@ private fun SettingsGroup(
     onPaused: (Boolean) -> Unit,
     onThemeFocus: (String) -> Unit,
     onSeriesEnabled: (Boolean) -> Unit,
+    onCoarseCity: (String?) -> Unit,
     onDebugUseFakeAi: (Boolean) -> Unit,
     onForceRollover: () -> Unit,
     onSeedHistory: () -> Unit,
@@ -303,6 +309,7 @@ private fun SettingsGroup(
             state = state,
             onThemeFocus = onThemeFocus,
             onSeriesEnabled = onSeriesEnabled,
+            onCoarseCity = onCoarseCity,
         )
         SettingsCategory.Photos -> PhotosSection(state = state)
         SettingsCategory.About -> AboutSection(state = state, onOpenPrivacy = onOpenPrivacy)
@@ -430,8 +437,10 @@ private fun PromptsSection(
     state: SettingsUiState,
     onThemeFocus: (String) -> Unit,
     onSeriesEnabled: (Boolean) -> Unit,
+    onCoarseCity: (String?) -> Unit,
 ) {
     var draft by remember { mutableStateOf(state.themeFocus) }
+    var showCities by remember { mutableStateOf(false) }
     LaunchedEffect(state.themeFocus) {
         if (state.themeFocus != draft) draft = state.themeFocus
     }
@@ -441,6 +450,18 @@ private fun PromptsSection(
         checked = state.seriesEnabled,
         onCheckedChange = onSeriesEnabled,
         supporting = SettingsCopy.SERIES_SUPPORTING,
+    )
+    ListItem(
+        headlineContent = { Text(SettingsCopy.WHERE_YOU_ARE) },
+        supportingContent = {
+            Column {
+                Text(state.coarseCityName ?: SettingsCopy.WHERE_YOU_ARE_UNSET)
+                Text(SettingsCopy.WHERE_YOU_ARE_SUPPORTING)
+            }
+        },
+        modifier = Modifier
+            .heightIn(min = 48.dp)
+            .clickable { showCities = true },
     )
     OutlinedTextField(
         value = draft,
@@ -463,6 +484,78 @@ private fun PromptsSection(
             Column {
                 Text(state.aiStatus)
                 state.aiSupporting?.let { Text(it) }
+            }
+        },
+    )
+    if (showCities) {
+        CityPickerDialog(
+            selectedId = state.coarseCityId,
+            onSelect = { id ->
+                onCoarseCity(id)
+                showCities = false
+            },
+            onDismiss = { showCities = false },
+        )
+    }
+}
+
+@Composable
+private fun CityPickerDialog(
+    selectedId: String?,
+    onSelect: (String?) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(
+                onClick = onDismiss,
+                modifier = Modifier.heightIn(min = 48.dp),
+            ) {
+                Text("Close")
+            }
+        },
+        title = { Text(SettingsCopy.WHERE_YOU_ARE) },
+        text = {
+            Column(
+                modifier = Modifier
+                    .heightIn(max = 420.dp)
+                    .verticalScroll(rememberScrollState()),
+            ) {
+                val unsetSelected = selectedId == null
+                ListItem(
+                    headlineContent = {
+                        Text(
+                            text = SettingsCopy.WHERE_YOU_ARE_UNSET,
+                            color = if (unsetSelected) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.onSurface
+                            },
+                        )
+                    },
+                    modifier = Modifier
+                        .heightIn(min = 48.dp)
+                        .clickable { onSelect(null) },
+                )
+                CityCatalog.cities.forEach { city ->
+                    val selected = city.id == selectedId
+                    ListItem(
+                        headlineContent = {
+                            Text(
+                                text = city.name,
+                                color = if (selected) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.onSurface
+                                },
+                            )
+                        },
+                        modifier = Modifier
+                            .heightIn(min = 48.dp)
+                            .clickable { onSelect(city.id) },
+                    )
+                }
             }
         },
     )
@@ -607,7 +700,10 @@ private fun SwitchRow(
     )
 }
 
-internal fun sampleSettingsState(): SettingsUiState {
+internal fun sampleSettingsState(
+    coarseCityId: String? = null,
+    coarseCityName: String? = null,
+): SettingsUiState {
     return SettingsUiState(
         notifyTime = LocalTime.of(9, 0),
         preciseTiming = false,
@@ -622,6 +718,8 @@ internal fun sampleSettingsState(): SettingsUiState {
         debugUseFakeAi = false,
         showBatteryHint = false,
         storageUsed = "12 MB",
+        coarseCityId = coarseCityId,
+        coarseCityName = coarseCityName,
     )
 }
 
@@ -654,5 +752,15 @@ private fun SettingsPreviewExpandedLight() {
 private fun SettingsPreviewFontScale() {
     ShutterUpTheme(darkTheme = false) {
         Surface { SettingsScreen(state = sampleSettingsState()) }
+    }
+}
+
+@Preview(name = "City set", widthDp = 400, heightDp = 900)
+@Composable
+private fun SettingsPreviewCitySet() {
+    ShutterUpTheme(darkTheme = false) {
+        Surface {
+            SettingsScreen(state = sampleSettingsState(coarseCityId = "sydney", coarseCityName = "Sydney"))
+        }
     }
 }

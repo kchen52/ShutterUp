@@ -107,4 +107,56 @@ class PromptDetailScreenshotTest {
         }
         composeRule.onRoot().captureRoboImage()
     }
+
+    @Test
+    fun promptDetailGoodLight() {
+        composeRule.setContent {
+            ShutterUpTheme(darkTheme = false) {
+                PromptDetailScreen(
+                    state = PromptDetailUiState(
+                        date = samplePrompt().date,
+                        prompt = samplePrompt(),
+                        remainingLabel = "2 hours of good light left",
+                        isToday = true,
+                    ),
+                )
+            }
+        }
+        composeRule.onRoot().captureRoboImage()
+    }
+
+    @Test
+    fun promptDetailGoodLightDark() {
+        composeRule.setContent {
+            ShutterUpTheme(darkTheme = true) {
+                PromptDetailScreen(
+                    state = PromptDetailUiState(
+                        date = samplePrompt().date,
+                        prompt = samplePrompt(),
+                        remainingLabel = "2 hours of good light left",
+                        isToday = true,
+                    ),
+                )
+            }
+        }
+        composeRule.onRoot().captureRoboImage()
+    }
+
+    @Test
+    @Config(qualifiers = "w400dp-h1600dp", fontScale = 2f)
+    fun promptDetailGoodLightFontScale2() {
+        composeRule.setContent {
+            ShutterUpTheme(darkTheme = false) {
+                PromptDetailScreen(
+                    state = PromptDetailUiState(
+                        date = samplePrompt().date,
+                        prompt = samplePrompt(),
+                        remainingLabel = "40 minutes of good light left",
+                        isToday = true,
+                    ),
+                )
+            }
+        }
+        composeRule.onRoot().captureRoboImage()
+    }
 }

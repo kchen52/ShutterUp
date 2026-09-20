@@ -60,4 +60,30 @@ class SettingsScreenshotTest {
         }
         composeRule.onRoot().captureRoboImage()
     }
+
+    @Test
+    @Config(qualifiers = "w400dp-h2000dp", fontScale = 2f)
+    fun settingsFontScale2() {
+        composeRule.setContent {
+            ShutterUpTheme(darkTheme = false) {
+                SettingsScreen(state = sampleSettingsState())
+            }
+        }
+        composeRule.onRoot().captureRoboImage()
+    }
+
+    @Test
+    fun settingsCitySetLight() {
+        composeRule.setContent {
+            ShutterUpTheme(darkTheme = false) {
+                SettingsScreen(
+                    state = sampleSettingsState(
+                        coarseCityId = "sydney",
+                        coarseCityName = "Sydney",
+                    ),
+                )
+            }
+        }
+        composeRule.onRoot().captureRoboImage()
+    }
 }
