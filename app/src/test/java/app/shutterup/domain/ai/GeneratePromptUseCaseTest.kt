@@ -39,6 +39,8 @@ class GeneratePromptUseCaseTest {
         val useCase = useCase(primary = primary)
         val result = useCase.promptFor(date, themeFocus = null)
         assertEquals(3, primary.calls)
+        assertEquals(1, primary.engineHolds)
+        assertEquals(1, primary.engineReleases)
         assertEquals("Third Try Light", result.title)
         assertEquals(PromptSource.ON_DEVICE_AI, result.source)
     }
@@ -500,6 +502,65 @@ class GeneratePromptUseCaseTest {
     }
 
     @Test
+    fun promptFor_holdsEngineForTheBatchThenReleases() = runBlocking {
+        val primary = ScriptedGenerator(prompts = listOf(validPrompt()))
+        val useCase = useCase(primary = primary)
+        useCase.promptFor(date, null)
+        assertEquals(1, primary.engineHolds)
+        assertEquals(1, primary.engineReleases)
+        useCase.promptFor(date, null)
+        assertEquals(1, primary.engineHolds)
+        assertEquals(1, primary.engineReleases)
+    }
+
+    @Test
+    fun topUpBuffer_holdsEngineOnceForTheWholeFill() = runBlocking {
+        val primary = ScriptedGenerator(
+            prompts = listOf(
+                validPrompt(title = "Day Zero Light", oneLiner = "Photograph morning light on a table.", theme = "Morning"),
+                validPrompt(title = "Day One Light", oneLiner = "Find a shadow that splits a wall.", theme = "Shadow"),
+                validPrompt(title = "Day Two Light", oneLiner = "Frame a doorway as a bright rectangle.", theme = "Doorway"),
+            ),
+        )
+        val useCase = useCase(primary = primary)
+        useCase.topUpBuffer(date, null)
+        assertEquals(1, primary.engineHolds)
+        assertEquals(1, primary.engineReleases)
+        assertEquals(3, primary.calls)
+        useCase.topUpBuffer(date, null)
+        assertEquals(1, primary.engineHolds)
+        assertEquals(1, primary.engineReleases)
+    }
+
+    @Test
+    fun ensureLibraryPrompt_doesNotHoldEngine() = runBlocking {
+        val primary = ScriptedGenerator(prompts = listOf(validPrompt()))
+        val useCase = useCase(primary = primary)
+        val result = useCase.ensureLibraryPrompt(date, null)
+        assertEquals("Library Frame", result.title)
+        assertEquals(PromptSource.LIBRARY, result.source)
+        assertEquals(0, primary.calls)
+        assertEquals(0, primary.engineHolds)
+        assertEquals(0, primary.engineReleases)
+    }
+
+    @Test
+    fun startSeriesTomorrow_holdsEngineOnceForTheWeek() = runBlocking {
+        val primary = ScriptedGenerator(
+            prompts = listOf(validPrompt(title = "Already Here")),
+            series = listOf(validSeries()),
+        )
+        val useCase = useCase(primary = primary)
+        useCase.promptFor(date, null)
+        assertEquals(1, primary.engineHolds)
+        assertEquals(1, primary.engineReleases)
+        useCase.startSeriesTomorrow(date, null)
+        assertEquals(2, primary.engineHolds)
+        assertEquals(2, primary.engineReleases)
+        assertEquals(1, primary.seriesCalls)
+    }
+
+    @Test
     fun discardUnshownFuture_truncatesActiveSeriesAndKeepsToday() = runBlocking {
         val primary = ScriptedGenerator(prompts = listOf(validPrompt()), series = listOf(validSeries()))
         val prompts = FakeDayPrompts()
@@ -605,6 +666,10 @@ private class ScriptedGenerator(
         private set
     var seriesCalls: Int = 0
         private set
+    var engineHolds: Int = 0
+        private set
+    var engineReleases: Int = 0
+        private set
     val requests = mutableListOf<GenerationRequest>()
     val lastRequest: GenerationRequest?
         get() = requests.lastOrNull()
@@ -624,6 +689,14 @@ private class ScriptedGenerator(
         }
         seriesCalls += 1
         return Result.success(series[(seriesCalls - 1).coerceAtMost(series.lastIndex)])
+    }
+
+    override suspend fun holdEngine() {
+        engineHolds += 1
+    }
+
+    override suspend fun releaseEngine() {
+        engineReleases += 1
     }
 }
 

@@ -10,7 +10,6 @@ import app.shutterup.domain.ai.LibraryPromptSource
 import app.shutterup.domain.ai.PromptGenerator
 import app.shutterup.domain.repository.GamificationRepository
 import app.shutterup.domain.repository.PreferencesRepository
-import com.google.mlkit.genai.prompt.GenerativeModel
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -65,8 +64,4 @@ object AiModule {
         fake = fakes.firstOrNull(),
         preferences = prefs,
     )
-
-    @Provides
-    @Singleton
-    fun provideGenerativeModel(): GenerativeModel = NanoPromptGenerator.defaultClient()
 }

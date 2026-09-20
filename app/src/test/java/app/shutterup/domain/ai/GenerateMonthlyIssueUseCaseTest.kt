@@ -70,6 +70,8 @@ class GenerateMonthlyIssueUseCaseTest {
         assertEquals("Reflections", stored.dominantTheme)
         assertEquals(listOf("Reflections", "Looking up"), stored.loudestThemes)
         assertEquals(3, stored.completedDayCount)
+        assertEquals(1, primary.engineHolds)
+        assertEquals(1, primary.engineReleases)
     }
 
     @Test
@@ -85,6 +87,8 @@ class GenerateMonthlyIssueUseCaseTest {
         val useCase = useCase(primary = primary, prompts = prompts, issues = issues)
         useCase.generateDue()
         assertEquals(3, primary.calls)
+        assertEquals(1, primary.engineHolds)
+        assertEquals(1, primary.engineReleases)
         val stored = issues.get("2026-09")!!
         assertEquals(PromptSourceRef.LIBRARY, stored.source)
         assertEquals("Glass looking back.", stored.headline)
@@ -100,6 +104,8 @@ class GenerateMonthlyIssueUseCaseTest {
         val useCase = useCase(primary = primary, prompts = prompts, issues = issues)
         useCase.generateDue()
         assertEquals(0, primary.calls)
+        assertEquals(0, primary.engineHolds)
+        assertEquals(0, primary.engineReleases)
         assertEquals(PromptSourceRef.LIBRARY, issues.get("2026-09")!!.source)
     }
 
@@ -222,8 +228,20 @@ private class MonthlyScriptedGenerator(
 ) : PromptGenerator {
     var calls: Int = 0
         private set
+    var engineHolds: Int = 0
+        private set
+    var engineReleases: Int = 0
+        private set
 
     override suspend fun availability(): Availability = availability
+
+    override suspend fun holdEngine() {
+        engineHolds += 1
+    }
+
+    override suspend fun releaseEngine() {
+        engineReleases += 1
+    }
 
     override suspend fun generate(request: GenerationRequest): Result<GeneratedPrompt> =
         Result.failure(UnsupportedOperationException())

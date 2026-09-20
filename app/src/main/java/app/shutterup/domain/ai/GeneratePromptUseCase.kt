@@ -44,7 +44,8 @@ class GeneratePromptUseCase @Inject constructor(
     val generation: StateFlow<GenerationProgress?> = _generation.asStateFlow()
 
     suspend fun promptFor(date: LocalDate, themeFocus: String?): GeneratedPrompt = mutex.withLock {
-        promptForLocked(date, themeFocus)
+        prompts.getDay(date)?.let { return@withLock it.toGeneratedPrompt() }
+        withEngine { promptForLocked(date, themeFocus) }
     }
 
     /**
@@ -85,17 +86,18 @@ class GeneratePromptUseCase @Inject constructor(
         themeFocus: String?,
         daysAhead: Int = 2,
     ): List<LocalDate> = mutex.withLock {
-        val filled = mutableListOf<LocalDate>()
+        val missing = mutableListOf<LocalDate>()
         var date = today
         val end = today.plusDays(daysAhead.toLong())
         while (!date.isAfter(end)) {
-            if (prompts.getDay(date) == null) {
-                promptForLocked(date, themeFocus)
-                filled += date
-            }
+            if (prompts.getDay(date) == null) missing += date
             date = date.plusDays(1)
         }
-        filled
+        if (missing.isEmpty()) return@withLock emptyList()
+        withEngine {
+            missing.forEach { promptForLocked(it, themeFocus) }
+            missing
+        }
     }
 
     /**
@@ -111,17 +113,19 @@ class GeneratePromptUseCase @Inject constructor(
      * independent (non-series) buffer prompts. An in-progress series is left alone.
      */
     suspend fun startSeriesTomorrow(today: LocalDate, themeFocus: String?) = mutex.withLock {
-        if (prompts.getDay(today) == null) {
-            withGeneration(GenerationProgress(today)) {
-                generateFresh(today, themeFocus, rerollUsed = false)
+        withEngine {
+            if (prompts.getDay(today) == null) {
+                withGeneration(GenerationProgress(today)) {
+                    generateFresh(today, themeFocus, rerollUsed = false)
+                }
             }
-        }
-        clearUnshownFutureForNewSeries(today)
-        val start = today.plusDays(1)
-        if (seriesRepo.covering(start) != null) return@withLock
-        if (prompts.getDay(start) != null) return@withLock
-        withGeneration(GenerationProgress(start, series = true)) {
-            generateSeriesOrSingle(start, themeFocus)
+            clearUnshownFutureForNewSeries(today)
+            val start = today.plusDays(1)
+            if (seriesRepo.covering(start) != null) return@withEngine
+            if (prompts.getDay(start) != null) return@withEngine
+            withGeneration(GenerationProgress(start, series = true)) {
+                generateSeriesOrSingle(start, themeFocus)
+            }
         }
     }
 
@@ -136,13 +140,15 @@ class GeneratePromptUseCase @Inject constructor(
             ),
         )
         val covering = existing.seriesId?.let { seriesRepo.get(it) } ?: seriesRepo.covering(date)
-        withGeneration(GenerationProgress(date, series = covering != null && existing.repeatsDate == null)) {
-            if (existing.repeatsDate != null) {
-                generateFresh(date, themeFocus, rerollUsed = true, overwrite = true)
-            } else if (covering != null) {
-                rerollInsideSeries(date, themeFocus, existing, covering)
-            } else {
-                generateFresh(date, themeFocus, rerollUsed = true, overwrite = true)
+        withEngine {
+            withGeneration(GenerationProgress(date, series = covering != null && existing.repeatsDate == null)) {
+                if (existing.repeatsDate != null) {
+                    generateFresh(date, themeFocus, rerollUsed = true, overwrite = true)
+                } else if (covering != null) {
+                    rerollInsideSeries(date, themeFocus, existing, covering)
+                } else {
+                    generateFresh(date, themeFocus, rerollUsed = true, overwrite = true)
+                }
             }
         }
     }
@@ -432,6 +438,15 @@ class GeneratePromptUseCase @Inject constructor(
     private suspend fun libraryIdFor(result: GeneratedPrompt): String? {
         if (result.source != PromptSource.LIBRARY) return null
         return library.findIdByTitle(result.title)
+    }
+
+    private suspend fun <T> withEngine(block: suspend () -> T): T {
+        primary.holdEngine()
+        try {
+            return block()
+        } finally {
+            primary.releaseEngine()
+        }
     }
 
     private suspend fun <T> withGeneration(

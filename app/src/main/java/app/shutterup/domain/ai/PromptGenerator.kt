@@ -17,6 +17,13 @@ interface PromptGenerator {
         Result.failure(UnsupportedOperationException("series generation is not supported"))
     suspend fun generateMonthlyIssue(request: MonthlyIssueRequest): Result<GeneratedMonthlyIssue> =
         Result.failure(UnsupportedOperationException("monthly issue generation is not supported"))
+    /**
+     * Keep the on-device engine loaded across a batch of [generate] calls.
+     * No-op for library and fake generators. Pair with [releaseEngine].
+     */
+    suspend fun holdEngine() = Unit
+    /** Unload the on-device engine when a generation batch is finished. */
+    suspend fun releaseEngine() = Unit
 }
 
 /** Mirrors the ML Kit `FeatureStatus` values relevant to generation. */

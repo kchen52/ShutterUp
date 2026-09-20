@@ -263,6 +263,7 @@ Composite implementation: `NanoPromptGenerator` (real) → on failure/unavailabl
 - Text-only input in v1 (no image input).
 - Set a hard timeout (20 s) per attempt; max 3 attempts per generation (2 regenerations on validation failure), then fall back.
 - Read `getBaseModelName()` and show it in Settings → AI status (helps debugging).
+- Keep Nano loaded only while generating: `warmup()` before the first inference of a batch, then `GenerativeModel.close()` when the batch finishes so the inference engine is not held in memory. Status and download checks use a short-lived client and close immediately.
 - Never call Nano while the device reports low battery (< 15 %) or when the app is in the background beyond the WorkManager job described in §7.6.
 
 ### 7.3 System prompt guidelines (content contract)
