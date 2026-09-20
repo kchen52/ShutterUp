@@ -4,6 +4,10 @@
     <cache-path
         name="pending"
         path="pending/" />
+    <!-- Composed share cards (PNG). Dedicated path so capture temps are never shared. -->
+    <cache-path
+        name="share"
+        path="share/" />
     <external-files-path
         name="ext_pictures"
         path="Pictures/" />
