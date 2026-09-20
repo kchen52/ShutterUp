@@ -7,6 +7,7 @@ import androidx.core.content.FileProvider
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import java.io.FileOutputStream
+import java.io.OutputStream
 import java.time.Clock
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -20,6 +21,10 @@ class ShareCache @Inject constructor(
     @ApplicationContext private val context: Context,
     private val clock: Clock,
 ) {
+    internal var encoder: PngEncoder = PngEncoder { bitmap, out ->
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+    }
+
     fun shareDir(): File = File(context.cacheDir, DIR_NAME)
 
     /**
@@ -40,7 +45,7 @@ class ShareCache @Inject constructor(
         val tmp = File(dir, "share-$id.png.tmp")
         try {
             FileOutputStream(tmp).use { out ->
-                val ok = bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+                val ok = encoder.encode(bitmap, out)
                 if (!ok) error("PNG compress failed")
                 out.flush()
                 out.fd.sync()
@@ -83,4 +88,8 @@ class ShareCache @Inject constructor(
     companion object {
         const val DIR_NAME: String = "share"
     }
+}
+
+fun interface PngEncoder {
+    fun encode(bitmap: Bitmap, out: OutputStream): Boolean
 }

@@ -3,6 +3,7 @@ package app.shutterup.share
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
+import androidx.core.content.FileProvider
 import androidx.exifinterface.media.ExifInterface
 import java.io.File
 import java.time.Clock
@@ -29,6 +30,7 @@ class ShareCacheTest {
 
     @Before
     fun setUp() {
+        clearFileProviderPathCache()
         cache = ShareCache(RuntimeEnvironment.getApplication(), clock)
         cache.shareDir().deleteRecursively()
     }
@@ -82,10 +84,10 @@ class ShareCacheTest {
     }
 
     @Test
-    fun writePng_recycledBitmapFailureCleansTemp() {
+    fun writePng_compressFailureCleansTemp() {
         cache.shareDir().mkdirs()
+        cache.encoder = PngEncoder { _, _ -> false }
         val bitmap = Bitmap.createBitmap(4, 4, Bitmap.Config.ARGB_8888)
-        bitmap.recycle()
         val result = runCatching { cache.writePng(bitmap) }
         assertTrue(result.isFailure)
         val leftovers = cache.shareDir().listFiles()?.toList().orEmpty()
@@ -121,6 +123,18 @@ class ShareIntentsTest {
         assertEquals(uri, inner.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java))
         assertNotEquals(0, inner.flags and Intent.FLAG_GRANT_READ_URI_PERMISSION)
     }
+}
+
+/**
+ * Robolectric gives each test a fresh cacheDir, but [FileProvider] caches
+ * path roots statically per authority. Clear it so URI resolution sees
+ * this test's cache directory.
+ */
+private fun clearFileProviderPathCache() {
+    val field = FileProvider::class.java.getDeclaredField("sCache")
+    field.isAccessible = true
+    @Suppress("UNCHECKED_CAST")
+    (field.get(null) as MutableMap<Any, Any>).clear()
 }
 
 private val PNG_MAGIC = byteArrayOf(
