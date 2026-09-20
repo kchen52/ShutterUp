@@ -1,11 +1,14 @@
 package app.shutterup.data.ai
 
 import app.shutterup.domain.ai.Availability
+import app.shutterup.domain.ai.GeneratedMonthlyIssue
 import app.shutterup.domain.ai.GeneratedPrompt
 import app.shutterup.domain.ai.GeneratedSeries
 import app.shutterup.domain.ai.GenerationRequest
+import app.shutterup.domain.ai.MonthlyIssueRequest
 import app.shutterup.domain.ai.PromptGenerator
 import app.shutterup.domain.ai.PromptSource
+import app.shutterup.domain.monthly.MonthlyIssueHeadlines
 import javax.inject.Inject
 
 class FakePromptGenerator @Inject constructor() : PromptGenerator {
@@ -50,5 +53,20 @@ class FakePromptGenerator @Inject constructor() : PromptGenerator {
                 prompts = prompts,
             ),
         )
+    }
+
+    override suspend fun generateMonthlyIssue(request: MonthlyIssueRequest): Result<GeneratedMonthlyIssue> {
+        val theme = request.themeCounts.firstOrNull()?.first ?: "Looking"
+        val headline = MonthlyIssueHeadlines.phraseFor(theme, variantIndex = request.completedCount)
+        val body = buildString {
+            val n = request.completedCount
+            if (n == 1) append("One day. ") else append("$n days. ")
+            if (request.notes.isNotEmpty()) {
+                append("You wrote on ${request.notes.size} of them.")
+            } else {
+                append("The longest stretch was ${request.longestRun}.")
+            }
+        }
+        return Result.success(GeneratedMonthlyIssue(headline = headline, body = body))
     }
 }

@@ -26,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -43,6 +44,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.shutterup.ui.components.Kicker
 import app.shutterup.ui.components.ThemeChip
+import app.shutterup.ui.issue.MonthlyIssuePage
+import app.shutterup.ui.issue.sampleIssuePage
 import app.shutterup.ui.theme.ProvideThemeTint
 import app.shutterup.ui.theme.ShutterUpTheme
 import app.shutterup.ui.theme.themeTint
@@ -59,6 +62,8 @@ import java.util.Locale
 @Composable
 fun FeedRoute(
     onOpenDay: (String) -> Unit,
+    onOpenIssue: (String) -> Unit = {},
+    onOpenIssues: () -> Unit = {},
     viewModel: FeedViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -66,6 +71,9 @@ fun FeedRoute(
         state = state,
         onOpenDay = onOpenDay,
         onSelectTheme = viewModel::selectTheme,
+        onOpenIssue = onOpenIssue,
+        onOpenIssues = onOpenIssues,
+        onDismissIssue = viewModel::dismissFeaturedIssue,
     )
 }
 
@@ -75,6 +83,9 @@ fun FeedScreen(
     state: FeedUiState,
     onOpenDay: (String) -> Unit,
     onSelectTheme: (String?) -> Unit = {},
+    onOpenIssue: (String) -> Unit = {},
+    onOpenIssues: () -> Unit = {},
+    onDismissIssue: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val scroll = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -107,6 +118,27 @@ fun FeedScreen(
                         selectedTheme = state.selectedTheme,
                         onSelectTheme = onSelectTheme,
                     )
+                }
+                state.featuredIssue?.let { issue ->
+                    item(span = StaggeredGridItemSpan.FullLine) {
+                        MonthlyIssuePage(
+                            page = issue,
+                            onOpenDay = onOpenDay,
+                            onDismiss = onDismissIssue,
+                            onOpenIssue = { onOpenIssue(issue.yearMonth) },
+                        )
+                    }
+                }
+                if (state.hasPastIssues) {
+                    item(span = StaggeredGridItemSpan.FullLine) {
+                        TextButton(onClick = onOpenIssues) {
+                            Text(
+                                text = "Past issues",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
                 }
                 if (state.items.isEmpty()) {
                     item(span = StaggeredGridItemSpan.FullLine) {
@@ -256,6 +288,11 @@ internal fun sampleFeedState(): FeedUiState = FeedUiState(
     selectedTheme = null,
 )
 
+internal fun sampleFeedStateWithIssue(sparse: Boolean = false): FeedUiState = sampleFeedState().copy(
+    featuredIssue = sampleIssuePage(photoCount = if (sparse) 3 else 24),
+    hasPastIssues = true,
+)
+
 @Preview(name = "compact-light", showBackground = true, widthDp = 400, heightDp = 900)
 @Composable
 private fun FeedPreviewLight() {
@@ -291,5 +328,13 @@ private fun FeedPreviewExpanded() {
 private fun FeedPreviewFontScale() {
     ShutterUpTheme(darkTheme = false) {
         FeedScreen(state = sampleFeedState(), onOpenDay = {})
+    }
+}
+
+@Preview(name = "with-issue-light", showBackground = true, widthDp = 400, heightDp = 1400)
+@Composable
+private fun FeedPreviewWithIssue() {
+    ShutterUpTheme(darkTheme = false) {
+        FeedScreen(state = sampleFeedStateWithIssue(), onOpenDay = {})
     }
 }

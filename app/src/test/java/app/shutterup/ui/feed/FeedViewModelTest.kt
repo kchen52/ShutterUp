@@ -3,9 +3,11 @@ package app.shutterup.ui.feed
 import app.shutterup.domain.model.DayPrompt
 import app.shutterup.domain.model.DayStatus
 import app.shutterup.domain.model.Entry
+import app.shutterup.domain.model.MonthlyIssue
 import app.shutterup.domain.model.PromptSourceRef
 import app.shutterup.domain.repository.DayPromptRepository
 import app.shutterup.domain.repository.EntryRepository
+import app.shutterup.domain.repository.MonthlyIssueRepository
 import app.shutterup.domain.model.SupersededPrompt
 import java.time.Instant
 import java.time.LocalDate
@@ -68,7 +70,7 @@ class FeedViewModelTest {
                 prompt(LocalDate.of(2026, 9, 12), DayStatus.COMPLETED, "Kitchen", "Quiet hours"),
             ),
         )
-        val vm = FeedViewModel(FakePrompts(days), FakeEntries())
+        val vm = FeedViewModel(FakePrompts(days), FakeEntries(), FakeIssues())
         val collected = mutableListOf<FeedUiState>()
         val job = launch { vm.state.collect { collected.add(it) } }
         vm.selectTheme("Reflections")
@@ -128,5 +130,14 @@ class FeedViewModelTest {
         override suspend fun count() = 0
         override suspend fun countForDate(date: LocalDate) = 0
         override suspend fun listAll() = emptyList<Entry>()
+    }
+
+    private class FakeIssues : MonthlyIssueRepository {
+        override fun observeAll() = flowOf(emptyList<MonthlyIssue>())
+        override fun observe(yearMonth: String) = flowOf(null)
+        override suspend fun get(yearMonth: String) = null
+        override suspend fun all() = emptyList<MonthlyIssue>()
+        override suspend fun insert(issue: MonthlyIssue) = 1L
+        override suspend fun dismissFromFeed(yearMonth: String) = Unit
     }
 }

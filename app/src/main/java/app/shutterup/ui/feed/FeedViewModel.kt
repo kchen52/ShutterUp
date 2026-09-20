@@ -2,12 +2,17 @@ package app.shutterup.ui.feed
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewModelScope
 import app.shutterup.domain.model.DayPrompt
 import app.shutterup.domain.model.DayStatus
 import app.shutterup.domain.model.Entry
 import app.shutterup.domain.repository.DayPromptRepository
 import app.shutterup.domain.repository.EntryRepository
+import app.shutterup.domain.repository.MonthlyIssueRepository
 import app.shutterup.ui.calendar.spokenDate
+import app.shutterup.ui.issue.IssuePageUi
+import app.shutterup.ui.issue.thumbFor
+import app.shutterup.ui.issue.toPage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -18,6 +23,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 /** One completed-day card in the chronological feed (DESIGN §4.6). */
 data class FeedCardUi(
@@ -35,6 +41,8 @@ data class FeedUiState(
     val themes: List<String> = emptyList(),
     /** `null` means the All chip. */
     val selectedTheme: String? = null,
+    val featuredIssue: IssuePageUi? = null,
+    val hasPastIssues: Boolean = false,
 )
 
 /**
@@ -44,22 +52,35 @@ data class FeedUiState(
 class FeedViewModel @Inject constructor(
     prompts: DayPromptRepository,
     entries: EntryRepository,
+    private val issues: MonthlyIssueRepository,
 ) : ViewModel() {
     private val selectedTheme = MutableStateFlow<String?>(null)
 
     val state: StateFlow<FeedUiState> = combine(
         prompts.observeDays(HISTORY_START, HISTORY_END),
         entries.observeRecentEntries(HISTORY_LIMIT),
+        issues.observeAll(),
         selectedTheme,
-    ) { days, recent, theme ->
+    ) { days, recent, monthly, theme ->
         val completed = completedDaysNewestFirst(days)
         val byDate = latestEntryByDate(recent)
         val themes = completed.map { it.theme }.distinct()
         val filtered = if (theme == null) completed else completed.filter { it.theme == theme }
+        val latest = monthly.maxByOrNull { it.yearMonth }
+        val featured = latest?.takeIf { !it.dismissedFromFeed }?.let { issue ->
+            val start = issue.startDate
+            val end = issue.endDate
+            val thumbs = byDate.keys.filter { it in start..end }.sorted().map { date ->
+                thumbFor(date, byDate[date]?.thumbPath)
+            }
+            issue.toPage(thumbs)
+        }
         FeedUiState(
             items = filtered.map { it.toFeedCard(byDate[it.date]) },
             themes = themes,
             selectedTheme = theme,
+            featuredIssue = featured,
+            hasPastIssues = monthly.isNotEmpty(),
         )
     }.stateIn(
         viewModelScope,
@@ -70,6 +91,11 @@ class FeedViewModel @Inject constructor(
     /** `null` selects All. */
     fun selectTheme(theme: String?) {
         selectedTheme.value = theme
+    }
+
+    fun dismissFeaturedIssue() {
+        val yearMonth = state.value.featuredIssue?.yearMonth ?: return
+        viewModelScope.launch { issues.dismissFromFeed(yearMonth) }
     }
 }
 

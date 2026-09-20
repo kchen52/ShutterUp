@@ -194,6 +194,32 @@ class PromptParserTest {
     }
 
     @Test
+    fun parseMonthly_readsHeadlineAndBody() {
+        val json = """
+            {"headline":"Light and glass.","body":"You looked up more than usual. Twenty-four days, mostly reflections."}
+        """.trimIndent()
+        val result = PromptParser.parseMonthly(json)
+        assertTrue(result.isSuccess)
+        val copy = result.getOrThrow()
+        assertEquals("Light and glass.", copy.headline)
+        assertEquals("You looked up more than usual. Twenty-four days, mostly reflections.", copy.body)
+    }
+
+    @Test
+    fun parseMonthly_missingBody_fails() {
+        val json = """{"headline":"Light and glass."}"""
+        val result = PromptParser.parseMonthly(json)
+        assertFailureNames(result, "body")
+    }
+
+    @Test
+    fun parseMonthly_overlongHeadline_fails() {
+        val json = """{"headline":"Reflections and looking up twice.","body":"One. Two."}"""
+        val result = PromptParser.parseMonthly(json)
+        assertFailureNames(result, "headline")
+    }
+
+    @Test
     fun parseSeries_wrongCount_fails() {
         val json = """{"title":"A Week of Steam","prompts":[]}"""
         val result = PromptParser.parseSeries(json, PromptSource.ON_DEVICE_AI)

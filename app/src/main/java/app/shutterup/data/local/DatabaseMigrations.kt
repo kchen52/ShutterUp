@@ -62,3 +62,31 @@ val MIGRATION_2_3 = object : Migration(2, 3) {
         )
     }
 }
+
+/** v3 series → v4 monthly issues table. */
+val MIGRATION_3_4 = object : Migration(3, 4) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS `monthly_issues` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                `yearMonth` TEXT NOT NULL,
+                `startDate` INTEGER NOT NULL,
+                `endDate` INTEGER NOT NULL,
+                `completedDayCount` INTEGER NOT NULL,
+                `headline` TEXT NOT NULL,
+                `body` TEXT NOT NULL,
+                `dominantTheme` TEXT NOT NULL,
+                `loudestThemes` TEXT NOT NULL,
+                `source` TEXT NOT NULL,
+                `generatedAt` INTEGER NOT NULL,
+                `dismissedFromFeed` INTEGER NOT NULL,
+                `modelName` TEXT
+            )
+            """.trimIndent(),
+        )
+        db.execSQL(
+            "CREATE UNIQUE INDEX IF NOT EXISTS `index_monthly_issues_yearMonth` ON `monthly_issues` (`yearMonth`)",
+        )
+    }
+}

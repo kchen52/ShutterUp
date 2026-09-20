@@ -1,8 +1,10 @@
 package app.shutterup.data.ai.nano
 
-import app.shutterup.domain.ai.GenerationRequest
+import app.shutterup.domain.ai.GeneratedMonthlyIssue
 import app.shutterup.domain.ai.GeneratedPrompt
 import app.shutterup.domain.ai.GeneratedSeries
+import app.shutterup.domain.ai.GenerationRequest
+import app.shutterup.domain.ai.MonthlyIssueRequest
 import app.shutterup.domain.ai.PromptSource
 
 /**
@@ -64,6 +66,32 @@ object NanoPromptText {
         """.trimIndent()
     }
 
+    fun monthlySystemPrompt(request: MonthlyIssueRequest): String {
+        val themeLine = request.themeCounts.joinToString("; ") { (theme, count) ->
+            "$theme ($count)"
+        }.ifBlank { "none recorded" }
+        val titles = request.titles.joinToString("; ").ifBlank { "none recorded" }
+        val notesBlock = if (request.notes.isEmpty()) {
+            "The user wrote no notes this month."
+        } else {
+            "The user wrote ${request.notes.size} note(s). You may notice a recurring subject if several share one, but never quote a note back: ${request.notes.joinToString(" | ")}"
+        }
+        return """
+            You are writing one page of a photography journal for ${request.monthLabel}.
+            The user completed ${request.completedCount} day(s). Longest consecutive stretch: ${request.longestRun} day(s).
+            Prompt titles: $titles
+            Themes and counts: $themeLine
+            $notesBlock
+            You cannot see the photographs. Do not invent what they look like. Do not mention blur, colour, exposure, composition as if you had seen the files.
+            Write:
+            - headline: a short evocative phrase, at most 30 characters, sentence case, ending with a full stop. Not a list of the month's themes. Example: Light and glass. Example: Second skies.
+            - body: two or three sentences, second person, present tense. Warm, quiet, editorial. Spend the sentences on the shape of the month — the days, whether notes were written, the longest stretch. Do not re-list the theme names; they already appear as a kicker on the page. No exclamation marks, no emoji, no hashtags, no URLs.
+            Do not praise ("Great work", "Amazing month"). Do not mention missed, skipped, or unfinished days. Do not guilt. Do not quote a note verbatim.
+            Register: "You looked up more than usual, and you kept going through a grey week."
+            Return only the requested structured fields.
+        """.trimIndent()
+    }
+
     fun map(output: NanoPromptOutput, modelName: String?): GeneratedPrompt = GeneratedPrompt(
         title = output.title,
         oneLiner = output.oneLiner,
@@ -79,6 +107,12 @@ object NanoPromptText {
         title = output.title,
         theme = output.theme,
         prompts = output.prompts.map { map(it, modelName) },
+    )
+
+    fun mapMonthly(output: NanoMonthlyOutput, modelName: String?): GeneratedMonthlyIssue = GeneratedMonthlyIssue(
+        headline = output.headline,
+        body = output.body,
+        modelName = modelName,
     )
 
     private fun seriesStay(request: GenerationRequest): String {

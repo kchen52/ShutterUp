@@ -3,6 +3,7 @@ package app.shutterup.domain.repository
 import app.shutterup.domain.model.DayPrompt
 import app.shutterup.domain.model.Entry
 import app.shutterup.domain.model.LibraryUsage
+import app.shutterup.domain.model.MonthlyIssue
 import app.shutterup.domain.model.Series
 import app.shutterup.domain.model.SupersededPrompt
 import java.time.LocalDate
@@ -37,6 +38,16 @@ interface SeriesRepository {
     suspend fun insert(series: Series): Long
     suspend fun update(series: Series)
     suspend fun delete(id: Long)
+}
+
+interface MonthlyIssueRepository {
+    fun observeAll(): Flow<List<MonthlyIssue>>
+    fun observe(yearMonth: String): Flow<MonthlyIssue?>
+    suspend fun get(yearMonth: String): MonthlyIssue?
+    suspend fun all(): List<MonthlyIssue>
+    /** Returns the new row id, or -1 when [yearMonth] already exists. */
+    suspend fun insert(issue: MonthlyIssue): Long
+    suspend fun dismissFromFeed(yearMonth: String)
 }
 
 interface EntryRepository {

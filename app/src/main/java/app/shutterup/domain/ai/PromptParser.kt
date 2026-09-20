@@ -48,6 +48,17 @@ object PromptParser {
             GeneratedSeries(title = title, theme = theme, prompts = prompts)
         }
 
+    fun parseMonthly(json: String): Result<GeneratedMonthlyIssue> =
+        runAsIllegalArgument {
+            val root = JsonReader(json).readDocument()
+            val obj = root as? Js.Obj
+                ?: throw IllegalArgumentException("top-level value must be an object")
+            val headline = requiredString(obj, "headline", index = null)
+            val body = requiredString(obj, "body", index = null)
+            if (headline.length > 30) fail("headline exceeds 30 characters", index = null)
+            GeneratedMonthlyIssue(headline = headline, body = body)
+        }
+
     private fun parseGenerated(obj: Js.Obj, source: PromptSource, index: Int?): GeneratedPrompt {
         val fields = parseSharedFields(obj, index)
         return GeneratedPrompt(

@@ -150,4 +150,102 @@ class DatabaseMigrationsTest {
         }
         sqlite.close()
     }
+
+    @Test
+    fun migrate3to4_addsMonthlyIssuesTable() {
+        val context = RuntimeEnvironment.getApplication()
+        context.deleteDatabase("mig-3-4.db")
+        val config = SupportSQLiteOpenHelper.Configuration.builder(context)
+            .name("mig-3-4.db")
+            .callback(
+                object : SupportSQLiteOpenHelper.Callback(3) {
+                    override fun onCreate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                        db.execSQL(
+                            """
+                            CREATE TABLE IF NOT EXISTS `day_prompts` (
+                                `date` INTEGER NOT NULL,
+                                `title` TEXT NOT NULL,
+                                `oneLiner` TEXT NOT NULL,
+                                `details` TEXT NOT NULL,
+                                `constraint` TEXT,
+                                `theme` TEXT NOT NULL,
+                                `tips` TEXT NOT NULL,
+                                `source` TEXT NOT NULL,
+                                `libraryId` TEXT,
+                                `modelName` TEXT,
+                                `generatedAt` INTEGER NOT NULL,
+                                `status` TEXT NOT NULL,
+                                `frozen` INTEGER NOT NULL,
+                                `rerollUsed` INTEGER NOT NULL,
+                                `seriesId` INTEGER,
+                                `seriesIndex` INTEGER,
+                                PRIMARY KEY(`date`)
+                            )
+                            """.trimIndent(),
+                        )
+                        db.execSQL(
+                            "CREATE INDEX IF NOT EXISTS `index_day_prompts_seriesId` ON `day_prompts` (`seriesId`)",
+                        )
+                        db.execSQL(
+                            """
+                            CREATE TABLE IF NOT EXISTS `series` (
+                                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                                `title` TEXT NOT NULL,
+                                `startDate` INTEGER NOT NULL,
+                                `endDate` INTEGER NOT NULL,
+                                `theme` TEXT NOT NULL,
+                                `source` TEXT NOT NULL
+                            )
+                            """.trimIndent(),
+                        )
+                        db.execSQL(
+                            """
+                            CREATE TABLE IF NOT EXISTS `entries` (
+                                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                                `date` INTEGER NOT NULL,
+                                `mediaUri` TEXT NOT NULL,
+                                `thumbPath` TEXT NOT NULL,
+                                `capturedAt` INTEGER NOT NULL,
+                                `width` INTEGER NOT NULL,
+                                `height` INTEGER NOT NULL,
+                                `note` TEXT,
+                                `importedFromGallery` INTEGER NOT NULL,
+                                `createdAt` INTEGER NOT NULL,
+                                `mediaKind` TEXT NOT NULL
+                            )
+                            """.trimIndent(),
+                        )
+                    }
+
+                    override fun onUpgrade(
+                        db: androidx.sqlite.db.SupportSQLiteDatabase,
+                        oldVersion: Int,
+                        newVersion: Int,
+                    ) = Unit
+                },
+            )
+            .build()
+        val helper = FrameworkSQLiteOpenHelperFactory().create(config)
+        val sqlite = helper.writableDatabase
+        MIGRATION_3_4.migrate(sqlite)
+        sqlite.query("SELECT name FROM sqlite_master WHERE type='table' AND name='monthly_issues'").use { cursor ->
+            assertTrue(cursor.moveToFirst())
+        }
+        val columns = mutableListOf<String>()
+        sqlite.query("PRAGMA table_info(monthly_issues)").use { cursor ->
+            val nameIndex = cursor.getColumnIndex("name")
+            while (cursor.moveToNext()) {
+                columns += cursor.getString(nameIndex)
+            }
+        }
+        assertTrue(columns.contains("yearMonth"))
+        assertTrue(columns.contains("headline"))
+        assertTrue(columns.contains("dismissedFromFeed"))
+        sqlite.query(
+            "SELECT name FROM sqlite_master WHERE type='index' AND name='index_monthly_issues_yearMonth'",
+        ).use { cursor ->
+            assertTrue(cursor.moveToFirst())
+        }
+        sqlite.close()
+    }
 }
