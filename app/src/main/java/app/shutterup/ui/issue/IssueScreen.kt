@@ -3,12 +3,11 @@ package app.shutterup.ui.issue
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -76,7 +75,6 @@ fun IssueScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
                     .padding(horizontal = horizontal, vertical = 8.dp),
                 contentAlignment = if (expanded) Alignment.TopCenter else Alignment.TopStart,
             ) {
@@ -84,9 +82,11 @@ fun IssueScreen(
                     MonthlyIssuePage(
                         page = page,
                         onOpenDay = onOpenDay,
+                        fillSheet = true,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .widthIn(max = 600.dp),
+                            .widthIn(max = 600.dp)
+                            .fillMaxHeight(),
                     )
                 }
             }

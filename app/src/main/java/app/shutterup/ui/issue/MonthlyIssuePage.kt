@@ -7,10 +7,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -30,6 +33,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.shutterup.ui.components.Kicker
 import app.shutterup.ui.theme.ShutterUpTheme
@@ -45,11 +49,16 @@ fun MonthlyIssuePage(
     modifier: Modifier = Modifier,
     onDismiss: (() -> Unit)? = null,
     onOpenIssue: (() -> Unit)? = null,
+    fillSheet: Boolean = false,
 ) {
     val dark = isSystemInDarkTheme()
     val tint = themeTint(page.theme, MaterialTheme.colorScheme, dark)
     val content: @Composable () -> Unit = {
-        Column(modifier = Modifier.padding(20.dp)) {
+        Column(
+            modifier = Modifier
+                .then(if (fillSheet) Modifier.fillMaxSize() else Modifier)
+                .padding(20.dp),
+        ) {
             Row(verticalAlignment = Alignment.Top) {
                 Kicker(
                     text = page.kicker,
@@ -76,7 +85,15 @@ fun MonthlyIssuePage(
             ContactSheet(
                 thumbs = page.thumbs,
                 onOpenDay = onOpenDay,
-                modifier = Modifier.padding(top = 24.dp),
+                fill = fillSheet,
+                modifier = if (fillSheet) {
+                    Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .padding(top = 24.dp)
+                } else {
+                    Modifier.padding(top = 24.dp)
+                },
             )
             Text(
                 text = page.body,
@@ -94,6 +111,7 @@ fun MonthlyIssuePage(
     }
     val pageModifier = modifier
         .fillMaxWidth()
+        .then(if (fillSheet) Modifier.fillMaxHeight() else Modifier)
         .semantics { contentDescription = page.kicker }
     if (onOpenIssue != null) {
         Surface(
@@ -118,36 +136,96 @@ fun ContactSheet(
     thumbs: List<IssueThumbUi>,
     onOpenDay: (String) -> Unit,
     modifier: Modifier = Modifier,
+    fill: Boolean = false,
 ) {
     if (thumbs.isEmpty()) {
         Spacer(modifier = modifier.fillMaxWidth())
         return
     }
-    val rows = (thumbs.size + SHEET_COLUMNS - 1) / SHEET_COLUMNS
+    if (fill) {
+        BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
+            val columns = chooseSheetColumns(thumbs.size, maxWidth, maxHeight)
+            val cell = sheetCellSize(columns, thumbs.size, maxWidth, maxHeight)
+            SheetGrid(
+                thumbs = thumbs,
+                columns = columns,
+                cell = cell,
+                onOpenDay = onOpenDay,
+            )
+        }
+        return
+    }
+    SheetGrid(
+        thumbs = thumbs,
+        columns = SHEET_COLUMNS,
+        cell = null,
+        onOpenDay = onOpenDay,
+        modifier = modifier.fillMaxWidth(),
+    )
+}
+
+@Composable
+private fun SheetGrid(
+    thumbs: List<IssueThumbUi>,
+    columns: Int,
+    cell: Dp?,
+    onOpenDay: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val rows = (thumbs.size + columns - 1) / columns
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(4.dp),
+        horizontalAlignment = Alignment.Start,
     ) {
         for (row in 0 until rows) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                for (col in 0 until SHEET_COLUMNS) {
-                    val index = row * SHEET_COLUMNS + col
+                for (col in 0 until columns) {
+                    val index = row * columns + col
+                    val cellModifier = if (cell != null) {
+                        Modifier.size(cell)
+                    } else {
+                        Modifier.weight(1f)
+                    }
                     if (index < thumbs.size) {
                         ContactCell(
                             thumb = thumbs[index],
                             onOpenDay = onOpenDay,
-                            modifier = Modifier.weight(1f),
+                            modifier = cellModifier,
                         )
                     } else {
-                        Spacer(modifier = Modifier.weight(1f))
+                        Spacer(modifier = cellModifier)
                     }
                 }
             }
         }
     }
+}
+
+internal fun chooseSheetColumns(count: Int, width: Dp, height: Dp): Int {
+    if (count <= 6) return SHEET_COLUMNS
+    val gutter = 4.dp
+    for (cols in 3..SHEET_COLUMNS) {
+        val cell = (width - gutter * (cols - 1)) / cols
+        if (cell <= 0.dp) continue
+        val rows = (count + cols - 1) / cols
+        val needed = cell * rows + gutter * (rows - 1)
+        if (needed <= height) return cols
+    }
+    return SHEET_COLUMNS
+}
+
+internal fun sheetCellSize(columns: Int, count: Int, width: Dp, height: Dp): Dp {
+    val gutter = 4.dp
+    val fromWidth = (width - gutter * (columns - 1)) / columns
+    val rows = (count + columns - 1) / columns
+    val needed = fromWidth * rows + gutter * (rows - 1)
+    if (needed <= height || rows <= 0) return fromWidth
+    val fromHeight = (height - gutter * (rows - 1)) / rows
+    return minOf(fromWidth, fromHeight)
 }
 
 @Composable
@@ -184,7 +262,12 @@ private fun ContactCell(
 @Composable
 private fun MonthlyIssuePagePreviewLight() {
     ShutterUpTheme(darkTheme = false) {
-        MonthlyIssuePage(page = sampleIssuePage(), onOpenDay = {})
+        MonthlyIssuePage(
+            page = sampleIssuePage(),
+            onOpenDay = {},
+            fillSheet = true,
+            modifier = Modifier.fillMaxSize(),
+        )
     }
 }
 
@@ -198,7 +281,12 @@ private fun MonthlyIssuePagePreviewLight() {
 @Composable
 private fun MonthlyIssuePagePreviewDark() {
     ShutterUpTheme(darkTheme = true) {
-        MonthlyIssuePage(page = sampleIssuePage(), onOpenDay = {})
+        MonthlyIssuePage(
+            page = sampleIssuePage(),
+            onOpenDay = {},
+            fillSheet = true,
+            modifier = Modifier.fillMaxSize(),
+        )
     }
 }
 
@@ -206,11 +294,12 @@ private fun MonthlyIssuePagePreviewDark() {
 @Composable
 private fun MonthlyIssuePagePreviewExpanded() {
     ShutterUpTheme(darkTheme = false) {
-        Box(Modifier.padding(24.dp)) {
+        Box(Modifier.fillMaxSize().padding(24.dp)) {
             MonthlyIssuePage(
                 page = sampleIssuePage(),
                 onOpenDay = {},
-                modifier = Modifier.fillMaxWidth(0.72f),
+                fillSheet = true,
+                modifier = Modifier.fillMaxWidth(0.72f).fillMaxHeight(),
             )
         }
     }
@@ -220,7 +309,12 @@ private fun MonthlyIssuePagePreviewExpanded() {
 @Composable
 private fun MonthlyIssuePagePreviewFontScale() {
     ShutterUpTheme(darkTheme = false) {
-        MonthlyIssuePage(page = sampleIssuePage(), onOpenDay = {})
+        MonthlyIssuePage(
+            page = sampleIssuePage(),
+            onOpenDay = {},
+            fillSheet = true,
+            modifier = Modifier.fillMaxSize(),
+        )
     }
 }
 
@@ -228,7 +322,12 @@ private fun MonthlyIssuePagePreviewFontScale() {
 @Composable
 private fun MonthlyIssuePagePreviewSparse() {
     ShutterUpTheme(darkTheme = false) {
-        MonthlyIssuePage(page = sampleIssuePage(sparse = true), onOpenDay = {})
+        MonthlyIssuePage(
+            page = sampleIssuePage(sparse = true),
+            onOpenDay = {},
+            fillSheet = true,
+            modifier = Modifier.fillMaxSize(),
+        )
     }
 }
 
