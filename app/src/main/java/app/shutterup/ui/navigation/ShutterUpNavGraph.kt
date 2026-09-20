@@ -28,19 +28,25 @@ import app.shutterup.ui.day.DayRoute
 import app.shutterup.ui.detail.PromptDetailRoute
 import app.shutterup.ui.feed.FeedRoute
 import app.shutterup.ui.home.HomeRoute
+import app.shutterup.ui.issue.IssueListRoute
+import app.shutterup.ui.issue.IssueRoute
 import app.shutterup.ui.settings.SettingsRoute
 
 object ShutterUpDestinations {
     const val HOME = "home"
     const val CALENDAR = "calendar"
-    const val FEED = "feed"
+            const val FEED = "feed"
     const val BADGES = "badges"
     const val SETTINGS = "settings"
+    const val ISSUES = "issues"
+    const val ISSUE = "issue/{yearMonth}"
     const val DAY = "day/{dateIso}"
     const val DETAIL = "detail/{dateIso}?autoLaunchCamera={autoLaunchCamera}&reroll={reroll}"
     const val COMPLETION = "completion/{dateIso}?newBadges={newBadges}&freezeEarned={freezeEarned}&previousStreak={previousStreak}"
 
     fun day(dateIso: String): String = "day/$dateIso"
+
+    fun issue(yearMonth: String): String = "issue/$yearMonth"
 
     fun detail(
         dateIso: String,
@@ -73,7 +79,8 @@ fun ShutterUpNavGraph(
     val selected = tabForRoute(route)
     val hideChrome = route.startsWith("detail") ||
         route.startsWith("completion") ||
-        route.startsWith("day")
+        route.startsWith("day") ||
+        route.startsWith("issue")
     val expanded = isExpandedWidth(currentWindowAdaptiveInfo().windowSizeClass.minWidthDp)
     ShutterUpAdaptiveScaffold(
         selected = selected,
@@ -150,6 +157,12 @@ fun ShutterUpNavGraph(
                     onOpenDay = { dateIso ->
                         navController.navigate(ShutterUpDestinations.day(dateIso))
                     },
+                    onOpenIssue = { yearMonth ->
+                        navController.navigate(ShutterUpDestinations.issue(yearMonth))
+                    },
+                    onOpenIssues = {
+                        navController.navigate(ShutterUpDestinations.ISSUES)
+                    },
                 )
             }
             composable(ShutterUpDestinations.BADGES) {
@@ -159,9 +172,34 @@ fun ShutterUpNavGraph(
                 SettingsRoute()
             }
             addDay(navController)
+            addIssues(navController)
             addDetail(navController)
             addCompletion(navController, todayIso)
         }
+    }
+}
+
+private fun NavGraphBuilder.addIssues(navController: NavHostController) {
+    composable(ShutterUpDestinations.ISSUES) {
+        IssueListRoute(
+            onBack = { navController.popBackStack() },
+            onOpenIssue = { yearMonth ->
+                navController.navigate(ShutterUpDestinations.issue(yearMonth))
+            },
+        )
+    }
+    composable(
+        route = ShutterUpDestinations.ISSUE,
+        arguments = listOf(
+            navArgument("yearMonth") { type = NavType.StringType },
+        ),
+    ) {
+        IssueRoute(
+            onBack = { navController.popBackStack() },
+            onOpenDay = { dateIso ->
+                navController.navigate(ShutterUpDestinations.day(dateIso))
+            },
+        )
     }
 }
 
@@ -286,6 +324,7 @@ private fun completionArguments() = listOf(
 
 private fun tabForRoute(route: String): ShutterUpDestination = when {
     route.startsWith(ShutterUpDestinations.CALENDAR) -> ShutterUpDestination.Calendar
+    route.startsWith("issue") -> ShutterUpDestination.Feed
     route.startsWith(ShutterUpDestinations.FEED) -> ShutterUpDestination.Feed
     route.startsWith(ShutterUpDestinations.BADGES) -> ShutterUpDestination.Badges
     route.startsWith(ShutterUpDestinations.SETTINGS) -> ShutterUpDestination.Settings
