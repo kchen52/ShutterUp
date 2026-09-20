@@ -1,5 +1,6 @@
 package app.shutterup.capture
 
+import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
 import android.net.Uri
@@ -65,6 +66,35 @@ class MediaStorePhotoArchiver @Inject constructor(
             }
         }
         return total
+    }
+
+    /** Match a Gallery original by filename after a reinstall (SPEC §14). */
+    fun findByDisplayName(displayName: String): Uri? {
+        if (displayName.isBlank()) return null
+        val inAlbum = queryId(
+            "${MediaStore.Images.Media.DISPLAY_NAME} = ? AND ${MediaStore.Images.Media.RELATIVE_PATH} LIKE ?",
+            arrayOf(displayName, "%${Environment.DIRECTORY_PICTURES}/ShutterUp%"),
+        )
+        if (inAlbum != null) return inAlbum
+        return queryId(
+            "${MediaStore.Images.Media.DISPLAY_NAME} = ?",
+            arrayOf(displayName),
+        )
+    }
+
+    private fun queryId(selection: String, args: Array<String>): Uri? {
+        return runCatching {
+            context.contentResolver.query(
+                collection(),
+                arrayOf(MediaStore.Images.Media._ID),
+                selection,
+                args,
+                null,
+            )?.use { cursor ->
+                if (!cursor.moveToFirst()) return null
+                ContentUris.withAppendedId(collection(), cursor.getLong(0))
+            }
+        }.getOrNull()
     }
 
     fun queryDisplayName(uri: Uri): String? {

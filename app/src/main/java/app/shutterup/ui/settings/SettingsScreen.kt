@@ -4,6 +4,8 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
 import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,6 +23,8 @@ import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -31,6 +35,7 @@ import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,10 +51,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.window.core.layout.WindowSizeClass
+import app.shutterup.data.backup.ProgressBackupFormat
+import app.shutterup.domain.geo.CityCatalog
 import app.shutterup.ui.components.Kicker
 import app.shutterup.ui.icons.SnowflakeIcon
 import app.shutterup.ui.theme.ShutterUpTheme
-import app.shutterup.domain.geo.CityCatalog
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -65,6 +71,12 @@ fun SettingsRoute(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val createBackup = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument(ProgressBackupFormat.MIME),
+    ) { uri -> viewModel.exportTo(uri) }
+    val openBackup = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument(),
+    ) { uri -> viewModel.importFrom(uri) }
     SettingsScreen(
         state = state,
         onNotifyTime = viewModel::setNotifyTime,
@@ -76,6 +88,17 @@ fun SettingsRoute(
         onForceRollover = viewModel::forceDayRollover,
         onSeedHistory = viewModel::seedSixtyDays,
         onResetAll = viewModel::resetAllData,
+        onBackup = { createBackup.launch(viewModel.suggestedBackupName()) },
+        onRestore = {
+            openBackup.launch(
+                arrayOf(
+                    ProgressBackupFormat.MIME,
+                    "application/x-zip-compressed",
+                    "application/octet-stream",
+                ),
+            )
+        },
+        onSnackbarShown = viewModel::consumeSnackbar,
         onOpenPrivacy = onOpenPrivacy,
         onOpenExactAlarmSettings = {
             context.startActivity(
@@ -129,6 +152,9 @@ fun SettingsScreen(
     onForceRollover: () -> Unit = {},
     onSeedHistory: () -> Unit = {},
     onResetAll: () -> Unit = {},
+    onBackup: () -> Unit = {},
+    onRestore: () -> Unit = {},
+    onSnackbarShown: () -> Unit = {},
     onOpenPrivacy: (() -> Unit)? = null,
     onOpenExactAlarmSettings: () -> Unit = {},
     onOpenBatterySettings: () -> Unit = {},
@@ -137,6 +163,12 @@ fun SettingsScreen(
     var category by remember { mutableStateOf(SettingsCategory.Daily) }
     val widthDp = currentWindowAdaptiveInfo().windowSizeClass.minWidthDp
     val twoPane = widthDp >= WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND
+    val snackbarHost = remember { SnackbarHostState() }
+    LaunchedEffect(state.snackbar) {
+        val message = state.snackbar ?: return@LaunchedEffect
+        snackbarHost.showSnackbar(message)
+        onSnackbarShown()
+    }
     Scaffold(
         modifier = modifier.nestedScroll(scroll.nestedScrollConnection),
         topBar = {
@@ -150,6 +182,7 @@ fun SettingsScreen(
                 scrollBehavior = scroll,
             )
         },
+        snackbarHost = { SnackbarHost(snackbarHost) },
     ) { padding ->
         if (twoPane) {
             Row(
@@ -183,6 +216,8 @@ fun SettingsScreen(
                         onForceRollover = onForceRollover,
                         onSeedHistory = onSeedHistory,
                         onResetAll = onResetAll,
+                        onBackup = onBackup,
+                        onRestore = onRestore,
                         onOpenPrivacy = onOpenPrivacy,
                         onOpenExactAlarmSettings = onOpenExactAlarmSettings,
                         onOpenBatterySettings = onOpenBatterySettings,
@@ -217,6 +252,8 @@ fun SettingsScreen(
                         onForceRollover = onForceRollover,
                         onSeedHistory = onSeedHistory,
                         onResetAll = onResetAll,
+                        onBackup = onBackup,
+                        onRestore = onRestore,
                         onOpenPrivacy = onOpenPrivacy,
                         onOpenExactAlarmSettings = onOpenExactAlarmSettings,
                         onOpenBatterySettings = onOpenBatterySettings,
@@ -284,6 +321,8 @@ private fun SettingsGroup(
     onForceRollover: () -> Unit,
     onSeedHistory: () -> Unit,
     onResetAll: () -> Unit,
+    onBackup: () -> Unit,
+    onRestore: () -> Unit,
     onOpenPrivacy: (() -> Unit)?,
     onOpenExactAlarmSettings: () -> Unit,
     onOpenBatterySettings: () -> Unit,
@@ -302,7 +341,11 @@ private fun SettingsGroup(
             onSeriesEnabled = onSeriesEnabled,
             onCoarseCity = onCoarseCity,
         )
-        SettingsCategory.Photos -> PhotosSection(state = state)
+        SettingsCategory.Photos -> PhotosSection(
+            state = state,
+            onBackup = onBackup,
+            onRestore = onRestore,
+        )
         SettingsCategory.About -> AboutSection(state = state, onOpenPrivacy = onOpenPrivacy)
         SettingsCategory.Debug -> DebugSection(
             state = state,
@@ -532,7 +575,12 @@ private fun CityPickerDialog(
 }
 
 @Composable
-private fun PhotosSection(state: SettingsUiState) {
+private fun PhotosSection(
+    state: SettingsUiState,
+    onBackup: () -> Unit,
+    onRestore: () -> Unit,
+) {
+    var confirmRestore by remember { mutableStateOf(false) }
     SectionHeader(SettingsCopy.SECTION_PHOTOS)
     ListItem(
         headlineContent = { Text(SettingsCopy.SAVE_LOCATION_LABEL) },
@@ -542,6 +590,46 @@ private fun PhotosSection(state: SettingsUiState) {
         headlineContent = { Text(SettingsCopy.STORAGE_USED) },
         supportingContent = { Text(state.storageUsed) },
     )
+    ListItem(
+        headlineContent = { Text(SettingsCopy.BACKUP) },
+        supportingContent = { Text(SettingsCopy.BACKUP_SUPPORTING) },
+        modifier = Modifier
+            .heightIn(min = 48.dp)
+            .clickable(onClick = onBackup),
+    )
+    ListItem(
+        headlineContent = { Text(SettingsCopy.RESTORE) },
+        supportingContent = { Text(SettingsCopy.RESTORE_SUPPORTING) },
+        modifier = Modifier
+            .heightIn(min = 48.dp)
+            .clickable { confirmRestore = true },
+    )
+    if (confirmRestore) {
+        AlertDialog(
+            onDismissRequest = { confirmRestore = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        confirmRestore = false
+                        onRestore()
+                    },
+                    modifier = Modifier.heightIn(min = 48.dp),
+                ) {
+                    Text(SettingsCopy.RESTORE_CONFIRM)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { confirmRestore = false },
+                    modifier = Modifier.heightIn(min = 48.dp),
+                ) {
+                    Text("Cancel")
+                }
+            },
+            title = { Text(SettingsCopy.RESTORE_TITLE) },
+            text = { Text(SettingsCopy.RESTORE_BODY) },
+        )
+    }
 }
 
 @Composable

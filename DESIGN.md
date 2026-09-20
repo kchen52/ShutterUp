@@ -404,7 +404,7 @@ Standard M3 list, grouped:
 
 - **Daily prompt** — Notification time (time picker), Precise timing (switch + explanatory supporting text + status line "Allowed" / "Needs permission → Open settings"), Pause (switch).
 - **Prompts** — Series (switch; off supporting text "Some weeks arrive as a set of seven related prompts instead of seven separate ones. Turning this on starts a series tomorrow. Today's prompt stays."; on supporting text "Some weeks arrive as a set of seven related prompts instead of seven separate ones. The current series finishes even if you turn this off."), Where you are (city picker from a bundled list; value "Not set" until chosen; supporting text as in §7), Built-in library (read-only row: "Daily prompts come from a curated bank on this phone.").
-- **Photos** — Save location (read-only "Pictures/ShutterUp"), Storage used.
+- **Photos** — Save location (read-only "Pictures/ShutterUp"), Storage used, Backup progress (writes a ZIP of prompts, notes, streaks, badges, and a copy of each photo), Restore progress (confirm, then pick the ZIP; Gallery originals already on the phone are not overwritten).
 - **About** — version, "Everything stays on your phone. ShutterUp has no internet access.", licences.
 - **Debug** (debug builds only) — Use fake AI (switch), Force day rollover, Seed 60 days of history, Reset all data.
 

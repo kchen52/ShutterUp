@@ -24,6 +24,7 @@ Dark-mode, large-font, and expanded-width (foldable) references live alongside t
 
 - **Daily prompts** — about 2000 bundled photography prompts with validation, 180-day exclusion, and 40+ themes so Series weeks can run; Gemini Nano is not loaded at runtime
 - **Quiet capture** — one still photo per day via the system camera into `Pictures/ShutterUp` (visible in Gallery and kept on uninstall); photo-picker fallback if the camera fails twice
+- **Progress backup** — Settings → Photos writes a ZIP of prompts, notes, streaks, badges, and photo copies so an uninstall/reinstall does not wipe history
 - **Streaks, freezes, badges** — streak counting with pause/freeze semantics, 18 canvas-drawn badge emblems in five sections
 - **History** — calendar month grid, chronological feed with theme filters, per-day view with notes
 - **Reminders** — daily notification with Shoot/Reroll actions, exact-alarm precise-timing option, timezone/boot/update rescheduling
@@ -56,7 +57,7 @@ CI (`.github/workflows/ci.yml`) runs all four gates on every PR and uploads the 
 ```
 app/src/main/java/app/shutterup/
   capture/        # FileProvider pending file, MediaStore archive, TakePicture, metadata
-  data/           # Room (entities/DAOs), DataStore prefs, AI (unused Nano + library), repos
+  data/           # Room (entities/DAOs), DataStore prefs, progress backup ZIP, AI (unused Nano + library), repos
   domain/         # pure-Kotlin core: AI parsing/validation, gamification,
                   # scheduling, rollover, capture rules (no Android imports)
   navigation/     # deep-link URIs

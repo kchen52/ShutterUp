@@ -30,6 +30,9 @@ interface EntryDao {
     @Upsert
     suspend fun upsert(entry: EntryEntity)
 
+    @Upsert
+    suspend fun upsertAll(entries: List<EntryEntity>)
+
     @Query("DELETE FROM entries WHERE date = :date")
     suspend fun delete(date: LocalDate)
 

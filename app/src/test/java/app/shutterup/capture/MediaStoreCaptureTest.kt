@@ -54,6 +54,8 @@ class MediaStorePhotoArchiverTest {
         val copied = RuntimeEnvironment.getApplication().contentResolver.openInputStream(uri)!!.use { it.readBytes() }
         assertEquals(originalBytes.toList(), copied.toList())
         assertEquals(0, pendingFlag(uri))
+        val found = archiver.findByDisplayName("2026-09-19_reflections.jpg")
+        assertEquals(uri, found)
     }
 
     @Test

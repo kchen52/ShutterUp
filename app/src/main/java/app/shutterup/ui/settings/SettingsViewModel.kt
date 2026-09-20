@@ -5,11 +5,15 @@ import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.text.format.Formatter
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.shutterup.capture.CaptureFileStore
 import app.shutterup.capture.MediaStorePhotoArchiver
+import app.shutterup.data.backup.ProgressBackupException
+import app.shutterup.data.backup.ProgressBackupFormat
+import app.shutterup.data.backup.ProgressBackupStore
 import app.shutterup.data.local.ShutterUpDatabase
 import app.shutterup.domain.ai.GeneratePromptUseCase
 import app.shutterup.domain.model.DayPrompt
@@ -59,6 +63,7 @@ data class SettingsUiState(
     val debugUseFakeAi: Boolean = false,
     val showBatteryHint: Boolean = false,
     val storageUsed: String = "0 B",
+    val snackbar: String? = null,
 ) {
     val preciseTimingStatus: String =
         if (exactAlarmAllowed) SettingsCopy.PRECISE_ALLOWED else SettingsCopy.PRECISE_NEEDS_PERMISSION
@@ -76,8 +81,8 @@ private data class PrefSlice(
 
 /**
  * Settings: notify time, precise timing, pause, freeze count,
- * built-in library, about/privacy, debug fake-AI. Export ZIP is v1.1 (SPEC §17) and
- * is omitted because no pipeline exists yet. Theme focus is deferred.
+ * built-in library, about/privacy, debug fake-AI, progress backup/restore.
+ * Theme focus is deferred.
  */
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
@@ -86,6 +91,7 @@ class SettingsViewModel @Inject constructor(
     private val widgetUpdater: TodayWidgetUpdater,
     private val files: CaptureFileStore,
     private val photos: MediaStorePhotoArchiver,
+    private val backup: ProgressBackupStore,
     private val generatePrompt: GeneratePromptUseCase,
     private val gamification: GamificationRepository,
     private val prompts: DayPromptRepository,
@@ -97,6 +103,7 @@ class SettingsViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val storageUsed = MutableStateFlow("0 B")
+    private val snackbar = MutableStateFlow<String?>(null)
 
     val state: StateFlow<SettingsUiState> = combine(
         combine(
@@ -116,7 +123,8 @@ class SettingsViewModel @Inject constructor(
         },
         gamification.observeStreak(),
         storageUsed,
-    ) { prefs, streak, storage ->
+        snackbar,
+    ) { prefs, streak, storage, message ->
         SettingsUiState(
             notifyTime = prefs.notifyTime,
             preciseTiming = prefs.precise,
@@ -132,6 +140,7 @@ class SettingsViewModel @Inject constructor(
             debugUseFakeAi = prefs.fakeAi,
             showBatteryHint = isBatteryRestricted(appContext),
             storageUsed = storage,
+            snackbar = message,
         )
     }.stateIn(
         viewModelScope,
@@ -283,6 +292,53 @@ class SettingsViewModel @Inject constructor(
             gamification.updateStreak(StreakState(0, 0, 0, null))
             refreshStorage()
         }
+    }
+
+    fun suggestedBackupName(): String =
+        ProgressBackupFormat.fileName(LocalDate.now(clock.withZone(zone)))
+
+    fun exportTo(uri: Uri?) {
+        if (uri == null) return
+        viewModelScope.launch(Dispatchers.IO) {
+            val result = runCatching {
+                appContext.contentResolver.openOutputStream(uri)?.use { stream ->
+                    backup.exportTo(stream)
+                } ?: error("no stream")
+            }
+            snackbar.value = if (result.isSuccess) {
+                SettingsCopy.BACKUP_SAVED
+            } else {
+                SettingsCopy.BACKUP_FAILED
+            }
+        }
+    }
+
+    fun importFrom(uri: Uri?) {
+        if (uri == null) return
+        viewModelScope.launch(Dispatchers.IO) {
+            val result = runCatching {
+                appContext.contentResolver.openInputStream(uri)?.use { stream ->
+                    backup.importFrom(stream)
+                } ?: error("no stream")
+            }
+            if (result.isSuccess) {
+                scheduler.onSettingsChanged()
+                widgetUpdater.refresh()
+                refreshStorage()
+                snackbar.value = SettingsCopy.RESTORE_DONE
+            } else {
+                val invalid = result.exceptionOrNull() is ProgressBackupException
+                snackbar.value = if (invalid) {
+                    SettingsCopy.RESTORE_INVALID
+                } else {
+                    SettingsCopy.BACKUP_FAILED
+                }
+            }
+        }
+    }
+
+    fun consumeSnackbar() {
+        snackbar.value = null
     }
 
     private fun refreshStorage() {
