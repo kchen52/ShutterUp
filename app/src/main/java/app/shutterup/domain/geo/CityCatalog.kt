@@ -34,7 +34,7 @@ object CityCatalog {
                 latitude = numberField(body, "latitude"),
                 longitude = numberField(body, "longitude"),
             )
-        }
+        }.sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.name })
     }
 
     private fun loadBundled(): String {
