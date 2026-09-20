@@ -40,6 +40,7 @@ class DayScreenshotTest {
     }
 
     @Test
+    @Config(qualifiers = "w400dp-h1600dp")
     fun diptychCompactLight() {
         composeRule.setContent {
             ShutterUpTheme(darkTheme = false) {
@@ -50,6 +51,7 @@ class DayScreenshotTest {
     }
 
     @Test
+    @Config(qualifiers = "w400dp-h1600dp")
     fun diptychCompactDark() {
         composeRule.setContent {
             ShutterUpTheme(darkTheme = true) {
@@ -82,6 +84,7 @@ class DayScreenshotTest {
     }
 
     @Test
+    @Config(qualifiers = "w400dp-h1600dp")
     fun diptychPortraitLandscape() {
         composeRule.setContent {
             ShutterUpTheme(darkTheme = false) {
@@ -92,6 +95,7 @@ class DayScreenshotTest {
     }
 
     @Test
+    @Config(qualifiers = "w400dp-h1600dp")
     fun diptychThreeTakeChain() {
         composeRule.setContent {
             ShutterUpTheme(darkTheme = false) {

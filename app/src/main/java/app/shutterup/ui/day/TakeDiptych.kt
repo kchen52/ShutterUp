@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -67,6 +68,7 @@ fun TakeDiptych(
                     crop = ui.crop,
                     pair = ui.second,
                     onOpenPhoto = onOpenPhoto,
+                    compact = false,
                     modifier = Modifier.weight(1f),
                 )
                 TakeFrame(
@@ -74,6 +76,7 @@ fun TakeDiptych(
                     crop = ui.crop,
                     pair = ui.first,
                     onOpenPhoto = onOpenPhoto,
+                    compact = false,
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -83,12 +86,14 @@ fun TakeDiptych(
                 crop = ui.crop,
                 pair = ui.second,
                 onOpenPhoto = onOpenPhoto,
+                compact = true,
             )
             TakeFrame(
                 frame = ui.second,
                 crop = ui.crop,
                 pair = ui.first,
                 onOpenPhoto = onOpenPhoto,
+                compact = true,
             )
         }
         if (ui.rest.isNotEmpty()) {
@@ -133,6 +138,7 @@ private fun TakeFrame(
     crop: DiptychCrop,
     pair: DiptychFrame,
     onOpenPhoto: (Entry) -> Unit,
+    compact: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val ratio = aspectRatio(frame.entry, pair.entry, crop)
@@ -147,6 +153,7 @@ private fun TakeFrame(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .then(if (compact) Modifier.heightIn(max = 240.dp) else Modifier)
                 .aspectRatio(ratio)
                 .clip(shape)
                 .border(
