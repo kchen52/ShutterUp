@@ -92,7 +92,11 @@ internal fun sampleIssuePage(photoCount: Int = 24): IssuePageUi {
             else -> "You looked up more than usual, and you kept going through a grey week. You wrote on nine of them."
         },
         theme = "Reflections",
-        themesKicker = if (sparse) "REFLECTIONS · QUIET HOURS" else "REFLECTIONS · LOOKING UP",
+        themesKicker = when {
+            n == 1 -> "REFLECTIONS"
+            n <= 3 -> "REFLECTIONS · QUIET HOURS"
+            else -> "REFLECTIONS · LOOKING UP"
+        },
         thumbs = thumbs.map { thumbFor(it, null) },
     )
 }
