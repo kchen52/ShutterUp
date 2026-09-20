@@ -39,4 +39,14 @@ class RoomDayPromptRepository @Inject constructor(
 
     override suspend fun allDays(): List<DayPrompt> =
         dao.allDays().map { it.toDomain() }
+
+    override suspend fun deleteAfter(date: LocalDate) {
+        dao.deleteAfter(date)
+    }
+
+    override fun observeDaysInSeries(seriesId: Long): Flow<List<DayPrompt>> =
+        dao.observeDaysInSeries(seriesId).map { rows -> rows.map { it.toDomain() } }
+
+    override suspend fun daysInSeries(seriesId: Long): List<DayPrompt> =
+        dao.daysInSeries(seriesId).map { it.toDomain() }
 }

@@ -69,6 +69,13 @@ class PreferencesDataStore(
         }
     }
 
+    override fun observeSeriesEnabled(): Flow<Boolean> =
+        dataStore.data.map { it[KEY_SERIES_ENABLED] ?: false }
+
+    override suspend fun setSeriesEnabled(enabled: Boolean) {
+        dataStore.edit { it[KEY_SERIES_ENABLED] = enabled }
+    }
+
     override fun observePaused(): Flow<Boolean> =
         dataStore.data.map { it[KEY_PAUSED] ?: false }
 
@@ -113,6 +120,7 @@ class PreferencesDataStore(
         val KEY_NOTIFY_MINUTE = intPreferencesKey("notify_minute")
         val KEY_PRECISE_TIMING = booleanPreferencesKey("precise_timing")
         val KEY_THEME_FOCUS = stringPreferencesKey("theme_focus")
+        val KEY_SERIES_ENABLED = booleanPreferencesKey("series_enabled")
         val KEY_PAUSED = booleanPreferencesKey("paused")
         val KEY_ONBOARDING_COMPLETE = booleanPreferencesKey("onboarding_complete")
         val KEY_DEBUG_FAKE_AI = booleanPreferencesKey("debug_fake_ai")

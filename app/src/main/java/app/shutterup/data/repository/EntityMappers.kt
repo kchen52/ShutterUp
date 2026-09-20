@@ -4,12 +4,14 @@ import app.shutterup.data.local.AchievementEntity
 import app.shutterup.data.local.DayPromptEntity
 import app.shutterup.data.local.EntryEntity
 import app.shutterup.data.local.LibraryUsageEntity
+import app.shutterup.data.local.SeriesEntity
 import app.shutterup.data.local.StreakStateEntity
 import app.shutterup.data.local.SupersededPromptEntity
 import app.shutterup.domain.model.Achievement
 import app.shutterup.domain.model.DayPrompt
 import app.shutterup.domain.model.Entry
 import app.shutterup.domain.model.LibraryUsage
+import app.shutterup.domain.model.Series
 import app.shutterup.domain.model.StreakState
 import app.shutterup.domain.model.SupersededPrompt
 
@@ -28,6 +30,8 @@ internal fun DayPromptEntity.toDomain(): DayPrompt = DayPrompt(
     status = status,
     frozen = frozen,
     rerollUsed = rerollUsed,
+    seriesId = seriesId,
+    seriesIndex = seriesIndex,
 )
 
 internal fun DayPrompt.toEntity(): DayPromptEntity = DayPromptEntity(
@@ -45,6 +49,26 @@ internal fun DayPrompt.toEntity(): DayPromptEntity = DayPromptEntity(
     status = status,
     frozen = frozen,
     rerollUsed = rerollUsed,
+    seriesId = seriesId,
+    seriesIndex = seriesIndex,
+)
+
+internal fun SeriesEntity.toDomain(): Series = Series(
+    id = id,
+    title = title,
+    startDate = startDate,
+    endDate = endDate,
+    theme = theme,
+    source = source,
+)
+
+internal fun Series.toEntity(): SeriesEntity = SeriesEntity(
+    id = id,
+    title = title,
+    startDate = startDate,
+    endDate = endDate,
+    theme = theme,
+    source = source,
 )
 
 internal fun EntryEntity.toDomain(): Entry = Entry(

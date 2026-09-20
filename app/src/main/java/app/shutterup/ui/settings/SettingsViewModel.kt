@@ -13,6 +13,7 @@ import app.shutterup.capture.MediaStorePhotoArchiver
 import app.shutterup.data.ai.NanoPromptGenerator
 import app.shutterup.data.local.ShutterUpDatabase
 import app.shutterup.domain.ai.Availability
+import app.shutterup.domain.ai.GeneratePromptUseCase
 import app.shutterup.domain.ai.PromptGenerator
 import app.shutterup.domain.model.DayPrompt
 import app.shutterup.domain.model.DayStatus
@@ -49,6 +50,7 @@ data class SettingsUiState(
     val exactAlarmAllowed: Boolean = true,
     val paused: Boolean = false,
     val themeFocus: String = "",
+    val seriesEnabled: Boolean = false,
     val freezeCount: Int = 0,
     val aiStatus: String = "",
     val aiSupporting: String? = null,
@@ -71,6 +73,7 @@ private data class PrefSlice(
     val focus: String?,
     val paused: Boolean,
     val fakeAi: Boolean,
+    val seriesEnabled: Boolean,
 )
 
 private data class AiSlice(
@@ -92,6 +95,7 @@ class SettingsViewModel @Inject constructor(
     private val nano: NanoPromptGenerator,
     private val files: CaptureFileStore,
     private val photos: MediaStorePhotoArchiver,
+    private val generatePrompt: GeneratePromptUseCase,
     private val gamification: GamificationRepository,
     private val prompts: DayPromptRepository,
     private val rollover: DayRolloverUseCase,
@@ -108,14 +112,17 @@ class SettingsViewModel @Inject constructor(
 
     val state: StateFlow<SettingsUiState> = combine(
         combine(
-            preferences.observeNotifyTime(),
-            preferences.observePreciseTiming(),
-            preferences.observeThemeFocus(),
-            preferences.observePaused(),
-            preferences.observeDebugUseFakeAi(),
-        ) { notifyTime, precise, focus, paused, fakeAi ->
-            PrefSlice(notifyTime, precise, focus, paused, fakeAi)
-        },
+            combine(
+                preferences.observeNotifyTime(),
+                preferences.observePreciseTiming(),
+                preferences.observeThemeFocus(),
+                preferences.observePaused(),
+                preferences.observeDebugUseFakeAi(),
+            ) { notifyTime, precise, focus, paused, fakeAi ->
+                PrefSlice(notifyTime, precise, focus, paused, fakeAi, seriesEnabled = false)
+            },
+            preferences.observeSeriesEnabled(),
+        ) { slice, seriesEnabled -> slice.copy(seriesEnabled = seriesEnabled) },
         gamification.observeStreak(),
         ai,
         storageUsed,
@@ -126,6 +133,7 @@ class SettingsViewModel @Inject constructor(
             exactAlarmAllowed = canScheduleExactAlarms(appContext),
             paused = prefs.paused,
             themeFocus = prefs.focus.orEmpty(),
+            seriesEnabled = prefs.seriesEnabled,
             freezeCount = streak.freezes,
             aiStatus = aiSlice.status,
             aiSupporting = aiSlice.supporting,
@@ -187,8 +195,21 @@ class SettingsViewModel @Inject constructor(
     /** Free text, ≤ 60 characters (SPEC §7.5). Empty clears the focus. */
     fun setThemeFocus(raw: String) {
         viewModelScope.launch {
-            preferences.setThemeFocus(sanitizeThemeFocus(raw))
+            val focus = sanitizeThemeFocus(raw)
+            val previous = preferences.observeThemeFocus().first()
+            preferences.setThemeFocus(focus)
+            if (focus != previous) {
+                val today = LocalDate.now(clock.withZone(zone))
+                generatePrompt.discardUnshownFuture(today)
+                generatePrompt.topUpBuffer(today, focus)
+            }
             scheduler.onSettingsChanged()
+        }
+    }
+
+    fun setSeriesEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            preferences.setSeriesEnabled(enabled)
         }
     }
 

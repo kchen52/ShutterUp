@@ -26,6 +26,7 @@ class PreferencesDataStoreTest {
         assertEquals(LocalTime.of(9, 0), repo.observeNotifyTime().first())
         assertFalse(repo.observePreciseTiming().first())
         assertNull(repo.observeThemeFocus().first())
+        assertFalse(repo.observeSeriesEnabled().first())
         assertFalse(repo.observePaused().first())
         assertFalse(repo.observeOnboardingComplete().first())
         assertFalse(repo.observeDebugUseFakeAi().first())
@@ -51,6 +52,12 @@ class PreferencesDataStoreTest {
         assertEquals("architecture", repo.observeThemeFocus().first())
         repo.setThemeFocus(null)
         assertNull(repo.observeThemeFocus().first())
+
+        assertFalse(repo.observeSeriesEnabled().first())
+        repo.setSeriesEnabled(true)
+        assertTrue(repo.observeSeriesEnabled().first())
+        repo.setSeriesEnabled(false)
+        assertFalse(repo.observeSeriesEnabled().first())
 
         repo.setPaused(true)
         assertTrue(repo.observePaused().first())

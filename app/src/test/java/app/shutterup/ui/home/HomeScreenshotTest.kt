@@ -39,4 +39,24 @@ class HomeScreenshotTest {
         }
         composeRule.onRoot().captureRoboImage()
     }
+
+    @Test
+    fun homeSeriesLight() {
+        composeRule.setContent {
+            ShutterUpTheme(darkTheme = false) {
+                Surface { HomeScreen(state = sampleHomeState(seriesProgress = sampleSeriesProgress())) }
+            }
+        }
+        composeRule.onRoot().captureRoboImage()
+    }
+
+    @Test
+    fun homeSeriesDark() {
+        composeRule.setContent {
+            ShutterUpTheme(darkTheme = true) {
+                Surface { HomeScreen(state = sampleHomeState(seriesProgress = sampleSeriesProgress())) }
+            }
+        }
+        composeRule.onRoot().captureRoboImage()
+    }
 }

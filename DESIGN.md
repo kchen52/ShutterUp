@@ -148,6 +148,7 @@ Rules:
 - When today is **SKIPPED**: the card keeps the kicker, shows the title struck through in `onSurfaceVariant`, and the body reads "Skipped — see you tomorrow." (`MISSED` only ever applies to past days, so it never appears on this card.)
 - **PAUSED**: card reads "Paused" with a `Resume` button; kicker shows the resume hint.
 - **Library prompt**: a tiny `labelSmall` chip "From the library" in the kicker line, `outline` colour.
+- **Series (opt-in):** when today's prompt belongs to a seven-day series, the kicker carries the series title and position instead of weekday · theme: `A WEEK OF HANDS · 3 OF 7`. A quiet seven-dot row sits above the Shoot row: completed days filled with `primary` at low emphasis, the rest `outlineVariant`, the current day a ring rather than a fill. Never red, never animated beyond the card-reveal. Missing a day leaves that dot unfilled. When Series is off, this screen renders exactly as the wireframe above.
 - **AI downloading**: a slim `LinearProgressIndicator` under the status row with "Preparing on-device AI · 43 %". Disappears when done.
 - **Notification permission denied**: an M3 `Card` (tonal, `errorContainer` is *not* used; use `secondaryContainer`) under the status row: "Turn on notifications to get your daily prompt" with an `Open settings` text button.
 
@@ -194,6 +195,15 @@ Compact:
 ```
 
 - Bottom bar is a `BottomAppBar`-like surface with Shoot as the filled action and Reroll / Skip as text buttons. Reroll disabled with "Rerolled" label once used.
+- When the day belongs to a series, the date kicker stays first and the series line takes the theme's slot — two tight lines, same as today, so the Fraunces title is still the first thing the eye lands on:
+
+```
+│ TUESDAY 19 SEPTEMBER              │  date kicker, unchanged
+│ A WEEK OF HANDS · 3 OF 7  [tag]   │  series replaces theme; library tag inline
+│ ·· ○ ····                         │  seven-dot row, then the title
+```
+
+  If the series title already contains the theme (case-insensitive), drop the theme. Otherwise append ` · THEME` only when the line still fits the one-line kicker budget at 200% font scale; if it cannot fit, drop the theme. When Series is off, this screen is unchanged.
 - "N hours left" turns to "N minutes left" under an hour; never coloured.
 - Deep-linked with `autoLaunchCamera` → the camera launches immediately; this screen is what the user returns to if they cancel.
 
@@ -227,6 +237,7 @@ The reward moment. Restraint, but a moment.
 
 - On entry: photo scales from 0.92 → 1.0 with a spring (stiffness medium-low, damping 0.8) while fading in over 350 ms; the aperture-settle check plays once beneath the photo; streak number rolls up (§6). Screenshots and previews show the check's final frame.
 - If a badge unlocked: after the streak roll finishes (~800 ms), a `ModalBottomSheet` rises with the emblem (§5), name in `headlineSmall`, one-line description, and a `Nice` dismiss button. One badge per sheet; multiple unlocks queue.
+- When the day belongs to a series, the kicker may carry the series name where it currently carries the theme (`A WEEK OF HANDS · DAY 15`). No extra praise copy, no series-complete fanfare.
 - Expanded: photo left (55 %), text/note/actions right, vertically centred.
 
 ### 4.4 Calendar
@@ -291,7 +302,7 @@ Sections in order: **Streaks · Count · Explorer · Time of day · Special**. T
 Standard M3 list, grouped:
 
 - **Daily prompt** — Notification time (time picker), Precise timing (switch + explanatory supporting text + status line "Allowed" / "Needs permission → Open settings"), Pause (switch).
-- **Prompts** — Theme focus (text field, supporting text "Leave blank to be surprised"), On-device AI status (read-only row: "Ready · Gemini Nano v2" / "Downloading 43 %" / "Unavailable — using the built-in library").
+- **Prompts** — Series (switch + supporting text "Some weeks arrive as a set of seven related prompts instead of seven separate ones."), Theme focus (text field, supporting text "Leave blank to be surprised"), On-device AI status (read-only row: "Ready · Gemini Nano v2" / "Downloading 43 %" / "Unavailable — using the built-in library").
 - **Photos** — Save location (read-only "Pictures/ShutterUp"), Storage used.
 - **About** — version, "Everything stays on your phone. ShutterUp has no internet access.", licences.
 - **Debug** (debug builds only) — Use fake AI (switch), Force day rollover, Seed 60 days of history, Reset all data.
@@ -396,6 +407,9 @@ Second person, present tense, short. Warm but not chirpy. Never exclamation mark
 | Precise timing supporting text | "Delivers at the exact minute. Android needs you to allow alarms and reminders for ShutterUp." |
 | Theme focus placeholder | "Leave blank and I'll surprise you" |
 | Library tag | "From the library" |
+| Series switch | `Series` |
+| Series supporting | "Some weeks arrive as a set of seven related prompts instead of seven separate ones." |
+| Series kicker | `{title} · {n} OF 7` e.g. `A WEEK OF HANDS · 3 OF 7` |
 | AI unavailable | "On-device AI isn't available on this phone right now. ShutterUp is using its built-in prompt library." |
 | About line | "Everything stays on your phone. ShutterUp has no internet access." |
 | Delete dialog | Title "Delete this photo?" Body "The day stays complete." Buttons `Delete from ShutterUp` / `Also delete from Gallery` / `Cancel` |

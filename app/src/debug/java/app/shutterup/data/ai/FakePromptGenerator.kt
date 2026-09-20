@@ -2,6 +2,7 @@ package app.shutterup.data.ai
 
 import app.shutterup.domain.ai.Availability
 import app.shutterup.domain.ai.GeneratedPrompt
+import app.shutterup.domain.ai.GeneratedSeries
 import app.shutterup.domain.ai.GenerationRequest
 import app.shutterup.domain.ai.PromptGenerator
 import app.shutterup.domain.ai.PromptSource
@@ -15,7 +16,23 @@ class FakePromptGenerator @Inject constructor() : PromptGenerator {
 
     override suspend fun generate(request: GenerationRequest): Result<GeneratedPrompt> {
         val date = request.date
+        val theme = request.seriesTitle?.takeIf { it.isNotBlank() } ?: "Test Theme"
         return Result.success(
+            GeneratedPrompt(
+                title = "Test prompt $date",
+                oneLiner = "Make a careful study of ordinary light on $date.",
+                details = "Pick one nearby surface and watch how the light changes across it. Frame tightly so the rest of the room falls away.",
+                tips = listOf("Hold the phone still.", "Expose for the brightest edge."),
+                constraint = "Stay indoors",
+                theme = theme.take(24),
+                source = PromptSource.ON_DEVICE_AI,
+            ),
+        )
+    }
+
+    override suspend fun generateSeries(request: GenerationRequest): Result<GeneratedSeries> {
+        val prompts = (0 until 7).map { offset ->
+            val date = request.date.plusDays(offset.toLong())
             GeneratedPrompt(
                 title = "Test prompt $date",
                 oneLiner = "Make a careful study of ordinary light on $date.",
@@ -24,6 +41,13 @@ class FakePromptGenerator @Inject constructor() : PromptGenerator {
                 constraint = "Stay indoors",
                 theme = "Test Theme",
                 source = PromptSource.ON_DEVICE_AI,
+            )
+        }
+        return Result.success(
+            GeneratedSeries(
+                title = "A Week of Test Theme",
+                theme = "Test Theme",
+                prompts = prompts,
             ),
         )
     }

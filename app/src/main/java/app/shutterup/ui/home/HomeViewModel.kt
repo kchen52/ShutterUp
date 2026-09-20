@@ -16,7 +16,10 @@ import app.shutterup.domain.repository.DayPromptRepository
 import app.shutterup.domain.repository.EntryRepository
 import app.shutterup.domain.repository.GamificationRepository
 import app.shutterup.domain.repository.PreferencesRepository
+import app.shutterup.domain.repository.SeriesRepository
 import app.shutterup.domain.rollover.DayRolloverUseCase
+import app.shutterup.domain.series.SeriesProgress
+import app.shutterup.domain.series.SeriesProgressCalculator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.Clock
@@ -45,6 +48,7 @@ data class HomeUiState(
     val notificationsDenied: Boolean = false,
     val aiDownloadPercent: Int? = null,
     val preparingPrompts: Boolean = false,
+    val seriesProgress: SeriesProgress? = null,
 )
 
 /**
@@ -59,6 +63,7 @@ class HomeViewModel @Inject constructor(
     private val preferences: PreferencesRepository,
     private val generatePrompt: GeneratePromptUseCase,
     private val rollover: DayRolloverUseCase,
+    private val seriesRepo: SeriesRepository,
     @Named("primaryGenerator") private val primary: PromptGenerator,
     private val clock: Clock,
     private val zone: ZoneId,
@@ -71,14 +76,20 @@ class HomeViewModel @Inject constructor(
 
     init {
         val month = YearMonth.from(today)
+        val rangeStart = minOf(month.atDay(1), today.minusDays(6))
+        val rangeEnd = maxOf(month.atEndOfMonth(), today.plusDays(6))
         viewModelScope.launch {
             combine(
-                prompts.observeDay(today),
-                prompts.observeDays(month.atDay(1), month.atEndOfMonth()),
+                combine(
+                    prompts.observeDay(today),
+                    prompts.observeDays(rangeStart, rangeEnd),
+                    seriesRepo.observeCovering(today),
+                ) { prompt, monthDays, series -> Triple(prompt, monthDays, series) },
                 entries.observeRecentEntries(RECENT_LIMIT),
                 gamification.observeStreak(),
                 preferences.observePaused(),
-            ) { prompt, monthDays, recent, streak, paused ->
+            ) { slice, recent, streak, paused ->
+                val (prompt, monthDays, series) = slice
                 val progress = monthProgress(monthDays, today, month)
                 HomeUiState(
                     today = today,
@@ -91,6 +102,9 @@ class HomeViewModel @Inject constructor(
                     notificationsDenied = _state.value.notificationsDenied,
                     aiDownloadPercent = _state.value.aiDownloadPercent,
                     preparingPrompts = _state.value.preparingPrompts,
+                    seriesProgress = series?.let {
+                        SeriesProgressCalculator.progress(it, monthDays, today)
+                    },
                 )
             }.collect { next -> _state.value = next }
         }

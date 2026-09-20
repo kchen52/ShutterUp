@@ -33,4 +33,13 @@ class SettingsCopyAndFocusTest {
         )
         assertEquals(SettingsCopy.ABOUT_LINE, SettingsCopy.PRIVACY_BODY.take(SettingsCopy.ABOUT_LINE.length))
     }
+
+    @Test
+    fun seriesCopyMatchesBrief() {
+        assertEquals("Series", SettingsCopy.SERIES)
+        assertEquals(
+            "Some weeks arrive as a set of seven related prompts instead of seven separate ones.",
+            SettingsCopy.SERIES_SUPPORTING,
+        )
+    }
 }

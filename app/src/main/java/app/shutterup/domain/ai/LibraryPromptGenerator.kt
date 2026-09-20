@@ -1,6 +1,7 @@
 package app.shutterup.domain.ai
 
 import app.shutterup.domain.repository.GamificationRepository
+import app.shutterup.domain.series.librarySeriesTitle
 import java.time.Clock
 import kotlin.random.Random
 
@@ -42,6 +43,64 @@ class LibraryPromptGenerator(
     /** Resolves a library id by exact title; null when the title is not a library entry. */
     suspend fun findIdByTitle(title: String): String? =
         source.loadAll().firstOrNull { it.title == title }?.id
+
+    override suspend fun generateSeries(request: GenerationRequest): Result<GeneratedSeries> =
+        runCatching { pickSeries(request) ?: error("no library theme has seven unused prompts") }
+
+    /**
+     * Builds a seven-prompt series from one library theme with at least seven
+     * unused entries (180-day exclusion). Returns null when none qualify.
+     */
+    suspend fun pickSeries(request: GenerationRequest): GeneratedSeries? {
+        val all = source.loadAll()
+        if (all.isEmpty()) return null
+        val cutoff = request.date.minusDays(180)
+        val unused = all.filter { prompt -> !gamification.libraryUsedSince(prompt.id, cutoff) }
+        val unusedByTheme = unused.groupBy { it.theme }
+        val eligible = unusedByTheme.filter { it.value.size >= 7 }
+        if (eligible.isEmpty()) return null
+        val focused = eligible.filter { (theme, prompts) ->
+            tagsMatchFocus(prompts.flatMap { it.tags }.distinct(), request.themeFocus) ||
+                (!request.themeFocus.isNullOrBlank() && theme.contains(request.themeFocus, ignoreCase = true))
+        }
+        val matching = focused.ifEmpty { eligible }
+        val indoorEnough = matching.filter { (_, prompts) ->
+            prompts.count { prompt -> prompt.tags.any { tag -> tag.equals("indoor", ignoreCase = true) } } >= 4
+        }
+        val pool = indoorEnough.ifEmpty { matching }
+        val fresh = pool.filterKeys { theme ->
+            request.recentThemes.none { recent -> recent.equals(theme, ignoreCase = true) }
+        }
+        val chosen = (fresh.ifEmpty { pool })
+        val theme = chosen.keys.toList().random(random)
+        val seven = chosen.getValue(theme).shuffled(random).take(7)
+        return GeneratedSeries(
+            title = librarySeriesTitle(theme),
+            theme = theme,
+            prompts = seven.map { it.toGeneratedPrompt() },
+            libraryIds = seven.map { it.id },
+        )
+    }
+
+    /**
+     * In-series reroll: another unused prompt from [theme], excluding [excludeTitles].
+     */
+    suspend fun pickFromTheme(
+        request: GenerationRequest,
+        theme: String,
+        excludeTitles: Set<String>,
+    ): LibraryPrompt? {
+        val all = source.loadAll().filter { it.theme.equals(theme, ignoreCase = true) }
+        if (all.isEmpty()) return null
+        val cutoff = request.date.minusDays(180)
+        val unused = all.filter { prompt -> !gamification.libraryUsedSince(prompt.id, cutoff) }
+        val excluded = excludeTitles.map { it.lowercase() }.toSet()
+        fun notExcluded(prompt: LibraryPrompt): Boolean =
+            prompt.title.lowercase() !in excluded
+        val preferred = unused.filter(::notExcluded).ifEmpty { unused }
+        val pool = preferred.ifEmpty { all.filter(::notExcluded).ifEmpty { all } }
+        return pool.random(random)
+    }
 }
 
 private fun tagsMatchFocus(tags: List<String>, themeFocus: String?): Boolean {

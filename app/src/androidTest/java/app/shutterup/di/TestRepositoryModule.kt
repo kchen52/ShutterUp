@@ -4,10 +4,12 @@ import app.shutterup.data.di.RepositoryModule
 import app.shutterup.data.repository.RoomDayPromptRepository
 import app.shutterup.data.repository.RoomEntryRepository
 import app.shutterup.data.repository.RoomGamificationRepository
+import app.shutterup.data.repository.RoomSeriesRepository
 import app.shutterup.domain.repository.DayPromptRepository
 import app.shutterup.domain.repository.EntryRepository
 import app.shutterup.domain.repository.GamificationRepository
 import app.shutterup.domain.repository.PreferencesRepository
+import app.shutterup.domain.repository.SeriesRepository
 import app.shutterup.testutil.InMemoryPreferencesRepository
 import dagger.Binds
 import dagger.Module
@@ -32,6 +34,10 @@ abstract class TestRepositoryModule {
     @Binds
     @Singleton
     abstract fun bindGamificationRepository(impl: RoomGamificationRepository): GamificationRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSeriesRepository(impl: RoomSeriesRepository): SeriesRepository
 
     @Binds
     @Singleton

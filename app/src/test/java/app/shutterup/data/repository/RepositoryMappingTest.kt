@@ -5,6 +5,7 @@ import app.shutterup.data.local.DayPromptEntity
 import app.shutterup.data.local.EntryEntity
 import app.shutterup.data.local.GamificationDao
 import app.shutterup.data.local.LibraryUsageEntity
+import app.shutterup.data.local.SeriesEntity
 import app.shutterup.data.local.StreakStateEntity
 import app.shutterup.data.local.SupersededPromptEntity
 import app.shutterup.domain.model.DayStatus
@@ -54,6 +55,8 @@ class RepositoryMappingTest {
         assertTrue(domain.tips.isEmpty())
         assertTrue(domain.frozen)
         assertTrue(domain.rerollUsed)
+        assertNull(domain.seriesId)
+        assertNull(domain.seriesIndex)
         assertEquals(entity, domain.toEntity())
     }
 
@@ -74,6 +77,24 @@ class RepositoryMappingTest {
             status = DayStatus.COMPLETED,
             frozen = false,
             rerollUsed = false,
+            seriesId = 9L,
+            seriesIndex = 3,
+        )
+        val domain = entity.toDomain()
+        assertEquals(9L, domain.seriesId)
+        assertEquals(3, domain.seriesIndex)
+        assertEquals(entity, domain.toEntity())
+    }
+
+    @Test
+    fun series_roundTrip() {
+        val entity = SeriesEntity(
+            id = 4,
+            title = "A Week of Hands",
+            startDate = date,
+            endDate = date.plusDays(6),
+            theme = "Hands",
+            source = PromptSourceRef.ON_DEVICE_AI,
         )
         assertEquals(entity, entity.toDomain().toEntity())
     }

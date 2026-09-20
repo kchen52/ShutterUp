@@ -251,6 +251,16 @@ private class FakeDayPrompts : DayPromptRepository {
 
     override suspend fun allDays(): List<DayPrompt> =
         days.values.sortedBy { it.date }
+
+    override suspend fun deleteAfter(date: LocalDate) {
+        days.keys.filter { it > date }.forEach { days.remove(it) }
+    }
+
+    override fun observeDaysInSeries(seriesId: Long): Flow<List<DayPrompt>> =
+        flowOf(days.values.filter { it.seriesId == seriesId }.sortedBy { it.date })
+
+    override suspend fun daysInSeries(seriesId: Long): List<DayPrompt> =
+        days.values.filter { it.seriesId == seriesId }.sortedBy { it.date }
 }
 
 private class FakeGamification(

@@ -33,6 +33,15 @@ interface DayPromptDao {
     @Query("SELECT * FROM day_prompts ORDER BY date ASC")
     suspend fun allDays(): List<DayPromptEntity>
 
+    @Query("DELETE FROM day_prompts WHERE date > :date")
+    suspend fun deleteAfter(date: LocalDate)
+
+    @Query("SELECT * FROM day_prompts WHERE seriesId = :seriesId ORDER BY date ASC")
+    fun observeDaysInSeries(seriesId: Long): Flow<List<DayPromptEntity>>
+
+    @Query("SELECT * FROM day_prompts WHERE seriesId = :seriesId ORDER BY date ASC")
+    suspend fun daysInSeries(seriesId: Long): List<DayPromptEntity>
+
     @Insert
     suspend fun recordSuperseded(prompt: SupersededPromptEntity)
 }

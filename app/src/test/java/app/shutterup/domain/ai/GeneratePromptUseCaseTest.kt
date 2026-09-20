@@ -3,10 +3,13 @@ package app.shutterup.domain.ai
 import app.shutterup.domain.model.Achievement
 import app.shutterup.domain.model.DayPrompt
 import app.shutterup.domain.model.LibraryUsage
+import app.shutterup.domain.model.Series
 import app.shutterup.domain.model.StreakState
 import app.shutterup.domain.model.SupersededPrompt
 import app.shutterup.domain.repository.DayPromptRepository
 import app.shutterup.domain.repository.GamificationRepository
+import app.shutterup.domain.repository.PreferencesRepository
+import app.shutterup.domain.repository.SeriesRepository
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
@@ -155,11 +158,185 @@ class GeneratePromptUseCaseTest {
         assertEquals("Rerolled Frame", prompts.getDay(date)?.title)
     }
 
+    @Test
+    fun seriesEnabled_generatesSevenRelatedDays() = runBlocking {
+        val primary = ScriptedGenerator(
+            prompts = listOf(validPrompt()),
+            series = listOf(validSeries()),
+        )
+        val prompts = FakeDayPrompts()
+        val series = MemorySeries()
+        val prefs = TogglePreferences(enabled = true)
+        val useCase = useCase(primary = primary, prompts = prompts, preferences = prefs, series = series)
+        val result = useCase.promptFor(date, null)
+        assertEquals("Hands day 1 light", result.title)
+        assertEquals(1, primary.seriesCalls)
+        assertEquals(7, prompts.allDays().size)
+        assertEquals(1, series.all().size)
+        assertEquals("A Week of Hands", series.all().single().title)
+        assertEquals(date, series.all().single().startDate)
+        assertEquals(date.plusDays(6), series.all().single().endDate)
+        assertEquals(1, prompts.getDay(date)?.seriesIndex)
+        assertEquals(7, prompts.getDay(date.plusDays(6))?.seriesIndex)
+    }
+
+    @Test
+    fun seriesEnabled_doesNotReplaceExistingTodayPrompt() = runBlocking {
+        val primary = ScriptedGenerator(
+            prompts = listOf(validPrompt(title = "Already Here")),
+            series = listOf(validSeries()),
+        )
+        val prompts = FakeDayPrompts()
+        val prefs = TogglePreferences(enabled = false)
+        val useCase = useCase(primary = primary, prompts = prompts, preferences = prefs)
+        useCase.promptFor(date, null)
+        prefs.enabled = true
+        val again = useCase.promptFor(date, "should not matter")
+        assertEquals("Already Here", again.title)
+        assertEquals(0, primary.seriesCalls)
+        assertEquals(1, prompts.allDays().size)
+    }
+
+    @Test
+    fun seriesFallbackToLibraryTheme_whenPrimarySeriesInvalid() = runBlocking {
+        val items = (1..8).map { i ->
+            libraryEntry("hands-$i", "Hand study $i").copy(
+                theme = "Hands",
+                tags = listOf("indoor", "hands"),
+                oneLiner = "Photograph gesture $i on a nearby surface today.",
+            )
+        }
+        val primary = ScriptedGenerator(prompts = listOf(invalidPrompt()), series = listOf(validSeries().copy(title = "")))
+        val prompts = FakeDayPrompts()
+        val series = MemorySeries()
+        val useCase = useCase(
+            primary = primary,
+            librarySource = UseCaseLibrarySource(items),
+            prompts = prompts,
+            preferences = TogglePreferences(enabled = true),
+            series = series,
+        )
+        val result = useCase.promptFor(date, null)
+        assertEquals(PromptSource.LIBRARY, result.source)
+        assertEquals(7, prompts.allDays().size)
+        assertEquals("A Week of Hands", series.all().single().title)
+        assertTrue(prompts.getDay(date)?.libraryId != null)
+    }
+
+    @Test
+    fun rerollInsideSeries_passesSeriesTitleOnRequest() = runBlocking {
+        val seriesPrompts = validSeries()
+        val reroll = validPrompt(
+            title = "Rerolled hand light",
+            oneLiner = "Catch the shadow a wrist throws on a table.",
+            theme = "Hands",
+        )
+        val primary = ScriptedGenerator(
+            prompts = listOf(reroll),
+            series = listOf(seriesPrompts),
+        )
+        val prompts = FakeDayPrompts()
+        val series = MemorySeries()
+        val useCase = useCase(
+            primary = primary,
+            prompts = prompts,
+            preferences = TogglePreferences(enabled = true),
+            series = series,
+        )
+        useCase.promptFor(date, null)
+        val rerolled = useCase.reroll(date, "architecture")
+        assertEquals("Rerolled hand light", rerolled.title)
+        assertEquals("A Week of Hands", primary.lastRequest?.seriesTitle)
+        assertEquals(true, prompts.getDay(date)?.rerollUsed)
+        assertEquals(prompts.getDay(date.plusDays(1))?.seriesId, prompts.getDay(date)?.seriesId)
+        assertEquals(1, prompts.superseded.size)
+    }
+
+    @Test
+    fun discardUnshownFuture_keepsTodayAndDropsBuffer() = runBlocking {
+        val primary = ScriptedGenerator(
+            listOf(
+                validPrompt(title = "Day Zero Light", oneLiner = "Photograph morning light on a table.", theme = "Morning"),
+                validPrompt(title = "Day One Light", oneLiner = "Find a shadow that splits a wall.", theme = "Shadow"),
+                validPrompt(title = "Day Two Light", oneLiner = "Frame a doorway as a bright rectangle.", theme = "Doorway"),
+            ),
+        )
+        val prompts = FakeDayPrompts()
+        val useCase = useCase(primary = primary, prompts = prompts)
+        useCase.topUpBuffer(date, "windows")
+        assertEquals(3, prompts.allDays().size)
+        useCase.discardUnshownFuture(date)
+        assertEquals("Day Zero Light", prompts.getDay(date)?.title)
+        assertEquals(null, prompts.getDay(date.plusDays(1)))
+        assertEquals(null, prompts.getDay(date.plusDays(2)))
+        val regenerated = useCase.topUpBuffer(date, "my dog")
+        assertEquals(listOf(date.plusDays(1), date.plusDays(2)), regenerated)
+        assertEquals("my dog", primary.lastRequest?.themeFocus)
+    }
+
+    @Test
+    fun seriesEnabled_startsOnNextEmptyDate_afterExistingToday() = runBlocking {
+        val primary = ScriptedGenerator(
+            prompts = listOf(validPrompt(title = "Already Here")),
+            series = listOf(validSeries()),
+        )
+        val prompts = FakeDayPrompts()
+        val series = MemorySeries()
+        val prefs = TogglePreferences(enabled = false)
+        val useCase = useCase(primary = primary, prompts = prompts, preferences = prefs, series = series)
+        useCase.promptFor(date, null)
+        prefs.enabled = true
+        useCase.topUpBuffer(date, null)
+        assertEquals("Already Here", prompts.getDay(date)?.title)
+        assertEquals(null, prompts.getDay(date)?.seriesId)
+        assertEquals(date.plusDays(1), series.all().single().startDate)
+        assertEquals(1, prompts.getDay(date.plusDays(1))?.seriesIndex)
+        assertEquals(7, prompts.allDays().count { it.seriesId != null })
+    }
+
+    @Test
+    fun discardUnshownFuture_truncatesActiveSeriesAndKeepsToday() = runBlocking {
+        val primary = ScriptedGenerator(prompts = listOf(validPrompt()), series = listOf(validSeries()))
+        val prompts = FakeDayPrompts()
+        val series = MemorySeries()
+        val useCase = useCase(
+            primary = primary,
+            prompts = prompts,
+            preferences = TogglePreferences(enabled = true),
+            series = series,
+        )
+        useCase.promptFor(date, null)
+        assertEquals(7, prompts.allDays().size)
+        useCase.discardUnshownFuture(date)
+        assertEquals("Hands day 1 light", prompts.getDay(date)?.title)
+        assertEquals(1, prompts.allDays().size)
+        assertEquals(date, series.all().single().endDate)
+        assertEquals(null, prompts.getDay(date.plusDays(1)))
+    }
+
+    @Test
+    fun seriesDisabledAfterStart_leavesGeneratedDays() = runBlocking {
+        val primary = ScriptedGenerator(prompts = listOf(validPrompt()), series = listOf(validSeries()))
+        val prompts = FakeDayPrompts()
+        val prefs = TogglePreferences(enabled = true)
+        val series = MemorySeries()
+        val useCase = useCase(primary = primary, prompts = prompts, preferences = prefs, series = series)
+        useCase.promptFor(date, null)
+        prefs.enabled = false
+        val later = date.plusDays(7)
+        val after = useCase.promptFor(later, null)
+        assertEquals("Steam Maps", after.title)
+        assertEquals(null, prompts.getDay(later)?.seriesId)
+        assertEquals(7, prompts.allDays().count { it.seriesId != null })
+    }
+
     private fun useCase(
         primary: PromptGenerator,
         librarySource: LibraryPromptSource = UseCaseLibrarySource(listOf(libraryEntry("fallback", "Library Frame"))),
         prompts: FakeDayPrompts = FakeDayPrompts(),
         gamification: RecordingGamification = RecordingGamification(),
+        preferences: TogglePreferences = TogglePreferences(),
+        series: MemorySeries = MemorySeries(),
     ): GeneratePromptUseCase {
         val library = LibraryPromptGenerator(
             source = librarySource,
@@ -173,6 +350,8 @@ class GeneratePromptUseCaseTest {
             prompts = prompts,
             gamification = gamification,
             validator = validator,
+            preferences = preferences,
+            seriesRepo = series,
             clock = clock,
             zone = zone,
         )
@@ -215,8 +394,11 @@ private class UseCaseLibrarySource(
 
 private class ScriptedGenerator(
     private val prompts: List<GeneratedPrompt>,
+    private val series: List<GeneratedSeries> = emptyList(),
 ) : PromptGenerator {
     var calls: Int = 0
+        private set
+    var seriesCalls: Int = 0
         private set
     val requests = mutableListOf<GenerationRequest>()
     val lastRequest: GenerationRequest?
@@ -229,6 +411,14 @@ private class ScriptedGenerator(
         val prompt = prompts[calls.coerceAtMost(prompts.lastIndex)]
         calls += 1
         return Result.success(prompt)
+    }
+
+    override suspend fun generateSeries(request: GenerationRequest): Result<GeneratedSeries> {
+        if (series.isEmpty()) {
+            return Result.failure(UnsupportedOperationException("no series"))
+        }
+        seriesCalls += 1
+        return Result.success(series[(seriesCalls - 1).coerceAtMost(series.lastIndex)])
     }
 }
 
@@ -260,6 +450,16 @@ private class FakeDayPrompts : DayPromptRepository {
 
     override suspend fun allDays(): List<DayPrompt> =
         days.values.sortedBy { it.date }
+
+    override suspend fun deleteAfter(date: LocalDate) {
+        days.keys.filter { it > date }.forEach { days.remove(it) }
+    }
+
+    override fun observeDaysInSeries(seriesId: Long): Flow<List<DayPrompt>> =
+        flowOf(days.values.filter { it.seriesId == seriesId }.sortedBy { it.date })
+
+    override suspend fun daysInSeries(seriesId: Long): List<DayPrompt> =
+        days.values.filter { it.seriesId == seriesId }.sortedBy { it.date }
 }
 
 private class RecordingGamification : GamificationRepository {
@@ -280,4 +480,67 @@ private class RecordingGamification : GamificationRepository {
 
     override suspend fun libraryUsedSince(libraryId: String, since: LocalDate): Boolean =
         recorded.any { it.libraryId == libraryId && !it.usedOnDate.isBefore(since) }
+}
+
+private class TogglePreferences(
+    enabled: Boolean = false,
+) : PreferencesRepository {
+    var enabled: Boolean = enabled
+    override fun observeNotifyTime() = flowOf(java.time.LocalTime.of(9, 0))
+    override suspend fun setNotifyTime(time: java.time.LocalTime) = Unit
+    override fun observePreciseTiming() = flowOf(false)
+    override suspend fun setPreciseTiming(enabled: Boolean) = Unit
+    override fun observeThemeFocus() = flowOf<String?>(null)
+    override suspend fun setThemeFocus(focus: String?) = Unit
+    override fun observeSeriesEnabled() = flowOf(enabled)
+    override suspend fun setSeriesEnabled(enabled: Boolean) {
+        this.enabled = enabled
+    }
+    override fun observePaused() = flowOf(false)
+    override suspend fun setPaused(paused: Boolean) = Unit
+    override fun observeOnboardingComplete() = flowOf(true)
+    override suspend fun setOnboardingComplete(complete: Boolean) = Unit
+    override fun observeDebugUseFakeAi() = flowOf(false)
+    override suspend fun setDebugUseFakeAi(useFake: Boolean) = Unit
+    override fun observeLastNotifiedDate() = flowOf<LocalDate?>(null)
+    override suspend fun setLastNotifiedDate(date: LocalDate?) = Unit
+}
+
+private class MemorySeries : SeriesRepository {
+    private val rows = linkedMapOf<Long, Series>()
+    private var nextId = 1L
+
+    override fun observe(id: Long) = flowOf(rows[id])
+    override fun observeCovering(date: LocalDate) = flowOf(
+        rows.values.firstOrNull { !date.isBefore(it.startDate) && !date.isAfter(it.endDate) },
+    )
+    override suspend fun get(id: Long) = rows[id]
+    override suspend fun covering(date: LocalDate): Series? =
+        rows.values.firstOrNull { !date.isBefore(it.startDate) && !date.isAfter(it.endDate) }
+    override suspend fun latest(): Series? = rows.values.maxByOrNull { it.endDate }
+    override suspend fun all(): List<Series> = rows.values.sortedBy { it.startDate }
+    override suspend fun insert(series: Series): Long {
+        val id = if (series.id == 0L) nextId++ else series.id
+        rows[id] = series.copy(id = id)
+        return id
+    }
+    override suspend fun update(series: Series) {
+        rows[series.id] = series
+    }
+    override suspend fun delete(id: Long) {
+        rows.remove(id)
+    }
+}
+
+private fun validSeries(): GeneratedSeries {
+    val prompts = listOf(
+        validPrompt(title = "Hands day 1 light", oneLiner = "Photograph the hands that made breakfast.", theme = "Hands"),
+        validPrompt(title = "Hands day 2 light", oneLiner = "Frame knuckles wrapped around a mug.", theme = "Hands"),
+        validPrompt(title = "Hands day 3 light", oneLiner = "Catch a shadow a wrist throws at noon.", theme = "Hands"),
+        validPrompt(title = "Hands day 4 light", oneLiner = "Study the grip that holds a book open.", theme = "Hands"),
+        validPrompt(title = "Hands day 5 light", oneLiner = "Look at soap bubbles on the sink edge.", theme = "Hands"),
+        validPrompt(title = "Hands day 6 light", oneLiner = "Watch fingers rest on a windowsill.", theme = "Hands"),
+        validPrompt(title = "Hands day 7 light", oneLiner = "Find the last light on your palms.", theme = "Hands"),
+    )
+    return GeneratedSeries(title = "A Week of Hands", theme = "Hands", prompts = prompts)
 }

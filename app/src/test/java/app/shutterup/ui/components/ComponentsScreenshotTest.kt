@@ -14,6 +14,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.unit.dp
+import app.shutterup.domain.series.SeriesDot
 import app.shutterup.ui.theme.ShutterUpTheme
 import app.shutterup.ui.theme.themeTint
 import com.github.takahirom.roborazzi.captureRoboImage
@@ -111,6 +112,26 @@ class ComponentsScreenshotTest {
         }
         composeRule.onRoot().captureRoboImage()
     }
+
+    @Test
+    fun seriesDots_light() {
+        composeRule.setContent {
+            ShutterUpTheme(darkTheme = false) {
+                SeriesDotsPreview()
+            }
+        }
+        composeRule.onRoot().captureRoboImage()
+    }
+
+    @Test
+    fun seriesDots_dark() {
+        composeRule.setContent {
+            ShutterUpTheme(darkTheme = true) {
+                SeriesDotsPreview()
+            }
+        }
+        composeRule.onRoot().captureRoboImage()
+    }
 }
 
 @Composable
@@ -173,6 +194,24 @@ private fun CameraPreview() {
                 .padding(24.dp)
                 .rotate(TodayCardCameraTilt)
                 .size(TodayCardCameraSize),
+        )
+    }
+}
+
+@Composable
+private fun SeriesDotsPreview() {
+    Surface(color = MaterialTheme.colorScheme.surface) {
+        SeriesDots(
+            dots = listOf(
+                SeriesDot.COMPLETED,
+                SeriesDot.COMPLETED,
+                SeriesDot.CURRENT,
+                SeriesDot.EMPTY,
+                SeriesDot.EMPTY,
+                SeriesDot.EMPTY,
+                SeriesDot.EMPTY,
+            ),
+            modifier = Modifier.padding(16.dp),
         )
     }
 }

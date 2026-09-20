@@ -13,6 +13,8 @@ import java.time.LocalDate
 interface PromptGenerator {
     suspend fun availability(): Availability
     suspend fun generate(request: GenerationRequest): Result<GeneratedPrompt>
+    suspend fun generateSeries(request: GenerationRequest): Result<GeneratedSeries> =
+        Result.failure(UnsupportedOperationException("series generation is not supported"))
 }
 
 /** Mirrors the ML Kit `FeatureStatus` values relevant to generation. */
@@ -47,6 +49,11 @@ data class GenerationRequest(
     val dayOfWeek: DayOfWeek,
     val season: Season,
     val excludeConstraintKinds: Set<String> = emptySet(),
+    /**
+     * When set, this request is a reroll (or hole-fill) inside an existing
+     * series and must stay within that series' theme.
+     */
+    val seriesTitle: String? = null,
 )
 
 data class GeneratedPrompt(
@@ -65,4 +72,12 @@ data class GeneratedPrompt(
     val source: PromptSource,
     /** Populated by the Nano implementation; null for library/fake. */
     val modelName: String? = null,
+)
+
+/** Seven related prompts plus a series title (SPEC §7.8). */
+data class GeneratedSeries(
+    val title: String,
+    val theme: String,
+    val prompts: List<GeneratedPrompt>,
+    val libraryIds: List<String?> = emptyList(),
 )

@@ -60,10 +60,13 @@ import app.shutterup.domain.model.DayStatus
 import app.shutterup.domain.model.Entry
 import app.shutterup.domain.model.PromptSourceRef
 import app.shutterup.domain.model.StreakState
+import app.shutterup.domain.series.SeriesDot
+import app.shutterup.domain.series.SeriesProgress
 import app.shutterup.ui.calendar.spokenDate
 import app.shutterup.ui.components.Kicker
 import app.shutterup.ui.components.LibraryTag
 import app.shutterup.ui.components.NotificationPermissionCard
+import app.shutterup.ui.components.SeriesDots
 import app.shutterup.ui.components.ShootButton
 import app.shutterup.ui.components.StreakStatus
 import app.shutterup.ui.components.TodayCardCamera
@@ -263,6 +266,7 @@ private fun TodayCard(
             photoPath = state.recent.firstOrNull { it.date == state.today }?.thumbPath
                 ?: state.recent.firstOrNull { it.date == state.today }?.mediaUri,
             minHeight = completedPhotoMinHeight,
+            seriesProgress = state.seriesProgress,
             onAddNote = onAddNote,
             onRetake = onRetake,
         )
@@ -294,7 +298,7 @@ private fun TodayCard(
                     .padding(20.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                TodayKickerRow(prompt)
+                TodayKickerRow(prompt, state.seriesProgress)
                 val skipped = prompt.status == DayStatus.SKIPPED
                 Text(
                     text = prompt.title,
@@ -314,6 +318,7 @@ private fun TodayCard(
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+                    state.seriesProgress?.let { SeriesDots(dots = it.dots) }
                 } else {
                     if (!listPane) {
                         Text(
@@ -322,6 +327,7 @@ private fun TodayCard(
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
+                    state.seriesProgress?.let { SeriesDots(dots = it.dots) }
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
@@ -339,13 +345,14 @@ private fun TodayCard(
 }
 
 @Composable
-private fun TodayKickerRow(prompt: DayPrompt) {
+private fun TodayKickerRow(prompt: DayPrompt, seriesProgress: SeriesProgress?) {
     val weekday = prompt.date.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.ENGLISH)
+    val kicker = seriesProgress?.kicker ?: "$weekday · ${prompt.theme}"
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Kicker(text = "$weekday · ${prompt.theme}")
+        Kicker(text = kicker)
         if (prompt.source == PromptSourceRef.LIBRARY) {
             LibraryTag()
         }
@@ -357,10 +364,12 @@ private fun CompletedTodayCard(
     prompt: DayPrompt,
     photoPath: String?,
     minHeight: Dp,
+    seriesProgress: SeriesProgress?,
     onAddNote: () -> Unit,
     onRetake: () -> Unit,
 ) {
     val weekday = prompt.date.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.ENGLISH)
+    val kicker = seriesProgress?.kicker ?: "$weekday · ${prompt.theme}"
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -401,7 +410,7 @@ private fun CompletedTodayCard(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Text(
-                text = "$weekday · ${prompt.theme}".uppercase(Locale.ENGLISH),
+                text = kicker.uppercase(Locale.ENGLISH),
                 color = MaterialTheme.colorScheme.inverseOnSurface,
                 style = MaterialTheme.typography.labelMedium,
             )
@@ -477,6 +486,7 @@ fun sampleHomeState(
     paused: Boolean = false,
     notificationsDenied: Boolean = false,
     aiDownloadPercent: Int? = null,
+    seriesProgress: SeriesProgress? = null,
 ): HomeUiState = HomeUiState(
     today = LocalDate.of(2026, 9, 19),
     prompt = prompt,
@@ -487,6 +497,21 @@ fun sampleHomeState(
     paused = paused,
     notificationsDenied = notificationsDenied,
     aiDownloadPercent = aiDownloadPercent,
+    seriesProgress = seriesProgress,
+)
+
+fun sampleSeriesProgress(): SeriesProgress = SeriesProgress(
+    title = "A Week of Hands",
+    index = 3,
+    dots = listOf(
+        SeriesDot.COMPLETED,
+        SeriesDot.COMPLETED,
+        SeriesDot.CURRENT,
+        SeriesDot.EMPTY,
+        SeriesDot.EMPTY,
+        SeriesDot.EMPTY,
+        SeriesDot.EMPTY,
+    ),
 )
 
 @Preview(name = "Compact light", showBackground = true, widthDp = 360, heightDp = 800)
@@ -508,5 +533,27 @@ private fun HomePreviewLight() {
 private fun HomePreviewDark() {
     ShutterUpTheme(darkTheme = true) {
         Surface { HomeScreen(state = sampleHomeState()) }
+    }
+}
+
+@Preview(name = "Series light", showBackground = true, widthDp = 360, heightDp = 800)
+@Composable
+private fun HomePreviewSeriesLight() {
+    ShutterUpTheme(darkTheme = false) {
+        Surface { HomeScreen(state = sampleHomeState(seriesProgress = sampleSeriesProgress())) }
+    }
+}
+
+@Preview(
+    name = "Series dark",
+    showBackground = true,
+    widthDp = 360,
+    heightDp = 800,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+)
+@Composable
+private fun HomePreviewSeriesDark() {
+    ShutterUpTheme(darkTheme = true) {
+        Surface { HomeScreen(state = sampleHomeState(seriesProgress = sampleSeriesProgress())) }
     }
 }

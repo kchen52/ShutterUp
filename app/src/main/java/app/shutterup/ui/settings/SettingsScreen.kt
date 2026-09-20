@@ -73,6 +73,7 @@ fun SettingsRoute(
         onPreciseTiming = viewModel::setPreciseTiming,
         onPaused = viewModel::setPaused,
         onThemeFocus = viewModel::setThemeFocus,
+        onSeriesEnabled = viewModel::setSeriesEnabled,
         onDebugUseFakeAi = viewModel::setDebugUseFakeAi,
         onForceRollover = viewModel::forceDayRollover,
         onSeedHistory = viewModel::seedSixtyDays,
@@ -125,6 +126,7 @@ fun SettingsScreen(
     onPreciseTiming: (Boolean) -> Unit = {},
     onPaused: (Boolean) -> Unit = {},
     onThemeFocus: (String) -> Unit = {},
+    onSeriesEnabled: (Boolean) -> Unit = {},
     onDebugUseFakeAi: (Boolean) -> Unit = {},
     onForceRollover: () -> Unit = {},
     onSeedHistory: () -> Unit = {},
@@ -178,6 +180,7 @@ fun SettingsScreen(
                         onPreciseTiming = onPreciseTiming,
                         onPaused = onPaused,
                         onThemeFocus = onThemeFocus,
+                        onSeriesEnabled = onSeriesEnabled,
                         onDebugUseFakeAi = onDebugUseFakeAi,
                         onForceRollover = onForceRollover,
                         onSeedHistory = onSeedHistory,
@@ -211,6 +214,7 @@ fun SettingsScreen(
                         onPreciseTiming = onPreciseTiming,
                         onPaused = onPaused,
                         onThemeFocus = onThemeFocus,
+                        onSeriesEnabled = onSeriesEnabled,
                         onDebugUseFakeAi = onDebugUseFakeAi,
                         onForceRollover = onForceRollover,
                         onSeedHistory = onSeedHistory,
@@ -277,6 +281,7 @@ private fun SettingsGroup(
     onPreciseTiming: (Boolean) -> Unit,
     onPaused: (Boolean) -> Unit,
     onThemeFocus: (String) -> Unit,
+    onSeriesEnabled: (Boolean) -> Unit,
     onDebugUseFakeAi: (Boolean) -> Unit,
     onForceRollover: () -> Unit,
     onSeedHistory: () -> Unit,
@@ -294,7 +299,11 @@ private fun SettingsGroup(
             onOpenExactAlarmSettings = onOpenExactAlarmSettings,
             onOpenBatterySettings = onOpenBatterySettings,
         )
-        SettingsCategory.Prompts -> PromptsSection(state = state, onThemeFocus = onThemeFocus)
+        SettingsCategory.Prompts -> PromptsSection(
+            state = state,
+            onThemeFocus = onThemeFocus,
+            onSeriesEnabled = onSeriesEnabled,
+        )
         SettingsCategory.Photos -> PhotosSection(state = state)
         SettingsCategory.About -> AboutSection(state = state, onOpenPrivacy = onOpenPrivacy)
         SettingsCategory.Debug -> DebugSection(
@@ -420,12 +429,19 @@ private fun DailyPromptSection(
 private fun PromptsSection(
     state: SettingsUiState,
     onThemeFocus: (String) -> Unit,
+    onSeriesEnabled: (Boolean) -> Unit,
 ) {
     var draft by remember { mutableStateOf(state.themeFocus) }
     LaunchedEffect(state.themeFocus) {
         if (state.themeFocus != draft) draft = state.themeFocus
     }
     SectionHeader(SettingsCopy.SECTION_PROMPTS)
+    SwitchRow(
+        title = SettingsCopy.SERIES,
+        checked = state.seriesEnabled,
+        onCheckedChange = onSeriesEnabled,
+        supporting = SettingsCopy.SERIES_SUPPORTING,
+    )
     OutlinedTextField(
         value = draft,
         onValueChange = { next ->

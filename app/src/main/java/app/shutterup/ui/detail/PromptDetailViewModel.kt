@@ -24,6 +24,9 @@ import app.shutterup.domain.repository.DayPromptRepository
 import app.shutterup.domain.repository.EntryRepository
 import app.shutterup.domain.repository.GamificationRepository
 import app.shutterup.domain.repository.PreferencesRepository
+import app.shutterup.domain.repository.SeriesRepository
+import app.shutterup.domain.series.SeriesProgress
+import app.shutterup.domain.series.SeriesProgressCalculator
 import app.shutterup.widget.TodayWidgetUpdater
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.io.File
@@ -69,6 +72,7 @@ data class PromptDetailUiState(
     val completion: CompletionNav? = null,
     val isToday: Boolean = true,
     val debugSource: Boolean = false,
+    val seriesProgress: SeriesProgress? = null,
 )
 
 /**
@@ -84,6 +88,7 @@ class PromptDetailViewModel @Inject constructor(
     private val preferences: PreferencesRepository,
     private val pipeline: CapturePipeline,
     private val skipToday: SkipTodayAction,
+    private val seriesRepo: SeriesRepository,
     private val generatePrompt: GeneratePromptUseCase,
     private val files: CaptureFileStore,
     private val metadata: CaptureMetadataReader,
@@ -119,9 +124,9 @@ class PromptDetailViewModel @Inject constructor(
                 prompts.observeDay(date),
                 entries.observeEntries(date),
                 gamification.observeStreak(),
-            ) { prompt, dayEntries, streak ->
-                Triple(prompt, dayEntries, streak)
-            }.collect { (prompt, dayEntries, streak) ->
+                seriesRepo.observeCovering(date),
+                prompts.observeDays(date.minusDays(6), date.plusDays(6)),
+            ) { prompt, dayEntries, streak, series, nearby ->
                 _state.update {
                     it.copy(
                         prompt = prompt,
@@ -129,9 +134,12 @@ class PromptDetailViewModel @Inject constructor(
                         streak = streak,
                         remainingLabel = RemainingToday.label(clock.instant().atZone(zone)),
                         isToday = date == LocalDate.now(clock.withZone(zone)),
+                        seriesProgress = series?.let {
+                            SeriesProgressCalculator.progress(it, nearby, date)
+                        },
                     )
                 }
-            }
+            }.collect { }
         }
         viewModelScope.launch {
             if (rerollOnOpen) reroll()

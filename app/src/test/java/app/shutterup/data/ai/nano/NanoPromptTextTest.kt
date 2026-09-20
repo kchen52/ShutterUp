@@ -31,6 +31,22 @@ class NanoPromptTextTest {
     }
 
     @Test
+    fun seriesSystemPrompt_asksForSevenRelatedPrompts() {
+        val text = NanoPromptText.seriesSystemPrompt(request)
+        assertTrue(text.contains("seven-day"))
+        assertTrue(text.contains("my dog"))
+        assertTrue(text.contains("At least four of the seven must work indoors"))
+        assertTrue(text.contains("not restate"))
+    }
+
+    @Test
+    fun systemPrompt_staysInSeriesWhenRerolling() {
+        val text = NanoPromptText.systemPrompt(request.copy(seriesTitle = "A Week of Hands"))
+        assertTrue(text.contains("A Week of Hands"))
+        assertTrue(text.contains("Stay within that series"))
+    }
+
+    @Test
     fun systemPrompt_autoThemeWhenFocusBlank() {
         val text = NanoPromptText.systemPrompt(request.copy(themeFocus = null, recentTitles = emptyList(), recentThemes = emptyList()))
         assertTrue(text.contains("Auto-generate"))
@@ -52,5 +68,30 @@ class NanoPromptTextTest {
         assertEquals(listOf("Tap to focus on the reflection."), mapped.tips)
         assertEquals(PromptSource.ON_DEVICE_AI, mapped.source)
         assertEquals("nano-v2", mapped.modelName)
+    }
+
+    @Test
+    fun mapSeries_copiesTitleAndSevenPrompts() {
+        val prompt = NanoPromptOutput(
+            title = "Hands at breakfast",
+            oneLiner = "Photograph the hands that made breakfast.",
+            details = "Watch the smallest gestures at the table. Frame only the hands.",
+            tips = listOf("Get close."),
+            constraint = "No zoom",
+            theme = "Hands",
+        )
+        val mapped = NanoPromptText.mapSeries(
+            NanoSeriesOutput(
+                title = "A Week of Hands",
+                theme = "Hands",
+                prompts = List(7) { index -> prompt.copy(title = "Hands day ${index + 1}") },
+            ),
+            "nano-v2",
+        )
+        assertEquals("A Week of Hands", mapped.title)
+        assertEquals("Hands", mapped.theme)
+        assertEquals(7, mapped.prompts.size)
+        assertEquals("Hands day 1", mapped.prompts.first().title)
+        assertEquals("nano-v2", mapped.prompts.first().modelName)
     }
 }

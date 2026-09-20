@@ -33,6 +33,23 @@ data class DayPrompt(
     /** A freeze protected this day; it does not break the streak. */
     val frozen: Boolean,
     val rerollUsed: Boolean,
+    /** Set when this day belongs to a seven-day series. */
+    val seriesId: Long? = null,
+    /** 1-based index within the series (1–7). */
+    val seriesIndex: Int? = null,
+)
+
+/**
+ * A week of related prompts (SPEC §7.8). Dates are inclusive.
+ */
+data class Series(
+    val id: Long = 0,
+    val title: String,
+    val startDate: LocalDate,
+    val endDate: LocalDate,
+    /** Steer used for in-series rerolls (library theme or series title). */
+    val theme: String,
+    val source: PromptSourceRef,
 )
 
 enum class PromptSourceRef {

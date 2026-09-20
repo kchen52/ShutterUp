@@ -55,6 +55,7 @@ ShutterUp is a single-user, fully offline Android app that sends the user one ph
 
 - **Prompt** — a generated daily photography challenge (title, one-liner, details, optional constraint, theme).
 - **Theme** — a short category label for the prompt (e.g. "Reflections", "Negative space", "Kitchen still life"). Auto-generated per prompt unless the user set a *theme focus*.
+- **Series** — an optional week of seven related prompts sharing a title and theme (e.g. "A Week of Hands"). Opt-in; the daily loop is unchanged.
 - **Theme focus** — an optional free-text setting from the user (e.g. "my dog", "black & white", "architecture") that steers generation.
 - **Day** — a local calendar date. Each day has exactly one prompt.
 - **Entry** — the user's single photo answering a day's prompt, plus optional note.
@@ -257,6 +258,21 @@ All generated prompts are persisted immediately with `date` assignments, so a pr
 - Entries authored to meet §7.3 rules; spread across ≥ 25 themes; ≥ 50 % indoor-friendly.
 - Library prompts render identically except for a "From the library" tag.
 
+### 7.8 Series (opt-in weekly arc)
+
+Settings → Prompts → **Series** (switch, default off). Supporting text: "Some weeks arrive as a set of seven related prompts instead of seven separate ones."
+
+When the setting is on, generation produces a seven-day themed run rather than independent daily prompts. The daily loop is unchanged: still one prompt a day, still one photo a day, still the same Shoot button. A series only changes how the next seven days' prompts are chosen and adds a quiet progress affordance (kicker + seven-dot row). This is not a new mode with new screens.
+
+A series has a **title** (e.g. "A Week of Hands") and seven prompts belonging to it, pinned to seven consecutive dates. Each prompt must still satisfy §7.3 and pass `PromptValidator`. They must vary within the series, not restate each other. At least four of the seven must work indoors.
+
+- **When a series starts.** Enabling the setting does not change today's prompt. The next series begins on the next date that has no prompt generated yet, and each subsequent series begins the day after the previous one ends. Turning the setting off lets the current series finish, then returns to single daily prompts — already-generated prompts are never deleted.
+- **Nano path.** The system prompt asks for a series (title + unifying theme + seven prompts) as structured output. Existing defensive parsing, validation, and the 3-attempt budget still apply. If series generation fails validation after that budget, fall back to the library path.
+- **Library path.** Pick a theme with at least seven unused prompts (180-day exclusion), take seven of them, and derive the series title from the theme (`A Week of {theme}`). Library series render with the existing "From the library" tag. `themeFocus` is respected the same way as for single prompts.
+- **Reroll.** The one-reroll-a-day rule is unchanged. A reroll inside a series stays within the series' theme. The rerolled-away prompt goes to `superseded_prompts`.
+- **Missing a day does not end the series.** That day's dot is left unfilled. No penalty, no warning copy, no "series broken" state.
+- **No series badge.** Completing a series is its own reward.
+
 ---
 
 ## 8. Notifications and scheduling
@@ -315,7 +331,12 @@ DayPrompt
   status          PENDING | COMPLETED | COMPLETED_NO_PHOTO | SKIPPED | MISSED | PAUSED
   frozen          Boolean          -- a freeze protected this day
   rerollUsed      Boolean
+  seriesId        Long?            -- FK to Series when this day belongs to a week
+  seriesIndex     Int?             -- 1–7 within that series
   supersededBy    LocalDate?       -- for rerolled-away prompts (stored in SupersededPrompt, see below)
+
+Series                         -- opt-in seven-day themed run (SPEC §7.8)
+  id PK, title, startDate, endDate, theme, source
 
 SupersededPrompt              -- rerolled-away prompts, for dedup only
   id PK, date, title, theme, generatedAt
@@ -344,7 +365,8 @@ LibraryUsage
 
 Preferences (DataStore)
   notifyTime (LocalTime), preciseTiming (Boolean), themeFocus (String?),
-  paused (Boolean), onboardingComplete (Boolean), debugUseFakeAi (Boolean, debug only)
+  seriesEnabled (Boolean, default false), paused (Boolean), onboardingComplete (Boolean),
+  debugUseFakeAi (Boolean, debug only)
 ```
 
 ---
@@ -423,8 +445,9 @@ Pure-Kotlin domain must reach high coverage. Required suites:
 
 - `PromptParserTest` — valid JSON, missing fields, over-length fields, extra fields, non-JSON garbage.
 - `PromptValidatorTest` — blocklist hits, gear mentions, dedup by title/theme, URL/emoji rejection, accepts a corpus of good prompts.
-- `GeneratePromptUseCaseTest` — retries on validation failure, falls back to library after 3 attempts, respects theme focus, never generates twice for one date, buffer top-up to 3 days.
-- `LibraryPromptGeneratorTest` — excludes prompts used in last 180 days, prefers matching tags, works when all are exhausted.
+- `GeneratePromptUseCaseTest` — retries on validation failure, falls back to library after 3 attempts, respects theme focus, never generates twice for one date, buffer top-up to 3 days, theme-focus change discards un-shown future buffer (today kept), series generation of seven days, series does not replace today's prompt, in-series reroll stays on theme, library series fallback.
+- `SeriesCalendarTest` / `SeriesProgressCalculatorTest` — next series start, enabling does not disrupt today, dots for completed / current / missed.
+- `LibraryPromptGeneratorTest` — excludes prompts used in last 180 days, prefers matching tags, works when all are exhausted, library series from a theme with ≥ 7 unused prompts.
 - `DailyNotificationSchedulerTest` — next-trigger computation across before/after notify time, completed today, paused, DST transitions, timezone change.
 - `DayRolloverUseCaseTest` — multi-day gaps, freeze consumption order, paused days neutral, idempotency.
 - `StreakCalculatorTest` — current/longest, paused skipping, frozen days, retro-consistency.
@@ -513,7 +536,7 @@ Until the secrets exist, the workflow's release path will produce a debug-signed
 
 ## 17. Roadmap
 
-**v1 (this spec):** onboarding, daily generation + buffer, library fallback, WorkManager + optional exact notifications, capture pipeline, MediaStore save, calendar/feed/themes/day/badges/settings, streaks + freezes + badges + monthly ring, Glance widget, adaptive layouts, unit + UI tests, CI.
+**v1 (this spec):** onboarding, daily generation + buffer, library fallback, optional Series weeks, WorkManager + optional exact notifications, capture pipeline, MediaStore save, calendar/feed/themes/day/badges/settings, streaks + freezes + badges + monthly ring, Glance widget, adaptive layouts, unit + UI tests, CI.
 
 **v1.1:** tabletop posture layout; one-off "theme for tomorrow"; export (ZIP of photos + JSON); evening "still time" reminder toggle; hemisphere/season setting; image-input prompts ("build on yesterday's shot").
 

@@ -3,6 +3,7 @@ package app.shutterup.domain.repository
 import app.shutterup.domain.model.DayPrompt
 import app.shutterup.domain.model.Entry
 import app.shutterup.domain.model.LibraryUsage
+import app.shutterup.domain.model.Series
 import app.shutterup.domain.model.SupersededPrompt
 import java.time.LocalDate
 import kotlinx.coroutines.flow.Flow
@@ -20,6 +21,22 @@ interface DayPromptRepository {
     suspend fun recentDays(limit: Int): List<DayPrompt>
     /** Every persisted day, oldest first. */
     suspend fun allDays(): List<DayPrompt>
+    /** Drops un-shown future buffer prompts after [date] (SPEC §7.5 / §14). */
+    suspend fun deleteAfter(date: LocalDate)
+    fun observeDaysInSeries(seriesId: Long): Flow<List<DayPrompt>>
+    suspend fun daysInSeries(seriesId: Long): List<DayPrompt>
+}
+
+interface SeriesRepository {
+    fun observe(id: Long): Flow<Series?>
+    fun observeCovering(date: LocalDate): Flow<Series?>
+    suspend fun get(id: Long): Series?
+    suspend fun covering(date: LocalDate): Series?
+    suspend fun latest(): Series?
+    suspend fun all(): List<Series>
+    suspend fun insert(series: Series): Long
+    suspend fun update(series: Series)
+    suspend fun delete(id: Long)
 }
 
 interface EntryRepository {
