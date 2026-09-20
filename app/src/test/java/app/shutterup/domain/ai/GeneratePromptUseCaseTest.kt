@@ -183,6 +183,33 @@ class GeneratePromptUseCaseTest {
     }
 
     @Test
+    fun rerollClearsRepeatLinkAndGeneratesANormalPrompt() = runBlocking {
+        val primary = ScriptedGenerator(
+            listOf(
+                validPrompt(
+                    title = "Original Frame",
+                    oneLiner = "Capture crumbs as a leading line.",
+                    theme = "Table",
+                ),
+                validPrompt(
+                    title = "Rerolled Frame",
+                    oneLiner = "Turn a mug into a silhouette study.",
+                    theme = "Silhouette",
+                ),
+            ),
+        )
+        val prompts = FakeDayPrompts()
+        val original = LocalDate.of(2024, 5, 1)
+        val useCase = useCase(primary = primary, prompts = prompts)
+        useCase.promptFor(date, null)
+        prompts.upsert(prompts.getDay(date)!!.copy(repeatsDate = original))
+        val rerolled = useCase.reroll(date, null)
+        assertEquals("Rerolled Frame", rerolled.title)
+        assertEquals(null, prompts.getDay(date)?.repeatsDate)
+        assertEquals(true, prompts.getDay(date)?.rerollUsed)
+    }
+
+    @Test
     fun seriesEnabled_generatesSevenRelatedDays() = runBlocking {
         val primary = ScriptedGenerator(
             prompts = listOf(validPrompt()),

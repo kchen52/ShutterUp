@@ -49,4 +49,10 @@ class RoomDayPromptRepository @Inject constructor(
 
     override suspend fun daysInSeries(seriesId: Long): List<DayPrompt> =
         dao.daysInSeries(seriesId).map { it.toDomain() }
+
+    override fun observeRepeatsOf(original: LocalDate): Flow<List<DayPrompt>> =
+        dao.observeRepeatsOf(original).map { rows -> rows.map { it.toDomain() } }
+
+    override suspend fun repeatsOf(original: LocalDate): List<DayPrompt> =
+        dao.repeatsOf(original).map { it.toDomain() }
 }

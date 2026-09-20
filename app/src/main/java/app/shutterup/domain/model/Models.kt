@@ -37,6 +37,11 @@ data class DayPrompt(
     val seriesId: Long? = null,
     /** 1-based index within the series (1–7). */
     val seriesIndex: Int? = null,
+    /**
+     * Date of the first take this prompt repeats. Null when this day is
+     * original. Later takes always point at that original, never at each other.
+     */
+    val repeatsDate: LocalDate? = null,
 )
 
 /**
