@@ -62,6 +62,7 @@ ShutterUp is a single-user, fully offline Android app that sends the user one ph
 - **Day status** — `PENDING` (not yet acted on, still today), `COMPLETED`, `SKIPPED`, `MISSED`, `PAUSED`.
 - **Streak** — consecutive completed days; `PAUSED` days are neutral; `SKIPPED`/`MISSED` break it unless a freeze is consumed.
 - **Freeze** — an earned token that automatically protects the streak on one missed day.
+- **Second take** — shooting a past day's prompt again on a later date. The later day stores `repeatsDate` pointing at the original first take.
 
 ---
 
@@ -94,7 +95,8 @@ ShutterUp is a single-user, fully offline Android app that sends the user one ph
 - **Camera cancelled** → back to Prompt Detail, nothing saved, pending temp file deleted.
 - **Camera unavailable / intent fails twice** → offer "Choose from Gallery" via the Photo Picker. The picked photo must have `DATE_TAKEN` (or EXIF `DateTimeOriginal`) on today's local date; otherwise reject with "Only photos taken today count".
 - **Retake** — before midnight, the Completion/Day screen offers **Retake**; the new photo replaces the old (confirm; old file deleted from `MediaStore` only if the app created it).
-- **Reroll** — once per day, from Prompt Detail or notification. Generates a fresh prompt (respecting dedup + theme focus). The rerolled-away prompt is kept in the DB with `supersededBy` for history/dedup, not shown in the calendar.
+- **Reroll** — once per day, from Prompt Detail or notification. Generates a fresh prompt (respecting dedup + theme focus). The rerolled-away prompt is kept in the DB with `supersededBy` for history/dedup, not shown in the calendar. Rerolling a day that holds a second take also clears `repeatsDate`, so the day becomes an ordinary prompt.
+- **Second take** — on the Day screen of a past day that has a photograph, **Shoot this again** copies that prompt onto today if today is still `PENDING`, otherwise onto tomorrow. A confirmation dialog names the landing day. See §4.6.
 - **Skip** — explicit "Skip today". Day becomes `SKIPPED`. Breaks streak unless a freeze is consumed. Confirmation dialog explains this.
 - **Missed** — at local midnight, any `PENDING` day becomes `MISSED` (freeze consumed if available). No evening reminder in v1.
 - **Opened app before notification time** → today's prompt is already visible on Home (prompts are valid from 00:00). Notification still fires at the chosen time unless the day is already `COMPLETED`/`SKIPPED`.
@@ -104,13 +106,25 @@ ShutterUp is a single-user, fully offline Android app that sends the user one ph
 ### 4.4 Browsing history
 
 - Home shows today's card + streak/freeze summary + mini month strip.
-- Calendar (month grid) with day cells showing thumbnail (completed), dot colour for skipped/missed/paused. Tap → Day screen (photo, prompt, note, theme, timestamps, achievements earned that day, Delete).
+- Calendar (month grid) with day cells showing thumbnail (completed), dot colour for skipped/missed/paused. Tap → Day screen (photo, prompt, note, theme, timestamps, achievements earned that day, Delete, and **Shoot this again** when the day is a past photograph).
 - Feed (chronological cards) and Themes (grouped by theme with counts) as secondary tabs.
 - Badges screen (see §6).
 
 ### 4.5 Deleting an entry
 
-Dialog: "Delete this photo from ShutterUp only" / "Also delete from Gallery" / Cancel. The day becomes `COMPLETED_NO_PHOTO` (still counts as completed for streaks; calendar shows a checkmark with no thumbnail).
+Dialog: "Delete this photo from ShutterUp only" / "Also delete from Gallery" / Cancel. The day becomes `COMPLETED_NO_PHOTO` (still counts as completed for streaks; calendar shows a checkmark with no thumbnail). Deleting either photograph in a second-take chain does not break the other day's screen: the remaining take still loads, and a missing frame shows "Original missing".
+
+### 4.6 Second take
+
+Photography improves by returning to a subject. On any **past** day that has a photograph, the Day action row offers a quiet **Shoot this again**.
+
+1. The app copies that day's prompt (title, one-liner, details, tips, constraint, theme, source) onto a later date, recorded as a repeat of the **original** date (`repeatsDate`). Repeating a take that is already a repeat still points at that original, so the chain stays linear.
+2. **Landing day.** Same predictability Series uses: today if today is still `PENDING` (or has no prompt yet), otherwise tomorrow. A confirmation dialog states this plainly: "This becomes today's prompt." or "This becomes tomorrow's prompt." The app never silently overwrites a day the user has already acted on (`COMPLETED`, `SKIPPED`, `MISSED`, `PAUSED`, `COMPLETED_NO_PHOTO`). If the chosen target is already acted on, the action does nothing.
+3. **Series.** If the target day belongs to an active Series, the repeat takes that day out of the series (clears `seriesId` and `seriesIndex`) while the series otherwise continues, leaving that week's dot unfilled.
+4. **The diptych.** On a second-take day's screen, the current photograph sits with the take before it: compact stacks them, expanded places them side by side, both 1:1 or both native, matched. Kickers under the pair: the earlier date (`19 SEPTEMBER`) and the interval (`83 DAYS ON`, `A MONTH ON`, `A YEAR ON`). One shared prompt headline below. Tapping either photograph opens the existing full-screen viewer.
+5. **More than two takes.** A prompt can be repeated any number of times. The screen always shows the viewed take against the one before it, with quiet text links to the rest of the chain. The original day's screen keeps a single photograph and a quiet line pointing forward (`Shot again on 11 December.`).
+6. **Reroll.** Rerolling a day that holds a second take clears `repeatsDate` and generates a normal prompt. The one-reroll-a-day rule is unchanged.
+7. **Gamification.** A second take counts toward streaks, themes and badges exactly like any other completed day. No new badge.
 
 ---
 
@@ -345,6 +359,7 @@ DayPrompt
   rerollUsed      Boolean
   seriesId        Long?            -- FK to Series when this day belongs to a week
   seriesIndex     Int?             -- 1–7 within that series
+  repeatsDate     LocalDate?       -- original first take this prompt repeats; null if original
   supersededBy    LocalDate?       -- for rerolled-away prompts (stored in SupersededPrompt, see below)
 
 Series                         -- opt-in seven-day themed run (SPEC §7.8)
@@ -466,8 +481,9 @@ Pure-Kotlin domain must reach high coverage. Required suites:
 
 - `PromptParserTest` — valid JSON, missing fields, over-length fields, extra fields, non-JSON garbage.
 - `PromptValidatorTest` — blocklist hits, gear mentions, dedup by title/theme, URL/emoji rejection, accepts a corpus of good prompts.
-- `GeneratePromptUseCaseTest` — retries on validation failure, falls back to library after 3 attempts, respects theme focus, never generates twice for one date, buffer top-up to 3 days, theme-focus change discards un-shown future buffer (today kept), series generation of seven days, series does not replace today's prompt, in-series reroll stays on theme, library series fallback.
+- `GeneratePromptUseCaseTest` — retries on validation failure, falls back to library after 3 attempts, respects theme focus, never generates twice for one date, buffer top-up to 3 days, theme-focus change discards un-shown future buffer (today kept), series generation of seven days, series does not replace today's prompt, in-series reroll stays on theme, library series fallback, reroll of a second take clears `repeatsDate`.
 - `SeriesCalendarTest` / `SeriesProgressCalculatorTest` — next series start, enabling does not disrupt today, dots for completed / current / missed.
+- `SecondTakeCalendarTest` / `TakeChainTest` / `TakeIntervalTest` / `StartSecondTakeUseCaseTest` — landing today when pending vs tomorrow when completed/skipped/paused; chain of two and of five; interval phrasing across days / a month / a year; series detachment of only the target day; reroll clears the repeat link.
 - `GenerateMonthlyIssueUseCaseTest` — finished-month windows across timezones and year boundaries, mid-month install, zero completed days, Nano validation retry then fallback, idempotent regeneration, catch-up of skipped empty months.
 - `MonthlyIssueValidatorTest` / `MonthlyIssueFallbackTest` / `MonthlyIssueCalendarTest` / `ThemeRankingTest` — reject cases, templates across sparse/full/single-theme/note-heavy months, ties, month windows.
 - `MonthlyIssueWorkerTest` — Robolectric: success writes once; failure retries.
