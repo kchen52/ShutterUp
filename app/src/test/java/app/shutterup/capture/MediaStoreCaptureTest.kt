@@ -60,9 +60,13 @@ class MediaStorePhotoArchiverTest {
     fun insertOriginal_doesNotReencodeBytes() {
         val source = File(RuntimeEnvironment.getApplication().cacheDir, "pending/raw.jpg")
         TestJpegs.write(source)
+        // Read the expected bytes before archiving: CapturePipeline deletes the pending
+        // file once it is in MediaStore, so the source is not guaranteed to outlive the
+        // insert. The contract under test is that the stored copy is byte-identical.
+        val originalBytes = source.readBytes()
         val uri = archiver.insertOriginal(source, "2026-09-19_untitled.jpg", capturedAt)
         val copied = RuntimeEnvironment.getApplication().contentResolver.openInputStream(uri)!!.use { it.readBytes() }
-        assertEquals(source.readBytes().toList(), copied.toList())
+        assertEquals(originalBytes.toList(), copied.toList())
     }
 
     private fun pendingFlag(uri: android.net.Uri): Int {
