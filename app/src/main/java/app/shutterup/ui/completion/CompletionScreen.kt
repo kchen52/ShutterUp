@@ -8,6 +8,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.border
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,11 +29,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -44,11 +48,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.shutterup.domain.model.DayStatus
+import app.shutterup.domain.model.Entry
+import app.shutterup.domain.model.MediaKind
 import app.shutterup.domain.model.PromptSourceRef
+import app.shutterup.domain.share.isDayShareable
+import app.shutterup.share.ShareCopy
 import app.shutterup.ui.badges.BadgeEmblem
 import app.shutterup.ui.badges.badgeDescription
 import app.shutterup.ui.badges.badgeDisplayName
@@ -61,6 +71,7 @@ import app.shutterup.ui.theme.ProvideThemeTint
 import app.shutterup.ui.theme.ShutterUpTheme
 import coil3.compose.AsyncImage
 import java.io.File
+import java.time.Instant
 
 /**
  * Completion: photo, note, streak, badge sheet, Done / Retake (DESIGN §4.3).
@@ -72,6 +83,14 @@ fun CompletionRoute(
     viewModel: CompletionViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val dark = isSystemInDarkTheme()
+    LaunchedEffect(state.shareChooser) {
+        val intent = state.shareChooser ?: return@LaunchedEffect
+        runCatching { context.startActivity(intent) }
+            .onFailure { viewModel.onShareLaunchFailed() }
+        viewModel.consumeShareChooser()
+    }
     CompletionScreen(
         state = state,
         onNoteChange = viewModel::updateNote,
@@ -80,6 +99,8 @@ fun CompletionRoute(
             onStay()
         },
         onRetake = onRetake,
+        onShare = { viewModel.share(darkTheme = dark) },
+        onSnackbarShown = viewModel::consumeSnackbar,
     )
 }
 
@@ -90,11 +111,19 @@ fun CompletionScreen(
     onNoteChange: (String) -> Unit = {},
     onDone: () -> Unit = {},
     onRetake: () -> Unit = {},
+    onShare: () -> Unit = {},
+    onSnackbarShown: () -> Unit = {},
     showBadgeSheet: Boolean = true,
     apertureProgress: Float? = null,
 ) {
     val prompt = state.prompt
-    val dark = androidx.compose.foundation.isSystemInDarkTheme()
+    val dark = isSystemInDarkTheme()
+    val snackbarHost = remember { SnackbarHostState() }
+    LaunchedEffect(state.snackbar) {
+        val message = state.snackbar ?: return@LaunchedEffect
+        snackbarHost.showSnackbar(message)
+        onSnackbarShown()
+    }
     var note by remember(state.note) { mutableStateOf(state.note) }
     var badgeIndex by remember { mutableIntStateOf(0) }
     val displayedStreak = state.streak.current
@@ -107,6 +136,7 @@ fun CompletionScreen(
     val photoShape = RoundedCornerShape(16.dp)
     val hairline = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
     ProvideThemeTint(theme = prompt?.theme.orEmpty(), darkTheme = dark) {
+        Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -218,17 +248,20 @@ fun CompletionScreen(
                 )
             }
             Spacer(Modifier.height(8.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Button(onClick = {
+            CompletionActionRow(
+                canShare = isDayShareable(prompt?.status, state.entries),
+                onDone = {
                     onNoteChange(note)
                     onDone()
-                }) { Text("Done") }
-                TextButton(onClick = onRetake) { Text("Retake") }
-            }
+                },
+                onShare = onShare,
+                onRetake = onRetake,
+            )
+        }
+        SnackbarHost(
+            hostState = snackbarHost,
+            modifier = Modifier.align(Alignment.BottomCenter),
+        )
         }
     }
     val badges = state.newBadgeIds
@@ -250,6 +283,29 @@ fun CompletionScreen(
                 Text(badgeDescription(id), style = MaterialTheme.typography.bodyMedium)
                 Button(onClick = { badgeIndex++ }) { Text("Nice") }
             }
+        }
+    }
+}
+
+@Composable
+internal fun CompletionActionRow(
+    canShare: Boolean,
+    onDone: () -> Unit = {},
+    onShare: () -> Unit = {},
+    onRetake: () -> Unit = {},
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Button(onClick = onDone) { Text("Done") }
+        Row {
+            if (canShare) {
+                TextButton(onClick = onShare) { Text(ShareCopy.BUTTON) }
+            }
+            TextButton(onClick = onRetake) { Text("Retake") }
         }
     }
 }
@@ -301,21 +357,69 @@ private fun CompletionPreviewSeriesLight() {
     }
 }
 
+@Preview(name = "Action row light", showBackground = true, widthDp = 360)
+@Composable
+private fun CompletionActionRowPreviewLight() {
+    ShutterUpTheme(darkTheme = false) {
+        Surface {
+            CompletionActionRow(
+                canShare = true,
+                modifier = Modifier.padding(20.dp),
+            )
+        }
+    }
+}
+
+@Preview(
+    name = "Action row dark",
+    showBackground = true,
+    widthDp = 360,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+)
+@Composable
+private fun CompletionActionRowPreviewDark() {
+    ShutterUpTheme(darkTheme = true) {
+        Surface {
+            CompletionActionRow(
+                canShare = true,
+                modifier = Modifier.padding(20.dp),
+            )
+        }
+    }
+}
+
 internal fun sampleCompletionState(
     firstEver: Boolean,
     seriesTitle: String? = null,
-): CompletionUiState = CompletionUiState(
-    date = samplePrompt().date,
-    prompt = samplePrompt(),
-    streak = app.shutterup.domain.model.StreakState(
-        current = if (firstEver) 1 else 15,
-        longest = if (firstEver) 1 else 15,
-        freezes = if (firstEver) 0 else 2,
-        lastProcessedDate = samplePrompt().date,
-    ),
-    newBadgeIds = if (firstEver) listOf("first_light") else listOf("streak_7"),
-    freezeEarned = !firstEver,
-    previousStreak = if (firstEver) 0 else 14,
-    firstEver = firstEver,
-    seriesTitle = seriesTitle,
-)
+): CompletionUiState {
+    val prompt = samplePrompt().copy(status = DayStatus.COMPLETED)
+    val entry = Entry(
+        id = 1,
+        date = prompt.date,
+        mediaUri = "file:///tmp/missing.jpg",
+        thumbPath = "/tmp/missing.jpg",
+        capturedAt = Instant.parse("2026-09-19T10:00:00Z"),
+        width = 1200,
+        height = 1600,
+        note = null,
+        importedFromGallery = false,
+        createdAt = Instant.parse("2026-09-19T10:00:00Z"),
+        mediaKind = MediaKind.PHOTO,
+    )
+    return CompletionUiState(
+        date = prompt.date,
+        prompt = prompt,
+        entries = listOf(entry),
+        streak = app.shutterup.domain.model.StreakState(
+            current = if (firstEver) 1 else 15,
+            longest = if (firstEver) 1 else 15,
+            freezes = if (firstEver) 0 else 2,
+            lastProcessedDate = prompt.date,
+        ),
+        newBadgeIds = if (firstEver) listOf("first_light") else listOf("streak_7"),
+        freezeEarned = !firstEver,
+        previousStreak = if (firstEver) 0 else 14,
+        firstEver = firstEver,
+        seriesTitle = seriesTitle,
+    )
+}

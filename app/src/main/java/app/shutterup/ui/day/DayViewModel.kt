@@ -1,6 +1,7 @@
 package app.shutterup.ui.day
 
 import android.content.Context
+import android.content.Intent
 import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -11,6 +12,8 @@ import app.shutterup.domain.model.Entry
 import app.shutterup.domain.repository.DayPromptRepository
 import app.shutterup.domain.repository.EntryRepository
 import app.shutterup.domain.repository.GamificationRepository
+import app.shutterup.share.ShareCardExporter
+import app.shutterup.share.ShareCopy
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.Clock
@@ -19,6 +22,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import javax.inject.Inject
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -39,6 +43,7 @@ data class DayUiState(
     val showDeleteDialog: Boolean = false,
     val freezeLine: String? = null,
     val snackbar: String? = null,
+    val shareChooser: Intent? = null,
 )
 
 /**
@@ -52,6 +57,7 @@ class DayViewModel @Inject constructor(
     private val entries: EntryRepository,
     private val deleteDayPhoto: DeleteDayPhotoUseCase,
     gamification: GamificationRepository,
+    private val shareExporter: ShareCardExporter,
     clock: Clock,
     zone: ZoneId,
 ) : ViewModel() {
@@ -60,6 +66,7 @@ class DayViewModel @Inject constructor(
         ?: LocalDate.now(clock.withZone(zone))
 
     private val today = LocalDate.now(clock.withZone(zone))
+    private var shareJob: Job? = null
 
     private val _state = MutableStateFlow(DayUiState(date = date, isToday = date == today))
     val state: StateFlow<DayUiState> = _state.asStateFlow()
@@ -116,6 +123,25 @@ class DayViewModel @Inject constructor(
 
     fun consumeSnackbar() {
         _state.update { it.copy(snackbar = null) }
+    }
+
+    fun share(darkTheme: Boolean) {
+        if (shareJob?.isActive == true) return
+        shareJob = viewModelScope.launch {
+            val current = _state.value
+            val prompt = current.prompt ?: return@launch
+            shareExporter.export(prompt, current.entries, darkTheme)
+                .onSuccess { intent -> _state.update { it.copy(shareChooser = intent) } }
+                .onFailure { _state.update { it.copy(snackbar = ShareCopy.FAILED) } }
+        }
+    }
+
+    fun consumeShareChooser() {
+        _state.update { it.copy(shareChooser = null) }
+    }
+
+    fun onShareLaunchFailed() {
+        _state.update { it.copy(shareChooser = null, snackbar = ShareCopy.FAILED) }
     }
 
     private fun isOriginalMissing(entry: Entry): Boolean {

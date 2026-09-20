@@ -31,6 +31,14 @@ class FakeDayPrompts(
     override suspend fun recentThemes(limit: Int) = emptyList<String>()
     override suspend fun recentDays(limit: Int) = days.take(limit)
     override suspend fun allDays() = days.toList()
+    override suspend fun deleteAfter(date: LocalDate) {
+        days.removeAll { it.date > date }
+    }
+    override fun observeDaysInSeries(seriesId: Long) = flowOf(seriesDays(seriesId))
+    override suspend fun daysInSeries(seriesId: Long) = seriesDays(seriesId)
+
+    private fun seriesDays(seriesId: Long) =
+        days.filter { it.seriesId == seriesId }.sortedBy { it.date }
 }
 
 class FakeEntries(
@@ -91,4 +99,8 @@ class FakePrefs : PreferencesRepository {
     }
     override fun observeLastNotifiedDate(): Flow<LocalDate?> = flowOf(null)
     override suspend fun setLastNotifiedDate(date: LocalDate?) = Unit
+    override fun observeSeriesEnabled() = flowOf(false)
+    override suspend fun setSeriesEnabled(enabled: Boolean) = Unit
+    override fun observeCoarseCityId(): Flow<String?> = flowOf(null)
+    override suspend fun setCoarseCityId(id: String?) = Unit
 }

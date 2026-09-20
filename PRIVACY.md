@@ -6,3 +6,10 @@ Everything stays on your phone. ShutterUp has no internet access.
 - Your photos live in your Gallery (`Pictures/ShutterUp/`); the app's database
   and settings participate in Android Auto Backup like any other app data.
 - The on-device AI (Gemini Nano) runs entirely on your phone.
+- Share is a system share sheet (`ACTION_SEND`), not an upload. ShutterUp
+  never opens a network socket; the destination app is one you already have
+  and chose. What leaves is a freshly rendered PNG card (photo, date, theme,
+  title). The original photograph is not attached, so none of its EXIF
+  travels with the card — no camera make or model, no `DateTimeOriginal`,
+  and no location even if the camera wrote GPS tags. Notes never leave
+  the app.

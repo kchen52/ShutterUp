@@ -38,4 +38,24 @@ class DayScreenshotTest {
         }
         composeRule.onRoot().captureRoboImage()
     }
+
+    @Test
+    fun dayActionRowLight() {
+        composeRule.setContent {
+            ShutterUpTheme(darkTheme = false) {
+                DayActionRow(canDelete = true, canShare = true, canRetake = true)
+            }
+        }
+        composeRule.onRoot().captureRoboImage()
+    }
+
+    @Test
+    fun dayActionRowDark() {
+        composeRule.setContent {
+            ShutterUpTheme(darkTheme = true) {
+                DayActionRow(canDelete = true, canShare = true, canRetake = true)
+            }
+        }
+        composeRule.onRoot().captureRoboImage()
+    }
 }

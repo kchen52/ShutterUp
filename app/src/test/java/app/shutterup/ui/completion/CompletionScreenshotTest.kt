@@ -64,4 +64,24 @@ class CompletionScreenshotTest {
         }
         composeRule.onRoot().captureRoboImage()
     }
+
+    @Test
+    fun completionActionRowLight() {
+        composeRule.setContent {
+            ShutterUpTheme(darkTheme = false) {
+                CompletionActionRow(canShare = true)
+            }
+        }
+        composeRule.onRoot().captureRoboImage()
+    }
+
+    @Test
+    fun completionActionRowDark() {
+        composeRule.setContent {
+            ShutterUpTheme(darkTheme = true) {
+                CompletionActionRow(canShare = true)
+            }
+        }
+        composeRule.onRoot().captureRoboImage()
+    }
 }

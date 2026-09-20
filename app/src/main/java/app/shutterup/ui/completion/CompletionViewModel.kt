@@ -1,5 +1,6 @@
 package app.shutterup.ui.completion
 
+import android.content.Intent
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,14 +11,19 @@ import app.shutterup.domain.repository.DayPromptRepository
 import app.shutterup.domain.repository.EntryRepository
 import app.shutterup.domain.repository.GamificationRepository
 import app.shutterup.domain.repository.SeriesRepository
+import app.shutterup.share.ShareCardExporter
+import app.shutterup.share.ShareCopy
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDate
 import javax.inject.Inject
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class CompletionUiState(
@@ -31,10 +37,17 @@ data class CompletionUiState(
     val previousStreak: Int = 0,
     val firstEver: Boolean = false,
     val seriesTitle: String? = null,
+    val shareChooser: Intent? = null,
+    val snackbar: String? = null,
+)
+
+private data class ShareChrome(
+    val chooser: Intent? = null,
+    val snackbar: String? = null,
 )
 
 /**
- * Completion: note, streak, newly unlocked badges, Done / Retake.
+ * Completion: note, streak, newly unlocked badges, Done / Retake / Share.
  */
 @HiltViewModel
 class CompletionViewModel @Inject constructor(
@@ -43,38 +56,51 @@ class CompletionViewModel @Inject constructor(
     private val entries: EntryRepository,
     gamification: GamificationRepository,
     seriesRepo: SeriesRepository,
+    private val shareExporter: ShareCardExporter,
 ) : ViewModel() {
     val date: LocalDate = LocalDate.parse(checkNotNull(savedStateHandle.get<String>("dateIso")))
     private val newBadges = savedStateHandle.get<String>("newBadges").orEmpty()
         .split(',').map { it.trim() }.filter { it.isNotEmpty() }
     private val freezeEarned = savedStateHandle.get<Boolean>("freezeEarned") ?: false
     private val previousStreak = savedStateHandle.get<Int>("previousStreak") ?: 0
+    private val shareChrome = MutableStateFlow(ShareChrome())
+    private var shareJob: Job? = null
 
     val state: StateFlow<CompletionUiState> = combine(
-        prompts.observeDay(date),
-        entries.observeEntries(date),
-        gamification.observeStreak(),
-        gamification.observeAchievements(),
-        seriesRepo.observeCovering(date),
-    ) { prompt, dayEntries, streak, achievements, series ->
-        CompletionUiState(
-            date = date,
-            prompt = prompt,
-            entries = dayEntries,
-            streak = streak,
-            note = dayEntries.lastOrNull()?.note.orEmpty(),
-            newBadgeIds = newBadges.ifEmpty {
-                achievements.filter { it.unlockedOnDate == date }.map { it.id }
-            },
-            freezeEarned = freezeEarned,
-            previousStreak = previousStreak,
-            firstEver = achievements.any { it.id == "first_light" && it.unlockedOnDate == date },
-            seriesTitle = series?.title,
-        )
+        combine(
+            prompts.observeDay(date),
+            entries.observeEntries(date),
+            gamification.observeStreak(),
+            gamification.observeAchievements(),
+            seriesRepo.observeCovering(date),
+        ) { prompt, dayEntries, streak, achievements, series ->
+            CompletionUiState(
+                date = date,
+                prompt = prompt,
+                entries = dayEntries,
+                streak = streak,
+                note = dayEntries.lastOrNull()?.note.orEmpty(),
+                newBadgeIds = newBadges.ifEmpty {
+                    achievements.filter { it.unlockedOnDate == date }.map { it.id }
+                },
+                freezeEarned = freezeEarned,
+                previousStreak = previousStreak,
+                firstEver = achievements.any { it.id == "first_light" && it.unlockedOnDate == date },
+                seriesTitle = series?.title,
+            )
+        },
+        shareChrome,
+    ) { base, chrome ->
+        base.copy(shareChooser = chrome.chooser, snackbar = chrome.snackbar)
     }.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5_000),
-        CompletionUiState(date = date, newBadgeIds = newBadges, freezeEarned = freezeEarned, previousStreak = previousStreak),
+        CompletionUiState(
+            date = date,
+            newBadgeIds = newBadges,
+            freezeEarned = freezeEarned,
+            previousStreak = previousStreak,
+        ),
     )
 
     fun updateNote(note: String) {
@@ -82,5 +108,28 @@ class CompletionViewModel @Inject constructor(
             val last = entries.observeEntries(date).first().lastOrNull() ?: return@launch
             entries.upsert(last.copy(note = note.ifBlank { null }))
         }
+    }
+
+    fun share(darkTheme: Boolean) {
+        if (shareJob?.isActive == true) return
+        shareJob = viewModelScope.launch {
+            val current = state.value
+            val prompt = current.prompt ?: return@launch
+            shareExporter.export(prompt, current.entries, darkTheme)
+                .onSuccess { intent -> shareChrome.update { it.copy(chooser = intent) } }
+                .onFailure { shareChrome.update { it.copy(snackbar = ShareCopy.FAILED) } }
+        }
+    }
+
+    fun consumeShareChooser() {
+        shareChrome.update { it.copy(chooser = null) }
+    }
+
+    fun onShareLaunchFailed() {
+        shareChrome.update { ShareChrome(snackbar = ShareCopy.FAILED) }
+    }
+
+    fun consumeSnackbar() {
+        shareChrome.update { it.copy(snackbar = null) }
     }
 }
