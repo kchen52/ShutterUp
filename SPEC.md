@@ -125,6 +125,8 @@ Dialog: "Delete this photo from ShutterUp only" / "Also delete from Gallery" / C
 | Calendar | Month grid, swipe months | Grid left, Day detail right |
 | Day | Photo, prompt, note, actions | Right pane |
 | Feed | Cards | Two-column staggered grid |
+| The Monthly (issue) | Composed page: kicker, headline, contact sheet, body | Same, centred at max 600 dp |
+| Past issues | Quiet list of previous months | Same |
 | Themes | List with counts → filtered feed | List left, filtered grid right |
 | Badges | Grid of badges (locked/unlocked) | Wider grid |
 | Settings | Standard list | Two-pane with category list |
@@ -273,6 +275,18 @@ A series has a **title** (e.g. "A Week of Hands") and seven prompts belonging to
 - **Missing a day does not end the series.** That day's dot is left unfilled. No penalty, no warning copy, no "series broken" state.
 - **No series badge.** Completing a series is its own reward.
 
+### 7.9 The Monthly (issue generation)
+
+On the first of each month the app quietly assembles the month just finished into a single composed page: a contact sheet of that month's photographs, the month's two loudest themes, and two or three sentences written on-device that describe the month back to the user.
+
+- **When it arrives.** An issue is due for every **finished** calendar month (device timezone) that has at least one completed day. The current month is never due, so a mid-month install produces nothing until the next 1st. A device that was off across the boundary catches up every missing finished month. Zero completed days produce no issue.
+- **Where it lives.** A card for the newest undismissed issue appears at the top of Feed. Dismissing the card does not delete the issue. Past issues are reachable from a quiet "Past issues" entry on Feed. There is no fifth bottom-bar destination.
+- **No notification.** The app never announces the issue.
+- **Text input only.** Nano does not see the photographs (v1). The model receives the month's prompt titles, themes with counts, completed-day count, longest consecutive run, and the user's notes. It must not claim anything about what the images look like.
+- **Nano path.** Structured output `{headline, body}`. Headline: a short phrase, ≤ 30 characters, sentence case, ending with a full stop. Body: two or three sentences, second person, present tense. Existing timeout (20 s) and a 3-attempt budget apply. `MonthlyIssueValidator` rejects length, emoji, hashtags, URLs, exclamation marks, praise, guilt about missed days, invented visual detail, and verbatim quotation of a note; failure retries then falls back.
+- **Fallback.** When Nano is unavailable or fails validation, compose the same two fields deterministically from the snapshot (dominant themes, day count, longest run, whether notes were written). The templates must read as warm English, not a stat line. A user who never gets Nano should not feel they got the cheap version.
+- **Idempotency.** Each `yearMonth` is written once. Regenerating must not duplicate the row. Generation runs in WorkManager (`MonthlyIssueWorker`), not on the UI thread when Feed opens.
+
 ---
 
 ## 8. Notifications and scheduling
@@ -335,6 +349,15 @@ DayPrompt
 
 Series                         -- opt-in seven-day themed run (SPEC §7.8)
   id PK, title, startDate, endDate, theme, source
+
+MonthlyIssue                   -- one composed page per finished month (SPEC §7.9)
+  id PK, yearMonth (unique, yyyy-MM), startDate, endDate, completedDayCount
+  headline, body
+  dominantTheme, loudestThemes
+  source          ON_DEVICE_AI | LIBRARY
+  generatedAt     Instant
+  dismissedFromFeed Boolean
+  modelName       String?
 
 SupersededPrompt              -- rerolled-away prompts, for dedup only
   id PK, date, title, theme, generatedAt
@@ -445,6 +468,9 @@ Pure-Kotlin domain must reach high coverage. Required suites:
 - `PromptValidatorTest` — blocklist hits, gear mentions, dedup by title/theme, URL/emoji rejection, accepts a corpus of good prompts.
 - `GeneratePromptUseCaseTest` — retries on validation failure, falls back to library after 3 attempts, respects theme focus, never generates twice for one date, buffer top-up to 3 days, theme-focus change discards un-shown future buffer (today kept), series generation of seven days, series does not replace today's prompt, in-series reroll stays on theme, library series fallback.
 - `SeriesCalendarTest` / `SeriesProgressCalculatorTest` — next series start, enabling does not disrupt today, dots for completed / current / missed.
+- `GenerateMonthlyIssueUseCaseTest` — finished-month windows across timezones and year boundaries, mid-month install, zero completed days, Nano validation retry then fallback, idempotent regeneration, catch-up of skipped empty months.
+- `MonthlyIssueValidatorTest` / `MonthlyIssueFallbackTest` / `MonthlyIssueCalendarTest` / `ThemeRankingTest` — reject cases, templates across sparse/full/single-theme/note-heavy months, ties, month windows.
+- `MonthlyIssueWorkerTest` — Robolectric: success writes once; failure retries.
 - `LibraryPromptGeneratorTest` — excludes prompts used in last 180 days, prefers matching tags, works when all are exhausted, library series from a theme with ≥ 7 unused prompts.
 - `DailyNotificationSchedulerTest` — next-trigger computation across before/after notify time, completed today, paused, DST transitions, timezone change.
 - `DayRolloverUseCaseTest` — multi-day gaps, freeze consumption order, paused days neutral, idempotency.

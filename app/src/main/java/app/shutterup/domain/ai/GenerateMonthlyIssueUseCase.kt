@@ -34,7 +34,7 @@ open class GenerateMonthlyIssueUseCase @Inject constructor(
     private val clock: Clock,
     private val zone: ZoneId,
 ) {
-    suspend fun generateDue(): List<String> {
+    open suspend fun generateDue(): List<String> {
         val today = LocalDate.now(clock.withZone(zone))
         val completed = prompts.allDays().filter { isCompleted(it.status) }
         val earliest = completed.minOfOrNull { it.date }

@@ -288,7 +288,46 @@ Expanded: right pane, photo top with the text below; the pane scrolls.
 
 Compact: single column of cards, each a photo in native aspect (16 dp radius) with a kicker (`12 SEP · REFLECTIONS`) and the title in `titleLarge` beneath. Infinite scroll, newest first. A filter chip row at top: `All` + one chip per theme (theme-tinted when selected). Non-completed days do not appear.
 
-Expanded: two-column staggered grid, same cards.
+When a new Monthly issue is waiting, its composed page sits **above** the history cards as a dismissible card (same 28 dp radius, theme-tinted at the §2.1 alphas). Dismissing it does not delete the issue. A quiet text button `Past issues` (`labelMedium`, `onSurfaceVariant`) opens the issue list. Neither is a fifth bottom-bar destination.
+
+Expanded: two-column staggered grid, same cards. The issue card spans both columns.
+
+### 4.11 The Monthly
+
+The design brief's print metaphor, as a page. It arrives like a postcard: no notification, no celebration, no "Your September is ready." It is simply there the next time the user opens Feed.
+
+Compact:
+
+```
+┌──────────────────────────────┐
+│ ←                            │
+│                              │
+│ SEPTEMBER · 24 DAYS          │  kicker, uppercase, labelMedium +1.0
+│                              │
+│ Light and glass.             │  headlineMedium, Fraunces — the one headline
+│                              │
+│ [■][■][■][■][■][■]           │  contact sheet, 1:1 thumbs, 4 dp gutters
+│ [■][■][■][■][■][■]           │
+│ [■][■][■][■][■][■]           │
+│ [■][■][■][■][■][■]           │
+│                              │
+│ You looked up more than      │  bodyLarge, onSurfaceVariant
+│ usual, and you kept going    │  written on-device
+│ through a grey week.         │
+│                              │
+│ REFLECTIONS · LOOKING UP     │  the month's two loudest themes, kicker
+└──────────────────────────────┘
+```
+
+Rules:
+
+- The contact sheet is the hero. 1:1 centre crops, date order, 12 dp corners, hairline outline. Tapping a thumb opens the Day screen for that date.
+- Exactly one Fraunces headline — the short on-device phrase.
+- Page tint from `themeTint` keyed on the month's dominant theme. Low alpha only. Never red.
+- A month with very few photographs still uses the six-column sheet; empty cells are paper, not placeholders. A month with zero completed days produces no issue.
+- Expanded: the page is centred at max 600 dp.
+
+Past issues: `LargeTopAppBar` title "The Monthly", a quiet list of month kickers and headlines. Tap opens this page.
 
 ### 4.7 Badges
 
@@ -413,6 +452,11 @@ Second person, present tense, short. Warm but not chirpy. Never exclamation mark
 | Delete dialog | Title "Delete this photo?" Body "The day stays complete." Buttons `Delete from ShutterUp` / `Also delete from Gallery` / `Cancel` |
 | Delete photo (Gallery) result | Snackbar "Deleted." |
 | Empty calendar | "Your first photo goes here." |
+| Monthly Feed card dismiss | `Dismiss` |
+| Past issues | `Past issues` |
+| Monthly list title | `The Monthly` |
+| Monthly page kicker | `{MONTH} · {n} DAYS` e.g. `SEPTEMBER · 24 DAYS` |
+| Monthly themes kicker | `{THEME} · {THEME}` e.g. `REFLECTIONS · LOOKING UP` |
 
 ---
 
