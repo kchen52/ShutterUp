@@ -114,7 +114,7 @@ class DayViewModel @Inject constructor(
                         prompt = prompt,
                         entries = dayEntries,
                         note = dayEntries.lastOrNull()?.note.orEmpty(),
-                        badgeIds = loaded.achievements
+                        badgeIds = packed.loaded.achievements
                             .filter { a -> a.unlockedOnDate == date }
                             .map { a -> a.id },
                         isToday = date == today,
