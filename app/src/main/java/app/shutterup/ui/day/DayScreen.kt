@@ -2,6 +2,7 @@ package app.shutterup.ui.day
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -50,43 +51,57 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.shutterup.domain.model.DayStatus
 import app.shutterup.domain.model.Entry
 import app.shutterup.domain.model.MediaKind
 import app.shutterup.domain.model.PromptSourceRef
+import app.shutterup.ui.adaptive.isExpandedWidth
 import app.shutterup.ui.badges.BadgeEmblem
 import app.shutterup.ui.components.ConstraintCard
 import app.shutterup.ui.components.Kicker
 import app.shutterup.ui.components.LibraryTag
 import app.shutterup.ui.components.ShootButton
 import app.shutterup.ui.detail.samplePrompt
+import app.shutterup.domain.take.DiptychCrop
+import app.shutterup.domain.take.TakeInterval
 import app.shutterup.ui.theme.ProvideThemeTint
 import app.shutterup.ui.theme.ShutterUpTheme
 import coil3.compose.AsyncImage
 import java.io.File
 import java.time.Instant
+import java.time.LocalDate
 
 /**
  * Single-day view. Shoot / Retake open Prompt Detail; delete keeps the day complete.
  */
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun DayRoute(
     onBack: () -> Unit,
     onOpenDetail: (dateIso: String, autoLaunchCamera: Boolean) -> Unit,
     onOpenCompletion: (dateIso: String) -> Unit,
+    onOpenDay: (dateIso: String) -> Unit = {},
     viewModel: DayViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val expanded = isExpandedWidth(currentWindowAdaptiveInfo().windowSizeClass.minWidthDp)
     DayScreen(
         state = state,
+        expanded = expanded,
         onBack = onBack,
         onShoot = { onOpenDetail(state.date.toString(), true) },
         onRetake = { onOpenDetail(state.date.toString(), true) },
         onOpenCompletion = { onOpenCompletion(state.date.toString()) },
+        onOpenDay = onOpenDay,
         onNoteChange = viewModel::updateNote,
         onDelete = viewModel::onDeleteClicked,
+        onShootAgain = viewModel::onShootAgainClicked,
+        onConfirmSecondTake = viewModel::confirmSecondTake,
+        onDismissSecondTake = viewModel::dismissSecondTake,
         onDeleteShutterUp = { viewModel.confirmDelete(alsoGallery = false) },
         onDeleteGallery = { viewModel.confirmDelete(alsoGallery = true) },
         onDeleteDismiss = viewModel::dismissDelete,
@@ -98,12 +113,17 @@ fun DayRoute(
 @Composable
 fun DayScreen(
     state: DayUiState,
+    expanded: Boolean = false,
     onBack: () -> Unit = {},
     onShoot: () -> Unit = {},
     onRetake: () -> Unit = {},
     onOpenCompletion: () -> Unit = {},
+    onOpenDay: (String) -> Unit = {},
     onNoteChange: (String) -> Unit = {},
     onDelete: () -> Unit = {},
+    onShootAgain: () -> Unit = {},
+    onConfirmSecondTake: () -> Unit = {},
+    onDismissSecondTake: () -> Unit = {},
     onDeleteShutterUp: () -> Unit = {},
     onDeleteGallery: () -> Unit = {},
     onDeleteDismiss: () -> Unit = {},
@@ -151,11 +171,34 @@ fun DayScreen(
                     .padding(padding)
                     .verticalScroll(rememberScrollState()),
             ) {
-                PhotoHeader(
-                    entries = state.entries,
-                    originalMissing = state.originalMissing ||
-                        prompt.status == DayStatus.COMPLETED_NO_PHOTO,
-                )
+                var viewerEntry by remember { mutableStateOf<Entry?>(null) }
+                if (state.diptych != null) {
+                    TakeDiptych(
+                        ui = state.diptych,
+                        expanded = expanded,
+                        onOpenPhoto = { viewerEntry = it },
+                        onOpenDay = onOpenDay,
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+                    )
+                } else {
+                    PhotoHeader(
+                        entries = state.entries,
+                        originalMissing = state.originalMissing ||
+                            prompt.status == DayStatus.COMPLETED_NO_PHOTO,
+                        onOpenPhoto = { viewerEntry = it },
+                    )
+                }
+                viewerEntry?.thumbPath?.let { path ->
+                    val file = File(path)
+                    if (file.exists()) {
+                        Dialog(
+                            onDismissRequest = { viewerEntry = null },
+                            properties = DialogProperties(usePlatformDefaultWidth = false),
+                        ) {
+                            PinchZoomViewer(file = file, onDismiss = { viewerEntry = null })
+                        }
+                    }
+                }
                 Column(
                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -199,6 +242,18 @@ fun DayScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
+                    state.laterTakesLine?.let { line ->
+                        Text(
+                            text = line,
+                            modifier = Modifier.clickable(
+                                enabled = state.laterTakeDateIso != null,
+                            ) {
+                                state.laterTakeDateIso?.let(onOpenDay)
+                            },
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                     OutlinedTextField(
                         value = state.note,
                         onValueChange = onNoteChange,
@@ -216,6 +271,9 @@ fun DayScreen(
                     ) {
                         if (state.entries.isNotEmpty()) {
                             TextButton(onClick = onDelete) { Text("Delete") }
+                        }
+                        if (state.canSecondTake) {
+                            TextButton(onClick = onShootAgain) { Text("Shoot this again") }
                         }
                         Spacer(Modifier.weight(1f))
                         if (canRetake) {
@@ -247,29 +305,46 @@ fun DayScreen(
             },
         )
     }
+    if (state.showSecondTakeDialog && state.secondTakeConfirmBody != null) {
+        AlertDialog(
+            onDismissRequest = onDismissSecondTake,
+            title = { Text("Shoot this again?") },
+            text = { Text(state.secondTakeConfirmBody) },
+            confirmButton = {
+                TextButton(onClick = onConfirmSecondTake) { Text("Shoot this again") }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismissSecondTake) { Text("Not now") }
+            },
+        )
+    }
 }
 
 @Composable
-private fun PhotoHeader(entries: List<Entry>, originalMissing: Boolean) {
+private fun PhotoHeader(
+    entries: List<Entry>,
+    originalMissing: Boolean,
+    onOpenPhoto: (Entry) -> Unit,
+) {
     val first = entries.firstOrNull()
     val file = first?.thumbPath?.let(::File)
     val hasFile = file != null && file.exists()
-    var viewer by remember { mutableStateOf(false) }
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(max = 420.dp),
     ) {
-        if (hasFile && !originalMissing) {
+        if (hasFile && !originalMissing && first != null) {
             AsyncImage(
                 model = file,
                 contentDescription = "Day photo",
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(max = 420.dp)
+                    .clickable { onOpenPhoto(first) }
                     .pointerInput(Unit) {
                         detectTransformGestures { _, _, zoom, _ ->
-                            if (zoom > 1.02f) viewer = true
+                            if (zoom > 1.02f) onOpenPhoto(first)
                         }
                     },
                 contentScale = ContentScale.Fit,
@@ -301,14 +376,6 @@ private fun PhotoHeader(entries: List<Entry>, originalMissing: Boolean) {
                     )
                 }
             }
-        }
-    }
-    if (viewer && hasFile) {
-        Dialog(
-            onDismissRequest = { viewer = false },
-            properties = DialogProperties(usePlatformDefaultWidth = false),
-        ) {
-            PinchZoomViewer(file = file!!, onDismiss = { viewer = false })
         }
     }
 }
@@ -382,6 +449,77 @@ fun sampleDayState(
     )
 }
 
+fun sampleDiptychState(
+    threeTakes: Boolean = false,
+    mixedAspect: Boolean = false,
+): DayUiState {
+    val firstDate = LocalDate.of(2026, 6, 28)
+    val secondDate = LocalDate.of(2026, 9, 19)
+    val thirdDate = LocalDate.of(2026, 12, 11)
+    val viewed = if (threeTakes) thirdDate else secondDate
+    val previous = if (threeTakes) secondDate else firstDate
+    val prompt = samplePrompt().copy(
+        date = viewed,
+        status = DayStatus.COMPLETED,
+        repeatsDate = firstDate,
+    )
+    val firstEntry = sampleTakeEntry(
+        date = previous,
+        width = 1200,
+        height = 1600,
+    )
+    val secondEntry = sampleTakeEntry(
+        date = viewed,
+        width = if (mixedAspect) 1600 else 1200,
+        height = if (mixedAspect) 1200 else 1600,
+    )
+    val crop = if (mixedAspect) DiptychCrop.SQUARE else DiptychCrop.NATIVE
+    return DayUiState(
+        date = viewed,
+        prompt = prompt,
+        entries = listOf(secondEntry),
+        badgeIds = emptyList(),
+        isToday = false,
+        originalMissing = false,
+        canSecondTake = true,
+        laterTakesLine = null,
+        diptych = DiptychUi(
+            first = DiptychFrame(
+                date = previous,
+                kicker = TakeInterval.dateKicker(previous),
+                entry = firstEntry,
+                originalMissing = false,
+            ),
+            second = DiptychFrame(
+                date = viewed,
+                kicker = TakeInterval.phrase(previous, viewed),
+                entry = secondEntry,
+                originalMissing = false,
+            ),
+            crop = crop,
+            rest = if (threeTakes) listOf(firstDate) else emptyList(),
+        ),
+    )
+}
+
+private fun sampleTakeEntry(
+    date: LocalDate,
+    width: Int,
+    height: Int,
+): Entry = Entry(
+    id = date.toEpochDay(),
+    date = date,
+    mediaUri = "file:///tmp/missing-$date.jpg",
+    thumbPath = "/tmp/missing-$date.jpg",
+    capturedAt = Instant.parse("2026-09-19T10:00:00Z"),
+    width = width,
+    height = height,
+    note = null,
+    importedFromGallery = false,
+    createdAt = Instant.parse("2026-09-19T10:00:00Z"),
+    mediaKind = MediaKind.PHOTO,
+)
+
 @Preview(name = "Compact light", showBackground = true, widthDp = 360, heightDp = 800)
 @Composable
 private fun DayPreviewLight() {
@@ -401,5 +539,65 @@ private fun DayPreviewLight() {
 private fun DayPreviewDark() {
     ShutterUpTheme(darkTheme = true) {
         Surface { DayScreen(state = sampleDayState(status = DayStatus.MISSED, frozen = true)) }
+    }
+}
+
+@Preview(name = "Diptych compact light", showBackground = true, widthDp = 360, heightDp = 1100)
+@Composable
+private fun DayDiptychPreviewLight() {
+    ShutterUpTheme(darkTheme = false) {
+        Surface { DayScreen(state = sampleDiptychState()) }
+    }
+}
+
+@Preview(
+    name = "Diptych compact dark",
+    showBackground = true,
+    widthDp = 360,
+    heightDp = 1100,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+)
+@Composable
+private fun DayDiptychPreviewDark() {
+    ShutterUpTheme(darkTheme = true) {
+        Surface { DayScreen(state = sampleDiptychState()) }
+    }
+}
+
+@Preview(name = "Diptych expanded", showBackground = true, widthDp = 840, heightDp = 900)
+@Composable
+private fun DayDiptychPreviewExpanded() {
+    ShutterUpTheme(darkTheme = false) {
+        Surface { DayScreen(state = sampleDiptychState(), expanded = true) }
+    }
+}
+
+@Preview(
+    name = "Diptych font scale 2x",
+    showBackground = true,
+    widthDp = 360,
+    heightDp = 1400,
+    fontScale = 2f,
+)
+@Composable
+private fun DayDiptychPreviewFontScale() {
+    ShutterUpTheme(darkTheme = false) {
+        Surface { DayScreen(state = sampleDiptychState()) }
+    }
+}
+
+@Preview(name = "Diptych mixed aspect", showBackground = true, widthDp = 360, heightDp = 1100)
+@Composable
+private fun DayDiptychPreviewMixedAspect() {
+    ShutterUpTheme(darkTheme = false) {
+        Surface { DayScreen(state = sampleDiptychState(mixedAspect = true)) }
+    }
+}
+
+@Preview(name = "Diptych three takes", showBackground = true, widthDp = 360, heightDp = 1200)
+@Composable
+private fun DayDiptychPreviewThreeTakes() {
+    ShutterUpTheme(darkTheme = false) {
+        Surface { DayScreen(state = sampleDiptychState(threeTakes = true)) }
     }
 }

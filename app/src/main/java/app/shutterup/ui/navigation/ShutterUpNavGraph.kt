@@ -218,6 +218,9 @@ private fun NavGraphBuilder.addDay(navController: NavHostController) {
             onOpenCompletion = { dateIso ->
                 navController.navigate(ShutterUpDestinations.completion(dateIso))
             },
+            onOpenDay = { dateIso ->
+                navController.navigate(ShutterUpDestinations.day(dateIso))
+            },
         )
     }
 }
