@@ -104,7 +104,7 @@ ShutterUp is a single-user, fully offline Android app that sends the user one ph
 ### 4.4 Browsing history
 
 - Home shows today's card + streak/freeze summary + mini month strip.
-- Calendar (month grid) with day cells showing thumbnail (completed), dot colour for skipped/missed/paused. Tap → Day screen (photo, prompt, note, theme, timestamps, achievements earned that day, Delete).
+- Calendar (month grid) with day cells showing thumbnail (completed), dot colour for skipped/missed/paused. Pinch-out (or a quiet **Year** control in the top bar) zooms to a year-in-hues grid — one small cell per day, filled with that day's theme tint. Tap a cell → Day screen (photo, prompt, note, theme, timestamps, achievements earned that day, Delete). Pinch-in or **Month** returns to the month grid. Not a fifth bottom-bar destination.
 - Feed (chronological cards) and Themes (grouped by theme with counts) as secondary tabs.
 - Badges screen (see §6).
 
@@ -122,14 +122,15 @@ Dialog: "Delete this photo from ShutterUp only" / "Also delete from Gallery" / C
 | Home | Today card, streak row, month strip, bottom nav | List-detail: left = Home content, right = Prompt Detail of selected day |
 | Prompt Detail | Full screen; Shoot as extended FAB | Right pane of list-detail |
 | Completion | Full screen photo + fields | Two-pane: photo left, prompt/note/badge right |
-| Calendar | Month grid, swipe months | Grid left, Day detail right |
+| Calendar | Month grid, swipe months. Pinch-out (or Year in the top bar) zooms to the year-in-hues grid; swipe years the same way months swipe. | Grid left, Day detail right. Year view uses the same split. |
+| Year (Calendar zoom) | 12 month bands, one tinted cell per day; no photos or numbers in cells. Not a bottom-bar destination. | Same, in the list pane |
 | Day | Photo, prompt, note, actions | Right pane |
 | Feed | Cards | Two-column staggered grid |
 | Themes | List with counts → filtered feed | List left, filtered grid right |
 | Badges | Grid of badges (locked/unlocked) | Wider grid |
 | Settings | Standard list | Two-pane with category list |
 
-Navigation: bottom bar on compact, navigation rail on expanded (`NavigationSuiteScaffold`). All screens must survive fold/unfold (configuration change) without losing state, including an in-flight camera launch.
+Navigation: bottom bar on compact, navigation rail on expanded (`NavigationSuiteScaffold`). Four destinations: Today · Calendar · Feed · Badges. The year-in-hues view is a zoom of Calendar (pinch or top-bar **Year**), not a fifth destination. All screens must survive fold/unfold (configuration change) without losing state, including an in-flight camera launch.
 
 ---
 

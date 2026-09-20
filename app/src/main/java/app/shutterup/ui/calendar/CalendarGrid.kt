@@ -1,5 +1,6 @@
 package app.shutterup.ui.calendar
 
+import app.shutterup.domain.calendar.YearCell
 import app.shutterup.domain.model.DayPrompt
 import app.shutterup.domain.model.DayStatus
 import java.time.DayOfWeek
@@ -64,6 +65,30 @@ fun calendarCellDescription(cell: CalendarCell): String {
     if (!cell.inMonth) return datePart
     val status = when {
         cell.isFuture -> null
+        cell.status == DayStatus.COMPLETED || cell.status == DayStatus.COMPLETED_NO_PHOTO -> "completed"
+        cell.status == DayStatus.MISSED -> "missed"
+        cell.status == DayStatus.SKIPPED -> "skipped"
+        cell.status == DayStatus.PAUSED -> "paused"
+        cell.isToday && (cell.status == DayStatus.PENDING || cell.status == null) -> "pending"
+        else -> null
+    }
+    val frozen = if (cell.frozen && (cell.status == DayStatus.MISSED || cell.status == DayStatus.SKIPPED)) {
+        ", streak frozen"
+    } else {
+        ""
+    }
+    return if (status != null) "$datePart, $status$frozen" else datePart
+}
+
+/**
+ * Spoken status for a year cell (DESIGN §11). Same format as the month grid:
+ * "19 September, completed". Paused stays in the description even though the
+ * cell is drawn as absent.
+ */
+fun yearCellDescription(cell: YearCell): String {
+    val datePart = spokenDate(cell.date)
+    if (cell.isFuture) return datePart
+    val status = when {
         cell.status == DayStatus.COMPLETED || cell.status == DayStatus.COMPLETED_NO_PHOTO -> "completed"
         cell.status == DayStatus.MISSED -> "missed"
         cell.status == DayStatus.SKIPPED -> "skipped"

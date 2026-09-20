@@ -275,9 +275,50 @@ Day cell (44 dp square, 12 dp radius), states:
 | Future | day number in `onSurfaceVariant` |
 
 - Swipe horizontally between months; `‹ ›` also work. Month title crossfades.
+- Pinch-out zooms continuously to the year-in-hues view (§4.4.1); pinch-in returns. A quiet `YEAR` / `MONTH` kicker in the top bar reaches the same place without the gesture. If a pinch and a month swipe conflict, the swipe wins.
 - Tap a completed cell → shared-element transition of the thumbnail into the Day screen (§6).
 - Tap a non-completed past cell → Day screen showing the prompt with its status in the kicker: `SKIPPED · REFLECTIONS`.
 - Expanded: calendar left (45 %), Day screen right for the selected date; today selected by default.
+
+### 4.4.1 Year in hues
+
+A zoom of Calendar, not a fifth destination. One Fraunces headline (the year). No photographs, no numbers inside the cells.
+
+```
+┌──────────────────────────────┐
+│ 2026           YEAR  ‹  ›    │  headlineMedium Fraunces
+│                              │  YEAR is MONTH while here
+│ JAN  ■■■■■■■■■■■■■■■■■■■■■■■ │  kicker; completed = theme accent
+│ FEB  ■■■■■■■■■■■■■■■■■■■■■■  │  empty / paused = faint fill, no stroke
+│ MAR  ■■■■■■■■■■■■■■■■■■■■■■■ │  future recedes
+│ APR  ■■■■■■■■■■■■■■■■■■■■■■  │  skipped = dash
+│ MAY  ■■■■■■■■■■■■■■■■■■■■■■■ │  missed = dot
+│ JUN  ■■■■■■■■■■■■■■■■■■■■■■  │  today pending = primary ring
+│ JUL  ■■■■■■■■■■■■■■■■■■■■■■■ │
+│ AUG  ■■■■■■■■■■■■■■■■■■■■■■■ │
+│ SEP  ■■■■■■■■■■■■■■■■■■■■■■  │
+│ OCT  ■■■■■■■■■■■■■■■■■■■■■■■ │
+│ NOV  ■■■■■■■■■■■■■■■■■■■■■■  │
+│ DEC  ■■■■■■■■■■■■■■■■■■■■■■■ │
+│                              │
+│ ◔ 142 of 262 days this year  │  labelMedium + ring
+│ Longest streak 22            │
+└──────────────────────────────┘
+```
+
+Rules:
+
+- Twelve month bands, one small cell per calendar day. Elapsed empty / paused days are a whisper of `outlineVariant` fill, no stroke — not a hollow ring. Future days recede further (or read as absent) so the grid is the year *so far*. Shorter months are simply shorter bands.
+- Completed days fill with that day's **theme accent** (`themeAccent`). No second colour mapping. There is no text on these cells, so the low-alpha overlay rule does not apply.
+- Paused days read as absent, not missed. Missed/skipped stay neutral — never red.
+- Month kicker in the margin: `labelMedium`, uppercase, +1.0 tracking (`JAN`).
+- Cells are rounded squares (about 12 % of the side — a slight corner, never a circle), not beads. Compact gutters are 1 dp so a run of completed days reads as a band.
+- Swipe years; `‹ ›` also work. Pinch-in returns to the month that belongs to this year.
+- Tap a cell → Day screen, same navigation as the month grid.
+- When the system animator duration scale is 0, the zoom is an instant crossfade. No parallax.
+- Content description per cell in the month-grid format: "19 September, completed". Touch target height 48 dp; colour is never the only carrier of status (fill / dash / dot / paper).
+
+The result should look like an abstract painting of the year that also happens to be the user's data. If it looks like a GitHub contribution graph, it is wrong.
 
 ### 4.5 Day
 
