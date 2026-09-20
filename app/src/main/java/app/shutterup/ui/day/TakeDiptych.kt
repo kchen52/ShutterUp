@@ -5,10 +5,11 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -25,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.min
 import app.shutterup.domain.model.Entry
 import app.shutterup.domain.take.DiptychCrop
 import app.shutterup.domain.take.TakeInterval
@@ -150,54 +152,60 @@ private fun TakeFrame(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Box(
+        BoxWithConstraints(
             modifier = Modifier
                 .fillMaxWidth()
-                .then(if (compact) Modifier.heightIn(max = 240.dp) else Modifier)
-                .aspectRatio(ratio)
-                .clip(shape)
-                .border(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
-                    shape = shape,
-                )
-                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                .then(
-                    if (frame.entry != null && hasFile && !missing) {
-                        Modifier.clickable { onOpenPhoto(frame.entry) }
-                    } else {
-                        Modifier
-                    },
-                ),
-            contentAlignment = Alignment.Center,
+                .then(if (compact) Modifier.heightIn(max = 240.dp) else Modifier),
         ) {
-            when {
-                hasFile && !missing -> {
-                    AsyncImage(
-                        model = file,
-                        contentDescription = frame.kicker,
-                        modifier = Modifier.fillMaxWidth(),
-                        contentScale = if (crop == DiptychCrop.SQUARE) {
-                            ContentScale.Crop
-                        } else {
-                            ContentScale.Fit
-                        },
+            val height = min(maxWidth / ratio, maxHeight)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(height)
+                    .clip(shape)
+                    .border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
+                        shape = shape,
                     )
-                }
-                missing -> {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(
-                            imageVector = Icons.Rounded.BrokenImage,
-                            contentDescription = "Original missing",
-                            modifier = Modifier.size(36.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                    .then(
+                        if (frame.entry != null && hasFile && !missing) {
+                            Modifier.clickable { onOpenPhoto(frame.entry) }
+                        } else {
+                            Modifier
+                        },
+                    ),
+                contentAlignment = Alignment.Center,
+            ) {
+                when {
+                    hasFile && !missing -> {
+                        AsyncImage(
+                            model = file,
+                            contentDescription = frame.kicker,
+                            modifier = Modifier.fillMaxWidth(),
+                            contentScale = if (crop == DiptychCrop.SQUARE) {
+                                ContentScale.Crop
+                            } else {
+                                ContentScale.Fit
+                            },
                         )
-                        Text(
-                            text = "Original missing",
-                            modifier = Modifier.padding(top = 8.dp),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+                    }
+                    missing -> {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(
+                                imageVector = Icons.Rounded.BrokenImage,
+                                contentDescription = "Original missing",
+                                modifier = Modifier.size(36.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Text(
+                                text = "Original missing",
+                                modifier = Modifier.padding(top = 8.dp),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
                     }
                 }
             }
