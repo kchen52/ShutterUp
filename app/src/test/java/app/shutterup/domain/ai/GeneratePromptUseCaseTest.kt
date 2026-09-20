@@ -87,6 +87,30 @@ class GeneratePromptUseCaseTest {
     }
 
     @Test
+    fun unsetCityKeepsNorthernSeason() = runBlocking {
+        val primary = ScriptedGenerator(listOf(validPrompt()))
+        val useCase = useCase(primary = primary)
+        useCase.promptFor(date, null)
+        assertEquals(Season.SUMMER, primary.lastRequest?.season)
+    }
+
+    @Test
+    fun southernCityFlipsSeasonOnTheJuneDate() = runBlocking {
+        val primary = ScriptedGenerator(listOf(validPrompt()))
+        val useCase = useCase(primary = primary, preferences = TogglePreferences(cityId = "sydney"))
+        useCase.promptFor(date, null)
+        assertEquals(Season.WINTER, primary.lastRequest?.season)
+    }
+
+    @Test
+    fun northernCityKeepsNorthernSeason() = runBlocking {
+        val primary = ScriptedGenerator(listOf(validPrompt()))
+        val useCase = useCase(primary = primary, preferences = TogglePreferences(cityId = "new-york"))
+        useCase.promptFor(date, null)
+        assertEquals(Season.SUMMER, primary.lastRequest?.season)
+    }
+
+    @Test
     fun secondPromptForSameDate_doesNotCallPrimaryAgain() = runBlocking {
         val primary = ScriptedGenerator(listOf(validPrompt(title = "Once Only")))
         val useCase = useCase(primary = primary)
@@ -484,6 +508,7 @@ private class RecordingGamification : GamificationRepository {
 
 private class TogglePreferences(
     enabled: Boolean = false,
+    private val cityId: String? = null,
 ) : PreferencesRepository {
     var enabled: Boolean = enabled
     override fun observeNotifyTime() = flowOf(java.time.LocalTime.of(9, 0))
@@ -504,6 +529,8 @@ private class TogglePreferences(
     override suspend fun setDebugUseFakeAi(useFake: Boolean) = Unit
     override fun observeLastNotifiedDate() = flowOf<LocalDate?>(null)
     override suspend fun setLastNotifiedDate(date: LocalDate?) = Unit
+    override fun observeCoarseCityId() = flowOf(cityId)
+    override suspend fun setCoarseCityId(id: String?) = Unit
 }
 
 private class MemorySeries : SeriesRepository {

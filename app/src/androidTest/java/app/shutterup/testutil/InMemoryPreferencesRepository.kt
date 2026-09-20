@@ -60,4 +60,11 @@ class InMemoryPreferencesRepository @Inject constructor() : PreferencesRepositor
     override suspend fun setSeriesEnabled(enabled: Boolean) {
         seriesEnabled.value = enabled
     }
+
+    private val coarseCityId = MutableStateFlow<String?>(null)
+
+    override fun observeCoarseCityId(): Flow<String?> = coarseCityId.asStateFlow()
+    override suspend fun setCoarseCityId(id: String?) {
+        coarseCityId.value = id?.ifBlank { null }
+    }
 }

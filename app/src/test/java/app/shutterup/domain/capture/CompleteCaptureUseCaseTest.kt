@@ -194,5 +194,7 @@ class CompleteCaptureUseCaseTest {
         override suspend fun setLastNotifiedDate(date: LocalDate?) = Unit
         override fun observeSeriesEnabled() = flowOf(false)
         override suspend fun setSeriesEnabled(enabled: Boolean) = Unit
+        override fun observeCoarseCityId() = flowOf<String?>(null)
+        override suspend fun setCoarseCityId(id: String?) = Unit
     }
 }

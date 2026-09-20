@@ -7,7 +7,7 @@ import org.junit.Test
 
 /**
  * Privacy-guarantee guard (SPEC §11, §15.1): the merged manifest must never
- * contain INTERNET, READ_MEDIA_IMAGES, or USE_EXACT_ALARM.
+ * contain INTERNET, READ_MEDIA_IMAGES, USE_EXACT_ALARM, or location.
  */
 class ManifestGuardTest {
 
@@ -15,6 +15,8 @@ class ManifestGuardTest {
         "android.permission.INTERNET",
         "android.permission.READ_MEDIA_IMAGES",
         "android.permission.USE_EXACT_ALARM",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
     )
 
     @Test

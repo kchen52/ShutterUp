@@ -112,6 +112,19 @@ class PreferencesDataStore(
         }
     }
 
+    override fun observeCoarseCityId(): Flow<String?> =
+        dataStore.data.map { it[KEY_COARSE_CITY_ID] }
+
+    override suspend fun setCoarseCityId(id: String?) {
+        dataStore.edit { prefs ->
+            if (id.isNullOrBlank()) {
+                prefs.remove(KEY_COARSE_CITY_ID)
+            } else {
+                prefs[KEY_COARSE_CITY_ID] = id
+            }
+        }
+    }
+
     private companion object {
         const val PREFS_FILE = "shutterup_prefs.preferences_pb"
         const val DEFAULT_NOTIFY_HOUR = 9
@@ -125,5 +138,6 @@ class PreferencesDataStore(
         val KEY_ONBOARDING_COMPLETE = booleanPreferencesKey("onboarding_complete")
         val KEY_DEBUG_FAKE_AI = booleanPreferencesKey("debug_fake_ai")
         val KEY_LAST_NOTIFIED_DATE = stringPreferencesKey("last_notified_date")
+        val KEY_COARSE_CITY_ID = stringPreferencesKey("coarse_city_id")
     }
 }
