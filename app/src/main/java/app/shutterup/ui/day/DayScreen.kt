@@ -8,6 +8,8 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -124,7 +126,7 @@ fun DayRoute(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun DayScreen(
     state: DayUiState,
@@ -219,9 +221,10 @@ fun DayScreen(
                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    Row(
+                    FlowRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        itemVerticalAlignment = Alignment.CenterVertically,
                     ) {
                         Kicker(text = "${statusLabel(prompt.status)} · ${prompt.theme}")
                         if (prompt.source == PromptSourceRef.LIBRARY) {
@@ -762,7 +765,7 @@ private fun DayDiptychPreviewExpanded() {
     name = "Diptych font scale 2x",
     showBackground = true,
     widthDp = 360,
-    heightDp = 1400,
+    heightDp = 2800,
     fontScale = 2f,
 )
 @Composable

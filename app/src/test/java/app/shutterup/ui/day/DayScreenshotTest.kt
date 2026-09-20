@@ -121,7 +121,7 @@ class DayScreenshotTest {
     }
 
     @Test
-    @Config(qualifiers = "w360dp-h1400dp", fontScale = 2f)
+    @Config(qualifiers = "w360dp-h2800dp", fontScale = 2f)
     fun diptychFontScale2() {
         composeRule.setContent {
             ShutterUpTheme(darkTheme = false) {
