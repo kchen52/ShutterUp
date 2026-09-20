@@ -5,6 +5,7 @@ import androidx.compose.ui.test.onRoot
 import app.shutterup.ui.theme.ProvideThemeTint
 import app.shutterup.ui.theme.ShutterUpTheme
 import com.github.takahirom.roborazzi.captureRoboImage
+import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -21,32 +22,67 @@ class ShareCardScreenshotTest {
     val composeRule = createComposeRule()
 
     @Test
+    fun titleAtLimit_isFortyCharacters() {
+        assertEquals(40, TITLE_AT_LIMIT.length)
+    }
+
+    @Test
     fun shareCardPortraitLight() {
-        capture(darkTheme = false, width = 300, height = 400)
+        capture(darkTheme = false, width = 900, height = 1200)
     }
 
     @Test
     fun shareCardPortraitDark() {
-        capture(darkTheme = true, width = 300, height = 400)
+        capture(darkTheme = true, width = 900, height = 1200)
     }
 
     @Test
     fun shareCardLandscapeLight() {
-        capture(darkTheme = false, width = 400, height = 300)
+        capture(darkTheme = false, width = 1200, height = 900)
     }
 
     @Test
     fun shareCardLandscapeDark() {
-        capture(darkTheme = true, width = 400, height = 300)
+        capture(darkTheme = true, width = 1200, height = 900)
+    }
+
+    @Test
+    fun shareCardSquareLight() {
+        capture(darkTheme = false, width = 1000, height = 1000)
+    }
+
+    @Test
+    fun shareCardSquareDark() {
+        capture(darkTheme = true, width = 1000, height = 1000)
+    }
+
+    @Test
+    fun shareCardTitleLimitLight() {
+        capture(
+            darkTheme = false,
+            width = 900,
+            height = 1200,
+            title = TITLE_AT_LIMIT,
+        )
+    }
+
+    @Test
+    fun shareCardTitleLimitDark() {
+        capture(
+            darkTheme = true,
+            width = 900,
+            height = 1200,
+            title = TITLE_AT_LIMIT,
+        )
     }
 
     @Test
     fun shareCardLongTitleLight() {
         capture(
             darkTheme = false,
-            width = 300,
-            height = 400,
-            title = LONG_TITLE,
+            width = 900,
+            height = 1200,
+            title = OVERLONG_TITLE,
         )
     }
 
@@ -54,9 +90,9 @@ class ShareCardScreenshotTest {
     fun shareCardLongTitleDark() {
         capture(
             darkTheme = true,
-            width = 300,
-            height = 400,
-            title = LONG_TITLE,
+            width = 900,
+            height = 1200,
+            title = OVERLONG_TITLE,
         )
     }
 
@@ -80,7 +116,7 @@ class ShareCardScreenshotTest {
     }
 
     companion object {
-        private const val LONG_TITLE =
+        private const val OVERLONG_TITLE =
             "Find the last remaining scrap of sky in a puddle after the rain has already gone and the street is almost dry"
     }
 }
