@@ -30,7 +30,7 @@ enum class PromptSource {
     LIBRARY,
 }
 
-/** Northern-hemisphere season derived from the date; a setting may refine this in v1.1. */
+/** Meteorological season derived from the date and, when known, the hemisphere. */
 enum class Season {
     SPRING,
     SUMMER,
