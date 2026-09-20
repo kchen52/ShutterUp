@@ -33,7 +33,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -58,13 +57,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.shutterup.domain.model.DayPrompt
 import app.shutterup.domain.model.DayStatus
 import app.shutterup.domain.model.Entry
-import app.shutterup.domain.model.PromptSourceRef
 import app.shutterup.domain.model.StreakState
 import app.shutterup.domain.series.SeriesDot
 import app.shutterup.domain.series.SeriesProgress
 import app.shutterup.ui.calendar.spokenDate
 import app.shutterup.ui.components.Kicker
-import app.shutterup.ui.components.LibraryTag
 import app.shutterup.ui.components.NotificationPermissionCard
 import app.shutterup.ui.components.SeriesDots
 import app.shutterup.ui.components.ShootButton
@@ -183,18 +180,6 @@ fun HomeScreen(
                     monthCompleted = state.monthCompleted,
                     monthEligible = state.monthEligible,
                 )
-                if (state.aiDownloadPercent != null) {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        LinearProgressIndicator(
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                        Text(
-                            text = SettingsCopy.AI_PREPARING,
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                }
                 if (state.notificationsDenied) {
                     NotificationPermissionCard(onOpenSettings = onOpenNotificationSettings)
                 }
@@ -239,11 +224,7 @@ private fun TodayCard(
     }
     if (prompt == null) {
         val generating = state.generationMessage
-        val copy = when {
-            generating != null -> generating
-            state.preparingPrompts || state.aiDownloadPercent != null -> "Preparing on-device AI"
-            else -> SettingsCopy.AI_UNAVAILABLE
-        }
+        val copy = generating ?: SettingsCopy.CHOOSING_PROMPT
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(28.dp),
@@ -348,9 +329,6 @@ private fun TodayKickerRow(prompt: DayPrompt, seriesProgress: SeriesProgress?) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Kicker(text = kicker)
-        if (prompt.source == PromptSourceRef.LIBRARY) {
-            LibraryTag()
-        }
     }
 }
 
@@ -480,7 +458,6 @@ fun sampleHomeState(
     prompt: DayPrompt = samplePrompt(),
     paused: Boolean = false,
     notificationsDenied: Boolean = false,
-    aiDownloadPercent: Int? = null,
     seriesProgress: SeriesProgress? = null,
 ): HomeUiState = HomeUiState(
     today = LocalDate.of(2026, 9, 19),
@@ -491,7 +468,6 @@ fun sampleHomeState(
     recent = emptyList(),
     paused = paused,
     notificationsDenied = notificationsDenied,
-    aiDownloadPercent = aiDownloadPercent,
     seriesProgress = seriesProgress,
 )
 

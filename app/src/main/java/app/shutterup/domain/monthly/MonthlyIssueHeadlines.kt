@@ -4,7 +4,7 @@ import java.time.YearMonth
 import java.util.Locale
 
 /**
- * Hand-written month headlines keyed to the 27 library themes, two each so
+ * Hand-written month headlines keyed to the library themes, two each so
  * consecutive months of the same theme do not repeat. Quiet, concrete,
  * sentence case, full stop. Unknown Nano themes fall back to the theme
  * itself as a bare phrase.
@@ -53,6 +53,24 @@ object MonthlyIssueHeadlines {
         normalize("Tiny Worlds") to listOf("A smaller scale.", "Down at your feet."),
         normalize("Wild Patterns") to listOf("Repeat, then not.", "The same, again."),
         normalize("Windows and Doors") to listOf("Through the glass.", "An open frame."),
+        normalize("Backyard Edges") to listOf("Along the fence.", "The yard's edge."),
+        normalize("Book Spines") to listOf("A row of titles.", "Books at rest."),
+        normalize("Chair Studies") to listOf("An empty seat.", "The chair waits."),
+        normalize("Fabric Folds") to listOf("Cloth at rest.", "A gathered hem."),
+        normalize("Floor Finds") to listOf("Down at your feet.", "On the boards."),
+        normalize("Glass Surfaces") to listOf("Clear and close.", "Light through glass."),
+        normalize("Hallway Light") to listOf("Down the corridor.", "A stripe of light."),
+        normalize("Lamp Glow") to listOf("A small warm pool.", "The lamp is on."),
+        normalize("Laundry Day") to listOf("Cloth on a line.", "A folded stack."),
+        normalize("Plant Shadows") to listOf("A leaf of shade.", "Green on the wall."),
+        normalize("Shelf Stories") to listOf("Things in a row.", "On the shelf."),
+        normalize("Shoe Stories") to listOf("By the door.", "A pair at rest."),
+        normalize("Stairwell Light") to listOf("On the steps.", "The turn of a stair."),
+        normalize("Steam Shapes") to listOf("A quiet plume.", "Warm air rising."),
+        normalize("Table Edges") to listOf("At the rim.", "The table's edge."),
+        normalize("Tile Grids") to listOf("A grid of squares.", "Grout and line."),
+        normalize("Wall Marks") to listOf("A mark on the wall.", "What the wall kept."),
+        normalize("Pocket Objects") to listOf("Emptied pockets.", "Small things out."),
     )
 
     private fun asHeadline(theme: String): String {

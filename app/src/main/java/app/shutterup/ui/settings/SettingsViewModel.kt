@@ -10,11 +10,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.shutterup.capture.CaptureFileStore
 import app.shutterup.capture.MediaStorePhotoArchiver
-import app.shutterup.data.ai.NanoPromptGenerator
 import app.shutterup.data.local.ShutterUpDatabase
-import app.shutterup.domain.ai.Availability
 import app.shutterup.domain.ai.GeneratePromptUseCase
-import app.shutterup.domain.ai.PromptGenerator
 import app.shutterup.domain.model.DayPrompt
 import app.shutterup.domain.model.DayStatus
 import app.shutterup.domain.model.PromptSourceRef
@@ -34,7 +31,6 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
 import javax.inject.Inject
-import javax.inject.Named
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -55,8 +51,6 @@ data class SettingsUiState(
     val coarseCityId: String? = null,
     val coarseCityName: String? = null,
     val freezeCount: Int = 0,
-    val aiStatus: String = "",
-    val aiSupporting: String? = null,
     val saveLocation: String = SettingsCopy.SAVE_LOCATION_VALUE,
     val versionName: String = "",
     val privacyBody: String = SettingsCopy.PRIVACY_BODY,
@@ -80,23 +74,16 @@ private data class PrefSlice(
     val cityId: String?,
 )
 
-private data class AiSlice(
-    val status: String,
-    val supporting: String?,
-)
-
 /**
- * Settings: notify time, precise timing, pause, theme focus, freeze count,
- * AI status, about/privacy, debug fake-AI. Export ZIP is v1.1 (SPEC §17) and
- * is omitted because no pipeline exists yet.
+ * Settings: notify time, precise timing, pause, freeze count,
+ * built-in library, about/privacy, debug fake-AI. Export ZIP is v1.1 (SPEC §17) and
+ * is omitted because no pipeline exists yet. Theme focus is deferred.
  */
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val preferences: PreferencesRepository,
     private val scheduler: NotificationScheduler,
     private val widgetUpdater: TodayWidgetUpdater,
-    @Named("primaryGenerator") private val generator: PromptGenerator,
-    private val nano: NanoPromptGenerator,
     private val files: CaptureFileStore,
     private val photos: MediaStorePhotoArchiver,
     private val generatePrompt: GeneratePromptUseCase,
@@ -109,9 +96,6 @@ class SettingsViewModel @Inject constructor(
     @ApplicationContext private val appContext: Context,
 ) : ViewModel() {
 
-    private val ai = MutableStateFlow(
-        AiSlice(SettingsCopy.AI_UNAVAILABLE_STATUS, SettingsCopy.AI_UNAVAILABLE),
-    )
     private val storageUsed = MutableStateFlow("0 B")
 
     val state: StateFlow<SettingsUiState> = combine(
@@ -131,9 +115,8 @@ class SettingsViewModel @Inject constructor(
             slice.copy(seriesEnabled = seriesEnabled, cityId = cityId)
         },
         gamification.observeStreak(),
-        ai,
         storageUsed,
-    ) { prefs, streak, aiSlice, storage ->
+    ) { prefs, streak, storage ->
         SettingsUiState(
             notifyTime = prefs.notifyTime,
             preciseTiming = prefs.precise,
@@ -144,8 +127,6 @@ class SettingsViewModel @Inject constructor(
             coarseCityId = prefs.cityId,
             coarseCityName = CityCatalog.find(prefs.cityId)?.name,
             freezeCount = streak.freezes,
-            aiStatus = aiSlice.status,
-            aiSupporting = aiSlice.supporting,
             versionName = versionName(appContext),
             showDebug = isDebuggable(appContext),
             debugUseFakeAi = prefs.fakeAi,
@@ -160,21 +141,10 @@ class SettingsViewModel @Inject constructor(
             versionName = versionName(appContext),
             showDebug = isDebuggable(appContext),
             showBatteryHint = isBatteryRestricted(appContext),
-            aiStatus = SettingsCopy.AI_UNAVAILABLE_STATUS,
-            aiSupporting = SettingsCopy.AI_UNAVAILABLE,
         ),
     )
 
     init {
-        viewModelScope.launch(Dispatchers.IO) {
-            val availability = runCatching { generator.availability() }
-                .getOrDefault(Availability.UNAVAILABLE)
-            val modelName = runCatching { nano.baseModelName() }.getOrNull()
-            ai.value = AiSlice(
-                status = aiStatusLine(availability, modelName),
-                supporting = aiSupporting(availability),
-            )
-        }
         refreshStorage()
     }
 
@@ -254,17 +224,6 @@ class SettingsViewModel @Inject constructor(
     fun setDebugUseFakeAi(useFake: Boolean) {
         viewModelScope.launch {
             preferences.setDebugUseFakeAi(useFake)
-            val availability = runCatching { generator.availability() }
-                .getOrDefault(Availability.UNAVAILABLE)
-            val modelName = if (useFake) {
-                null
-            } else {
-                runCatching { nano.baseModelName() }.getOrNull()
-            }
-            ai.value = AiSlice(
-                status = aiStatusLine(availability, modelName),
-                supporting = aiSupporting(availability),
-            )
         }
     }
 
@@ -340,23 +299,9 @@ class SettingsViewModel @Inject constructor(
     }
 }
 
-/** SPEC §7.5: theme focus is optional free text, at most 60 characters. */
+/** SPEC §7.5: theme focus is optional free text, at most 60 characters. Deferred in v1. */
 fun sanitizeThemeFocus(raw: String): String? =
     raw.trim().take(SettingsViewModel.THEME_FOCUS_MAX).ifEmpty { null }
-
-internal fun aiStatusLine(availability: Availability, modelName: String?): String = when (availability) {
-    Availability.AVAILABLE -> {
-        val name = modelName?.takeIf { it.isNotBlank() }
-        if (name == null) SettingsCopy.AI_READY else "${SettingsCopy.AI_READY} · $name"
-    }
-    Availability.DOWNLOADABLE, Availability.DOWNLOADING -> SettingsCopy.AI_PREPARING
-    Availability.UNAVAILABLE -> SettingsCopy.AI_UNAVAILABLE_STATUS
-}
-
-internal fun aiSupporting(availability: Availability): String? = when (availability) {
-    Availability.UNAVAILABLE -> SettingsCopy.AI_UNAVAILABLE
-    else -> null
-}
 
 private fun canScheduleExactAlarms(context: Context): Boolean {
     val alarm = context.getSystemService(Context.ALARM_SERVICE) as? android.app.AlarmManager

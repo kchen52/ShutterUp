@@ -48,7 +48,6 @@ import app.shutterup.capture.TakePrivatePicture
 import app.shutterup.domain.model.PromptSourceRef
 import app.shutterup.ui.components.ConstraintCard
 import app.shutterup.ui.components.Kicker
-import app.shutterup.ui.components.LibraryTag
 import app.shutterup.ui.components.SeriesDots
 import app.shutterup.ui.components.ShootButton
 import app.shutterup.ui.settings.SettingsCopy
@@ -57,7 +56,7 @@ import app.shutterup.ui.theme.ShutterUpTheme
 import java.util.Locale
 
 /**
- * Prompt Detail: theme, constraint, library tag, shoot (SPEC §4.2 / DESIGN §4.2).
+ * Prompt Detail: theme, constraint, shoot (SPEC §4.2 / DESIGN §4.2).
  */
 @Composable
 fun PromptDetailRoute(
@@ -196,7 +195,7 @@ fun PromptDetailScreen(
                         .padding(padding),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(SettingsCopy.AI_PREPARING, style = MaterialTheme.typography.bodyLarge)
+                    Text(SettingsCopy.CHOOSING_PROMPT, style = MaterialTheme.typography.bodyLarge)
                 }
                 return@Scaffold
             }
@@ -220,9 +219,6 @@ fun PromptDetailScreen(
                             text = series.detailKicker(prompt.theme),
                             modifier = Modifier.weight(1f, fill = false),
                         )
-                        if (prompt.source == PromptSourceRef.LIBRARY) {
-                            LibraryTag()
-                        }
                     }
                     SeriesDots(dots = series.dots)
                 } else {
@@ -231,9 +227,6 @@ fun PromptDetailScreen(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Kicker(text = prompt.theme.uppercase(Locale.ENGLISH))
-                        if (prompt.source == PromptSourceRef.LIBRARY) {
-                            LibraryTag()
-                        }
                     }
                 }
                 if (state.debugSource && prompt.source == PromptSourceRef.ON_DEVICE_AI) {

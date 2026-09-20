@@ -6,9 +6,7 @@ import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.shutterup.domain.ai.Availability
 import app.shutterup.domain.ai.GeneratePromptUseCase
-import app.shutterup.domain.ai.PromptGenerator
 import app.shutterup.domain.model.DayPrompt
 import app.shutterup.domain.model.Entry
 import app.shutterup.domain.model.StreakState
@@ -28,7 +26,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.time.ZoneId
 import javax.inject.Inject
-import javax.inject.Named
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -47,7 +44,6 @@ data class HomeUiState(
     val recent: List<Entry> = emptyList(),
     val paused: Boolean = false,
     val notificationsDenied: Boolean = false,
-    val aiDownloadPercent: Int? = null,
     val preparingPrompts: Boolean = false,
     val generationMessage: String? = null,
     val seriesProgress: SeriesProgress? = null,
@@ -66,7 +62,6 @@ class HomeViewModel @Inject constructor(
     private val generatePrompt: GeneratePromptUseCase,
     private val rollover: DayRolloverUseCase,
     private val seriesRepo: SeriesRepository,
-    @Named("primaryGenerator") private val primary: PromptGenerator,
     private val clock: Clock,
     private val zone: ZoneId,
 ) : ViewModel() {
@@ -102,7 +97,6 @@ class HomeViewModel @Inject constructor(
                     recent = recent,
                     paused = paused,
                     notificationsDenied = _state.value.notificationsDenied,
-                    aiDownloadPercent = _state.value.aiDownloadPercent,
                     preparingPrompts = _state.value.preparingPrompts,
                     generationMessage = _state.value.generationMessage,
                     seriesProgress = series?.let {
@@ -124,7 +118,6 @@ class HomeViewModel @Inject constructor(
         }
         viewModelScope.launch {
             refreshNotifications()
-            refreshAvailability()
             val paused = preferences.observePaused().first()
             rollover.rollover(today, paused)
             if (!paused) {
@@ -150,15 +143,6 @@ class HomeViewModel @Inject constructor(
             Manifest.permission.POST_NOTIFICATIONS,
         ) == PackageManager.PERMISSION_GRANTED
         _state.update { it.copy(notificationsDenied = !granted) }
-    }
-
-    private suspend fun refreshAvailability() {
-        val availability = runCatching { primary.availability() }.getOrNull()
-        _state.update {
-            it.copy(
-                aiDownloadPercent = if (availability == Availability.DOWNLOADING) 0 else null,
-            )
-        }
     }
 
     companion object {

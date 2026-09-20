@@ -49,7 +49,7 @@ class GeneratePromptUseCase @Inject constructor(
     }
 
     /**
-     * Library-only path for the notification worker (SPEC §7.6): never calls Nano.
+     * Library path for the notification worker (SPEC §7.6). Never loads Nano.
      * Returns the persisted prompt for [date], or picks from the bundled bank.
      */
     suspend fun ensureLibraryPrompt(date: LocalDate, themeFocus: String?): GeneratedPrompt =

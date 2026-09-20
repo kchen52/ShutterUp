@@ -31,11 +31,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -55,8 +53,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import app.shutterup.domain.ai.Availability
-import app.shutterup.ui.settings.SettingsCopy
 import app.shutterup.ui.theme.FrauncesHeadline
 import app.shutterup.ui.theme.ShutterUpTheme
 import kotlin.math.cos
@@ -77,13 +73,12 @@ fun OnboardingRoute(
         onNext = viewModel::nextPage,
         onBack = viewModel::previousPage,
         onNotifyTime = viewModel::setNotifyTime,
-        onThemeFocus = viewModel::setThemeFocus,
         onFinish = viewModel::finish,
     )
 }
 
 /**
- * Four full-screen pages, max width 480 dp, swipe or Next (DESIGN.md §4.9).
+ * Three full-screen pages, max width 480 dp, swipe or Next (DESIGN.md §4.9).
  */
 @Composable
 fun OnboardingScreen(
@@ -93,7 +88,6 @@ fun OnboardingScreen(
     onNext: () -> Unit = {},
     onBack: () -> Unit = {},
     onNotifyTime: (Int, Int) -> Unit = { _, _ -> },
-    onThemeFocus: (String) -> Unit = {},
     onFinish: () -> Unit = {},
     onRequestNotifications: () -> Unit = {},
 ) {
@@ -137,7 +131,6 @@ fun OnboardingScreen(
                     page = page,
                     state = state,
                     onNotifyTime = onNotifyTime,
-                    onThemeFocus = onThemeFocus,
                     onAllowNotifications = requestNotifications,
                 )
             }
@@ -195,14 +188,12 @@ fun OnboardingPageContent(
     state: OnboardingUiState,
     modifier: Modifier = Modifier,
     onNotifyTime: (Int, Int) -> Unit = { _, _ -> },
-    onThemeFocus: (String) -> Unit = {},
     onAllowNotifications: () -> Unit = {},
 ) {
     when (page) {
         0 -> WelcomePage(modifier)
         1 -> NotificationsPage(onAllowNotifications, modifier)
-        2 -> PreferencesPage(state, onNotifyTime, onThemeFocus, modifier)
-        else -> AiStatusPage(state, modifier)
+        else -> PreferencesPage(state, onNotifyTime, modifier)
     }
 }
 
@@ -295,7 +286,6 @@ private fun MockNotificationCard() {
 private fun PreferencesPage(
     state: OnboardingUiState,
     onNotifyTime: (Int, Int) -> Unit,
-    onThemeFocus: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val pickerState = rememberTimePickerState(
@@ -322,82 +312,6 @@ private fun PreferencesPage(
             style = MaterialTheme.typography.titleMedium,
         )
         TimePicker(state = pickerState)
-        if (state.themeFocus.isEmpty()) {
-            Text(
-                text = SettingsCopy.THEME_FOCUS_LABEL,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        OutlinedTextField(
-            value = state.themeFocus,
-            onValueChange = onThemeFocus,
-            modifier = Modifier.fillMaxWidth(),
-            label = if (state.themeFocus.isNotEmpty()) {
-                { Text(SettingsCopy.THEME_FOCUS_LABEL) }
-            } else {
-                null
-            },
-            placeholder = { Text(OnboardingCopy.THEME_FOCUS_PLACEHOLDER) },
-            singleLine = true,
-        )
-    }
-}
-
-@Composable
-private fun AiStatusPage(
-    state: OnboardingUiState,
-    modifier: Modifier = Modifier,
-) {
-    val availability = state.availability
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(top = 32.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-        Text(
-            text = OnboardingCopy.AI_HEADLINE,
-            style = MaterialTheme.typography.headlineMedium,
-        )
-        when (availability) {
-            Availability.UNAVAILABLE -> {
-                Text(
-                    text = OnboardingCopy.AI_UNAVAILABLE,
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-            }
-            Availability.AVAILABLE -> {
-                Text(
-                    text = OnboardingCopy.AI_READY,
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-                Text(
-                    text = OnboardingCopy.AI_READY_BODY,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            Availability.DOWNLOADABLE, Availability.DOWNLOADING, null -> {
-                Text(
-                    text = if (state.aiDownloadPercent != null) {
-                        "${OnboardingCopy.AI_PREPARING} · ${state.aiDownloadPercent} %"
-                    } else {
-                        OnboardingCopy.AI_PREPARING
-                    },
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-                if (state.aiDownloadPercent != null) {
-                    LinearProgressIndicator(
-                        progress = { (state.aiDownloadPercent / 100f).coerceIn(0f, 1f) },
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                } else {
-                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                }
-            }
-        }
     }
 }
 
@@ -488,15 +402,3 @@ private fun OnboardingPrefsLightPreview() {
     }
 }
 
-@Preview(name = "AI light", showBackground = true, widthDp = 360, heightDp = 800)
-@Composable
-private fun OnboardingAiLightPreview() {
-    ShutterUpTheme(darkTheme = false) {
-        Surface {
-            OnboardingPageContent(
-                page = 3,
-                state = OnboardingUiState(page = 3, availability = Availability.DOWNLOADING),
-            )
-        }
-    }
-}

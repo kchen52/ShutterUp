@@ -6,7 +6,7 @@ import java.time.Clock
 import kotlin.random.Random
 
 /**
- * Bundled-bank generator (SPEC §7.7). Selection excludes ids used since
+ * Bundled-bank generator (SPEC §7.7). Runtime primary in v1. Selection excludes ids used since
  * [GenerationRequest.date] minus 180 days; if that filter empties the list,
  * the full library is used (exhaustion fallback). Among remaining entries,
  * tag-matching [GenerationRequest.themeFocus] is preferred, else uniform random.

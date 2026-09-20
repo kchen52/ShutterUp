@@ -1,6 +1,5 @@
 package app.shutterup.ui.settings
 
-import app.shutterup.domain.ai.Availability
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -17,13 +16,15 @@ class SettingsCopyAndFocusTest {
     }
 
     @Test
-    fun aiStatusUsesDesignCopy() {
-        assertEquals(SettingsCopy.AI_READY, aiStatusLine(Availability.AVAILABLE, null))
-        assertEquals("Ready · Gemini Nano v2", aiStatusLine(Availability.AVAILABLE, "Gemini Nano v2"))
-        assertEquals(SettingsCopy.AI_PREPARING, aiStatusLine(Availability.DOWNLOADING, null))
-        assertEquals(SettingsCopy.AI_UNAVAILABLE_STATUS, aiStatusLine(Availability.UNAVAILABLE, null))
-        assertEquals(SettingsCopy.AI_UNAVAILABLE, aiSupporting(Availability.UNAVAILABLE))
-        assertNull(aiSupporting(Availability.AVAILABLE))
+    fun libraryStatusUsesDesignCopy() {
+        assertEquals("Built-in library", SettingsCopy.LIBRARY_STATUS)
+        assertEquals(
+            "Daily prompts come from a curated bank on this phone.",
+            SettingsCopy.LIBRARY_SUPPORTING,
+        )
+        assertEquals("Choosing today's prompt.", SettingsCopy.CHOOSING_PROMPT)
+        assertFalse(SettingsCopy.LIBRARY_SUPPORTING.contains("!"))
+        assertFalse(SettingsCopy.CHOOSING_PROMPT.contains("!"))
     }
 
     @Test
@@ -33,6 +34,7 @@ class SettingsCopyAndFocusTest {
             SettingsCopy.ABOUT_LINE,
         )
         assertEquals(SettingsCopy.ABOUT_LINE, SettingsCopy.PRIVACY_BODY.take(SettingsCopy.ABOUT_LINE.length))
+        assertFalse(SettingsCopy.PRIVACY_BODY.contains("Gemini Nano"))
     }
 
     @Test

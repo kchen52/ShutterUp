@@ -23,8 +23,9 @@ import javax.inject.Named
 
 /**
  * Assembles a finished month into one issue (SPEC §7.9). Idempotent: a month
- * is written once. Zero completed days produce no issue. Nano is attempted
- * when available; otherwise the fallback composer writes the page.
+ * is written once. Zero completed days produce no issue. Copy is the
+ * deterministic fallback composer. A future generator may be attempted when
+ * wired as primary and available.
  */
 open class GenerateMonthlyIssueUseCase @Inject constructor(
     @Named("primaryGenerator") private val primary: PromptGenerator,

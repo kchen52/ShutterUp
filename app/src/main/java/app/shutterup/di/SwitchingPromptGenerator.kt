@@ -16,8 +16,9 @@ import kotlinx.coroutines.flow.first
 annotation class FakeAiBinding
 
 /**
- * Runtime swap between Nano and the debug [app.shutterup.data.ai.FakePromptGenerator]
- * based on the `debug_fake_ai` preference (SPEC §7.1).
+ * Runtime swap between the bundled library and the debug
+ * [app.shutterup.data.ai.FakePromptGenerator] based on the `debug_fake_ai`
+ * preference (SPEC §7.1).
  */
 class SwitchingPromptGenerator(
     private val onDevice: PromptGenerator,

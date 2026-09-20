@@ -1,6 +1,6 @@
 # ShutterUp
 
-A fully offline Android app that sends you **one photography prompt a day**, generated on-device by Gemini Nano (with a built-in library fallback), hands off to the system camera, and keeps the photo with its prompt. Light gamification — streaks, freezes, badges — keeps the daily habit going without ever turning into a fanfare.
+A fully offline Android app that sends you **one photography prompt a day**, chosen from a bundled library of about 2000 prompts, hands off to the system camera, and keeps the photo with its prompt. Light gamification — streaks, freezes, badges — keeps the daily habit going without ever turning into a fanfare.
 
 - [SPEC.md](SPEC.md) — product and technical specification
 - [DESIGN.md](DESIGN.md) — design brief: look, motion, copy, badges, icon
@@ -22,18 +22,18 @@ Dark-mode, large-font, and expanded-width (foldable) references live alongside t
 
 ## Features
 
-- **Daily prompts** — generated on-device via the ML Kit GenAI Prompt API (Gemini Nano v2, structured output), validated and de-duplicated, with a 220-prompt hand-written library fallback and 180-day exclusion
+- **Daily prompts** — about 2000 bundled photography prompts with validation, 180-day exclusion, and 40+ themes so Series weeks can run; Gemini Nano is not loaded at runtime
 - **Quiet capture** — one still photo per day via the system camera into `Pictures/ShutterUp` (visible in Gallery and kept on uninstall); photo-picker fallback if the camera fails twice
 - **Streaks, freezes, badges** — streak counting with pause/freeze semantics, 18 canvas-drawn badge emblems in five sections
 - **History** — calendar month grid, chronological feed with theme filters, per-day view with notes
 - **Reminders** — daily notification with Shoot/Reroll actions, exact-alarm precise-timing option, timezone/boot/update rescheduling
-- **Glance widgets** (2×2 and 4×2) with deep links, 4-page first-run onboarding, adaptive layouts (bottom bar / rail / list-detail on foldables)
+- **Glance widgets** (2×2 and 4×2) with deep links, 3-page first-run onboarding, adaptive layouts (bottom bar / rail / list-detail on foldables)
 - **Fully offline** — no `INTERNET` permission (enforced by a manifest guard test), no accounts, no sync
 - **Series** — opt-in weeks of seven related prompts, with a quiet seven-dot progress row; the daily loop stays one prompt and one photo a day
 
 ## Tech stack
 
-Kotlin, Jetpack Compose (Material 3 + adaptive), Hilt, Room, DataStore, WorkManager/AlarmManager, Camera (system intents + FileProvider), ML Kit GenAI, Glance. Tests: JUnit4 + Robolectric + Roborazzi screenshot tests; instrumented Compose UI tests on the Fold 7 (`connectedDebugAndroidTest`).
+Kotlin, Jetpack Compose (Material 3 + adaptive), Hilt, Room, DataStore, WorkManager/AlarmManager, Camera (system intents + FileProvider), Glance. Tests: JUnit4 + Robolectric + Roborazzi screenshot tests; instrumented Compose UI tests on the Fold 7 (`connectedDebugAndroidTest`).
 
 ## Building
 
@@ -56,7 +56,7 @@ CI (`.github/workflows/ci.yml`) runs all four gates on every PR and uploads the 
 ```
 app/src/main/java/app/shutterup/
   capture/        # FileProvider pending file, MediaStore archive, TakePicture, metadata
-  data/           # Room (entities/DAOs), DataStore prefs, AI (Nano/library), repos
+  data/           # Room (entities/DAOs), DataStore prefs, AI (unused Nano + library), repos
   domain/         # pure-Kotlin core: AI parsing/validation, gamification,
                   # scheduling, rollover, capture rules (no Android imports)
   navigation/     # deep-link URIs
@@ -64,5 +64,5 @@ app/src/main/java/app/shutterup/
                   # badges/settings/detail/completion/onboarding), nav graph, adaptive
   widget/         # Glance widgets
   work/           # DailyPromptWorker, schedulers, receivers
-app/src/main/assets/prompt_library.json   # 220 hand-written fallback prompts
+app/src/main/assets/prompt_library.json   # ~2000 bundled daily prompts
 ```

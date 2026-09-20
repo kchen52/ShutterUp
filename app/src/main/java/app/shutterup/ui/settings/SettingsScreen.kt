@@ -8,7 +8,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -21,7 +20,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -33,7 +31,6 @@ import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -73,7 +70,6 @@ fun SettingsRoute(
         onNotifyTime = viewModel::setNotifyTime,
         onPreciseTiming = viewModel::setPreciseTiming,
         onPaused = viewModel::setPaused,
-        onThemeFocus = viewModel::setThemeFocus,
         onSeriesEnabled = viewModel::setSeriesEnabled,
         onCoarseCity = viewModel::setCoarseCityId,
         onDebugUseFakeAi = viewModel::setDebugUseFakeAi,
@@ -127,7 +123,6 @@ fun SettingsScreen(
     onNotifyTime: (hour: Int, minute: Int) -> Unit = { _, _ -> },
     onPreciseTiming: (Boolean) -> Unit = {},
     onPaused: (Boolean) -> Unit = {},
-    onThemeFocus: (String) -> Unit = {},
     onSeriesEnabled: (Boolean) -> Unit = {},
     onCoarseCity: (String?) -> Unit = {},
     onDebugUseFakeAi: (Boolean) -> Unit = {},
@@ -182,7 +177,6 @@ fun SettingsScreen(
                         onNotifyTime = onNotifyTime,
                         onPreciseTiming = onPreciseTiming,
                         onPaused = onPaused,
-                        onThemeFocus = onThemeFocus,
                         onSeriesEnabled = onSeriesEnabled,
                         onCoarseCity = onCoarseCity,
                         onDebugUseFakeAi = onDebugUseFakeAi,
@@ -217,7 +211,6 @@ fun SettingsScreen(
                         onNotifyTime = onNotifyTime,
                         onPreciseTiming = onPreciseTiming,
                         onPaused = onPaused,
-                        onThemeFocus = onThemeFocus,
                         onSeriesEnabled = onSeriesEnabled,
                         onCoarseCity = onCoarseCity,
                         onDebugUseFakeAi = onDebugUseFakeAi,
@@ -285,7 +278,6 @@ private fun SettingsGroup(
     onNotifyTime: (Int, Int) -> Unit,
     onPreciseTiming: (Boolean) -> Unit,
     onPaused: (Boolean) -> Unit,
-    onThemeFocus: (String) -> Unit,
     onSeriesEnabled: (Boolean) -> Unit,
     onCoarseCity: (String?) -> Unit,
     onDebugUseFakeAi: (Boolean) -> Unit,
@@ -307,7 +299,6 @@ private fun SettingsGroup(
         )
         SettingsCategory.Prompts -> PromptsSection(
             state = state,
-            onThemeFocus = onThemeFocus,
             onSeriesEnabled = onSeriesEnabled,
             onCoarseCity = onCoarseCity,
         )
@@ -435,15 +426,10 @@ private fun DailyPromptSection(
 @Composable
 private fun PromptsSection(
     state: SettingsUiState,
-    onThemeFocus: (String) -> Unit,
     onSeriesEnabled: (Boolean) -> Unit,
     onCoarseCity: (String?) -> Unit,
 ) {
-    var draft by remember { mutableStateOf(state.themeFocus) }
     var showCities by remember { mutableStateOf(false) }
-    LaunchedEffect(state.themeFocus) {
-        if (state.themeFocus != draft) draft = state.themeFocus
-    }
     SectionHeader(SettingsCopy.SECTION_PROMPTS)
     SwitchRow(
         title = SettingsCopy.SERIES,
@@ -467,29 +453,9 @@ private fun PromptsSection(
             .heightIn(min = 48.dp)
             .clickable { showCities = true },
     )
-    OutlinedTextField(
-        value = draft,
-        onValueChange = { next ->
-            val clipped = next.take(SettingsViewModel.THEME_FOCUS_MAX)
-            draft = clipped
-            onThemeFocus(clipped)
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        label = { Text(SettingsCopy.THEME_FOCUS_LABEL) },
-        placeholder = { Text(SettingsCopy.THEME_FOCUS_PLACEHOLDER) },
-        supportingText = { Text(SettingsCopy.THEME_FOCUS_SUPPORTING) },
-        singleLine = true,
-    )
     ListItem(
-        headlineContent = { Text(SettingsCopy.AI_STATUS) },
-        supportingContent = {
-            Column {
-                Text(state.aiStatus)
-                state.aiSupporting?.let { Text(it) }
-            }
-        },
+        headlineContent = { Text(SettingsCopy.LIBRARY_STATUS) },
+        supportingContent = { Text(SettingsCopy.LIBRARY_SUPPORTING) },
     )
     if (showCities) {
         CityPickerDialog(
@@ -717,8 +683,6 @@ internal fun sampleSettingsState(
         themeFocus = "",
         seriesEnabled = seriesEnabled,
         freezeCount = 2,
-        aiStatus = SettingsCopy.AI_UNAVAILABLE_STATUS,
-        aiSupporting = SettingsCopy.AI_UNAVAILABLE,
         versionName = "0.1.0",
         showDebug = true,
         debugUseFakeAi = false,

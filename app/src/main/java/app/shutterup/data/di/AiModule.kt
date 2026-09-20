@@ -2,7 +2,6 @@ package app.shutterup.data.di
 
 import app.shutterup.data.ai.AssetLibraryPromptSource
 import app.shutterup.data.ai.BlocklistProvider
-import app.shutterup.data.ai.NanoPromptGenerator
 import app.shutterup.di.FakeAiBinding
 import app.shutterup.di.SwitchingPromptGenerator
 import app.shutterup.domain.ai.LibraryPromptGenerator
@@ -44,8 +43,9 @@ object AiModule {
     ): LibraryPromptGenerator = LibraryPromptGenerator(source, gamification, clock, Random.Default)
 
     /**
-     * Real Nano primary (SPEC §7.2). Debug builds can swap in the fake generator
-     * at runtime via FakeAiBinding and the Settings toggle.
+     * Library is the runtime primary (SPEC §7.2). Debug builds can swap in the
+     * fake generator via FakeAiBinding and the Settings toggle. Nano is kept
+     * in the tree for a later theme-focus revisit and is never requested here.
      */
     @Provides
     @ElementsIntoSet
@@ -56,11 +56,11 @@ object AiModule {
     @Singleton
     @Named("primaryGenerator")
     fun providePrimaryGenerator(
-        nano: NanoPromptGenerator,
+        library: LibraryPromptGenerator,
         @FakeAiBinding fakes: Set<@JvmSuppressWildcards PromptGenerator>,
         prefs: PreferencesRepository,
     ): PromptGenerator = SwitchingPromptGenerator(
-        onDevice = nano,
+        onDevice = library,
         fake = fakes.firstOrNull(),
         preferences = prefs,
     )

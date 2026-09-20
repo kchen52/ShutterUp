@@ -77,8 +77,6 @@ fun ComposeTestRule.completeOnboarding() {
     waitUntilText(OnboardingCopy.NOTIFICATIONS_HEADLINE)
     clickFirstText(OnboardingCopy.NEXT)
     waitUntilText(OnboardingCopy.PREFS_HEADLINE)
-    clickFirstText(OnboardingCopy.NEXT)
-    waitUntilText(OnboardingCopy.AI_HEADLINE)
     waitUntilText(OnboardingCopy.GET_FIRST_PROMPT)
     clickFirstText(OnboardingCopy.GET_FIRST_PROMPT)
 }

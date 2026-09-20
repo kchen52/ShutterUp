@@ -37,7 +37,7 @@ object PromptGenerationCopy {
 }
 
 /**
- * Slim, non-blocking strip shown while Nano or the library is writing prompts.
+ * Slim, non-blocking strip shown while the library is writing prompts.
  */
 @Composable
 fun GenerationStatusBar(
