@@ -20,7 +20,7 @@ ShutterUp is a single-user, fully offline Android app that sends the user one ph
 
 ### 1.2 Non-goals (explicitly out of scope for v1)
 
-- Social features, sharing feeds, comments, likes (revisit later).
+- In-app social features: sharing feeds, comments, likes, followers, or any surface that publishes work inside ShutterUp (revisit later).
 - Cloud sync, accounts, multi-device.
 - Cloud AI fallback of any kind.
 - In-app camera (CameraX viewfinder).
@@ -28,6 +28,8 @@ ShutterUp is a single-user, fully offline Android app that sends the user one ph
 - Late entries: a photo can only be attached to *today's* prompt.
 - Multiple photos per day: exactly one photo answers one prompt.
 - Localization beyond English.
+
+A **system share sheet** (`ACTION_SEND` of a composed card) is in v1. That is a hand-off to another app the user already has, with no server, no account, and no feed in this app. It is not a social feature in the sense of this non-goal. Revert §4.6 and the Share buttons on Day / Completion if that reading is wrong.
 
 ---
 
@@ -44,7 +46,7 @@ ShutterUp is a single-user, fully offline Android app that sends the user one ph
 | Camera | `ACTION_IMAGE_CAPTURE` via `ActivityResultContracts.TakePicture` into a `FileProvider` URI; Photo Picker as fallback | Keeps Samsung Camera features (Pro mode, Flex mode, cover-screen preview) with a direct return to the app |
 | Photo storage | `MediaStore` → `Pictures/ShutterUp/`; DB stores the content URI + a private thumbnail | Visible in Samsung Gallery / Google Photos backup, survives uninstall |
 | Photo size | Keep the original as delivered; generate ~400 px thumbnail | Storage is the user's call; grid stays fast |
-| Location | No location permission; camera-written EXIF left untouched | Privacy, simplicity |
+| Location | No location permission; camera-written EXIF left untouched on the original. Shared cards are a new PNG and carry none of it | Privacy, simplicity |
 | Backup | Android Auto Backup for DB + prefs; photos are the user's via Gallery | Photos exceed the 25 MB backup quota |
 | Deletion | Ask each time whether to also delete from Gallery | Default agreed |
 | Day boundary | Local calendar date, midnight in the device's current timezone | Simple mental model |
@@ -94,6 +96,7 @@ ShutterUp is a single-user, fully offline Android app that sends the user one ph
 - **Camera cancelled** → back to Prompt Detail, nothing saved, pending temp file deleted.
 - **Camera unavailable / intent fails twice** → offer "Choose from Gallery" via the Photo Picker. The picked photo must have `DATE_TAKEN` (or EXIF `DateTimeOriginal`) on today's local date; otherwise reject with "Only photos taken today count".
 - **Retake** — before midnight, the Completion/Day screen offers **Retake**; the new photo replaces the old (confirm; old file deleted from `MediaStore` only if the app created it).
+- **Share** — when the day has a photo, Completion and Day offer a quiet **Share** text button. It composes a card (photo, date, theme, title — never the note) and hands it to the system share sheet. See §4.6.
 - **Reroll** — once per day, from Prompt Detail or notification. Generates a fresh prompt (respecting dedup + theme focus). The rerolled-away prompt is kept in the DB with `supersededBy` for history/dedup, not shown in the calendar.
 - **Skip** — explicit "Skip today". Day becomes `SKIPPED`. Breaks streak unless a freeze is consumed. Confirmation dialog explains this.
 - **Missed** — at local midnight, any `PENDING` day becomes `MISSED` (freeze consumed if available). No evening reminder in v1.
@@ -104,13 +107,34 @@ ShutterUp is a single-user, fully offline Android app that sends the user one ph
 ### 4.4 Browsing history
 
 - Home shows today's card + streak/freeze summary + mini month strip.
-- Calendar (month grid) with day cells showing thumbnail (completed), dot colour for skipped/missed/paused. Tap → Day screen (photo, prompt, note, theme, timestamps, achievements earned that day, Delete).
+- Calendar (month grid) with day cells showing thumbnail (completed), dot colour for skipped/missed/paused. Tap → Day screen (photo, prompt, note, theme, timestamps, achievements earned that day, Delete, Share when a photo exists).
 - Feed (chronological cards) and Themes (grouped by theme with counts) as secondary tabs.
 - Badges screen (see §6).
 
 ### 4.5 Deleting an entry
 
-Dialog: "Delete this photo from ShutterUp only" / "Also delete from Gallery" / Cancel. The day becomes `COMPLETED_NO_PHOTO` (still counts as completed for streaks; calendar shows a checkmark with no thumbnail).
+Dialog: "Delete this photo from ShutterUp only" / "Also delete from Gallery" / Cancel. The day becomes `COMPLETED_NO_PHOTO` (still counts as completed for streaks; calendar shows a checkmark with no thumbnail). Share is no longer offered.
+
+### 4.6 Sharing a card
+
+The app has no internet permission and no in-app social surface. Sharing is a **system share sheet** (`ACTION_SEND` + `FileProvider`): the user picks a destination on the device. ShutterUp never uploads, never opens a socket, and never learns who received the card.
+
+**When:** a quiet `Share` text button on the Day screen and the Completion screen, in the existing action row next to `Delete` / `Retake` / `Done`. Only when the day actually has a still photo (`COMPLETED` with an `Entry` of `MediaKind.PHOTO`). Not offered for `COMPLETED_NO_PHOTO`, video, or days without an entry.
+
+**What leaves:** a freshly rendered PNG card, not the original photograph:
+
+- The photo at native aspect, 16 dp corners.
+- Kicker `19 SEPTEMBER · REFLECTIONS` (date + theme, uppercase, +1.0 tracking).
+- The prompt title in Fraunces (the one headline).
+- A small `ShutterUp` wordmark.
+
+The **note is never included**. Theme tint and light/dark follow the user's current appearance, using the same `themeTint` as the rest of the app.
+
+**How:** Compose renders the real design-system card to an offscreen bitmap at 1080 px wide (360 dp at 3×). PNG is written to `cache/share/` (a dedicated FileProvider cache path, not the pending-capture directory), old share files are deleted, and the URI is handed to `Intent.createChooser` with `FLAG_GRANT_READ_URI_PERMISSION` (and `ClipData`, so the grant actually travels). Rendering/encoding run off the main thread except for the brief ComposeView measure/draw, which must be on main. Failures snackbar `The card didn't come together. Try again.` and leave no half-written file.
+
+Because the shared bytes are a new composite, none of the original photo's EXIF travels with it — no camera make, no `DateTimeOriginal`, no GPS if the camera wrote it.
+
+This is deliberately one screen's worth of chrome. If §1.2 is read as forbidding even a system share sheet, revert this section and the two Share buttons.
 
 ---
 
@@ -452,6 +476,8 @@ Pure-Kotlin domain must reach high coverage. Required suites:
 - `AchievementEvaluatorTest` — each badge in §6.2 unlocks exactly once at the right moment.
 - `CaptureDateValidatorTest` — today vs. yesterday vs. timezone edge (photo at 23:50 vs 00:10).
 - `MediaNamingTest` — filename slug generation.
+- `ShareCardContentTest` / `ShareableDayTest` — kicker composition, shareable-day rule (photo required; note never a field).
+- `ShareCacheTest` / `ShareIntentsTest` — PNG write, FileProvider URI, grant flags, cache prune, failure leaves no leftover file.
 - `ManifestGuardTest` — parses the merged debug manifest and asserts no `INTERNET`, `READ_MEDIA_IMAGES`, `USE_EXACT_ALARM`.
 
 Use `kotlinx-coroutines-test`, `Turbine` for flows, a fake `Clock`, and `FakePromptGenerator`. Room DAOs: Robolectric-backed tests for queries used by streaks/calendar.
@@ -538,7 +564,7 @@ Until the secrets exist, the workflow's release path will produce a debug-signed
 
 **v1.1:** tabletop posture layout; one-off "theme for tomorrow"; export (ZIP of photos + JSON); evening "still time" reminder toggle; hemisphere/season setting; image-input prompts ("build on yesterday's shot").
 
-**Later:** social features, sharing, multi-device sync, Play release, other devices, Wear OS glance.
+**Later:** in-app social features (feeds, comments, likes), multi-device sync, Play release, other devices, Wear OS glance. System share of a composed card is already in v1 (§4.6).
 
 ---
 

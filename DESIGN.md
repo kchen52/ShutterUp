@@ -230,7 +230,7 @@ The reward moment. Restraint, but a moment.
 │                              │
 │ 15 days ✻ 2                  │  streak number rolls 14 → 15
 │                              │
-│ [ Done ]            Retake   │
+│ [ Done ]     Share     Retake   │
 └──────────────────────────────┘
 ```
 
@@ -238,6 +238,7 @@ The reward moment. Restraint, but a moment.
 - If a badge unlocked: after the streak roll finishes (~800 ms), a `ModalBottomSheet` rises with the emblem (§5), name in `headlineSmall`, one-line description, and a `Nice` dismiss button. One badge per sheet; multiple unlocks queue.
 - When the day belongs to a series, the kicker may carry the series name where it currently carries the theme (`A WEEK OF HANDS · DAY 15`). No extra praise copy, no series-complete fanfare.
 - Expanded: photo left (55 %), text/note/actions right, vertically centred.
+- **Share** is a quiet text button in the action row, offered only when the day has a photo. See §4.11.
 
 ### 4.4 Calendar
 
@@ -280,7 +281,7 @@ Day cell (44 dp square, 12 dp radius), states:
 
 ### 4.5 Day
 
-Compact: photo full-bleed at top (edge-to-edge, 0 dp top radius, native aspect capped at 70 % height, `pinch to zoom` opens a full-screen viewer), then the same content stack as Prompt Detail (kicker with date + status, title, one-liner, details, tips, constraint), then **Note** (editable inline, autosave), then a quiet action row: `Delete`, and `Retake` if today. Badges earned that day appear as small emblems (32 dp) under the kicker.
+Compact: photo full-bleed at top (edge-to-edge, 0 dp top radius, native aspect capped at 70 % height, `pinch to zoom` opens a full-screen viewer), then the same content stack as Prompt Detail (kicker with date + status, title, one-liner, details, tips, constraint), then **Note** (editable inline, autosave), then a quiet action row: `Delete`, `Share` when a photo exists, and `Retake` if today. Badges earned that day appear as small emblems (32 dp) under the kicker.
 
 Expanded: right pane, photo top with the text below; the pane scrolls.
 
@@ -327,6 +328,35 @@ Illustrations throughout the app are **composed from UI elements and shapes**, n
 | Camera failed twice | Inline card under the Shoot button: "Camera didn't return a photo. You can pick one you took today instead." + `Choose from Gallery`. |
 | Photo Picker date rejected | Snackbar: "That one's from another day — only today's photos count." |
 | Storage error on save | Dialog with `Try again`; never silently mark completed. |
+| Share card failed | Snackbar: "The card didn't come together. Try again." |
+
+### 4.11 Share card
+
+A composed still that leaves the app through the system share sheet. Chrome, not a call to action: a `Share` text button in the Day and Completion action rows, only when the day has a photo. The photo still wins; this is the paper around it.
+
+Rendered with the real design-system components (theme tint, `Kicker`, Fraunces headline) to an offscreen PNG, 1080 px wide. Light or dark matches the user's current appearance. The note is not on the card.
+
+```
+┌──────────────────────────┐
+│                          │
+│      [ the photograph,   │  native aspect
+│        16 dp radius ]    │
+│                          │
+│ 19 SEPTEMBER · REFLECTIONS│ kicker, uppercase, +1.0 tracking
+│ Find the sky in a puddle │  Fraunces, the one headline
+│                          │
+│              ShutterUp   │  small, quiet wordmark
+└──────────────────────────┘
+```
+
+Rules:
+
+- Card surface uses the prompt's theme tint (same 12 % / 18 % overlay as Today / chips).
+- Photo hairline: 1 dp `outlineVariant` at 30 % alpha (see §2.6).
+- Title wraps up to 3 lines, then ellipsizes. Never shrink to fit.
+- Wordmark is Fraunces at `labelMedium`, `onSurfaceVariant`, end-aligned. Quiet enough that it reads as a signature, not a second headline.
+- No series name, no streak, no badge. Date, theme, title, photo, wordmark.
+- Font scale is locked at 1.0 on the exported bitmap so a 200 % system font does not blow up a card headed for a messaging thread.
 
 ---
 
@@ -413,6 +443,8 @@ Second person, present tense, short. Warm but not chirpy. Never exclamation mark
 | Delete dialog | Title "Delete this photo?" Body "The day stays complete." Buttons `Delete from ShutterUp` / `Also delete from Gallery` / `Cancel` |
 | Delete photo (Gallery) result | Snackbar "Deleted." |
 | Empty calendar | "Your first photo goes here." |
+| Share button | `Share` |
+| Share failed | Snackbar "The card didn't come together. Try again." |
 
 ---
 
@@ -438,7 +470,7 @@ Concept: **an aperture opening onto a sun.** Six iris blades in a ring; the cent
 - Monochrome layer: the blades only, opening left transparent.
 - Dark-mode note: no separate dark variant needed; the launcher applies themed icons if the user enables them.
 
-In-app wordmark: "ShutterUp" in Fraunces 500, used only on Onboarding page 1 and Today's top-left label (at `labelLarge` size, system font there — the wordmark face is reserved for onboarding).
+In-app wordmark: "ShutterUp" in Fraunces 500, used on Onboarding page 1, the share card (at `labelMedium`, `onSurfaceVariant`), and Today's top-left label (at `labelLarge` size, system font there — the wordmark face is reserved for onboarding and the share card).
 
 ---
 
