@@ -109,6 +109,31 @@ class DayPromptDaoTest {
     }
 
     @Test
+    fun deleteIndependentAfter_keepsSeriesDays() = runTest {
+        val today = LocalDate.of(2024, 6, 15)
+        dao.upsert(dayPrompt(today, title = "Today"))
+        dao.upsert(dayPrompt(today.plusDays(1), title = "Independent"))
+        dao.upsert(
+            dayPrompt(today.plusDays(2), title = "Series day").copy(seriesId = 4, seriesIndex = 3),
+        )
+        dao.deleteIndependentAfter(today)
+        assertEquals("Today", dao.getDay(today)?.title)
+        assertNull(dao.getDay(today.plusDays(1)))
+        assertEquals("Series day", dao.getDay(today.plusDays(2))?.title)
+    }
+
+    @Test
+    fun deleteDaysInSeries_onlyTouchesThatSeries() = runTest {
+        dao.upsert(dayPrompt(LocalDate.of(2024, 6, 15), title = "S1").copy(seriesId = 4, seriesIndex = 1))
+        dao.upsert(dayPrompt(LocalDate.of(2024, 6, 16), title = "S2").copy(seriesId = 4, seriesIndex = 2))
+        dao.upsert(dayPrompt(LocalDate.of(2024, 6, 17), title = "Other").copy(seriesId = 9, seriesIndex = 1))
+        dao.deleteDaysInSeries(4)
+        assertNull(dao.getDay(LocalDate.of(2024, 6, 15)))
+        assertNull(dao.getDay(LocalDate.of(2024, 6, 16)))
+        assertEquals("Other", dao.getDay(LocalDate.of(2024, 6, 17))?.title)
+    }
+
+    @Test
     fun daysInSeries_returnsOnlyMatchingRows() = runTest {
         dao.upsert(dayPrompt(LocalDate.of(2024, 6, 15), title = "S1").copy(seriesId = 4, seriesIndex = 1))
         dao.upsert(dayPrompt(LocalDate.of(2024, 6, 16), title = "S2").copy(seriesId = 4, seriesIndex = 2))

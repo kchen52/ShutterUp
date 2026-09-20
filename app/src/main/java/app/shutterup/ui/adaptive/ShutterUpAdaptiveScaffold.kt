@@ -2,6 +2,7 @@ package app.shutterup.ui.adaptive
 
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -23,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.window.core.layout.WindowSizeClass
+import app.shutterup.ui.components.GenerationStatusBar
 import app.shutterup.ui.theme.ShutterUpTheme
 
 /**
@@ -39,30 +41,40 @@ fun ShutterUpAdaptiveScaffold(
     callbacks: ShutterUpTabCallbacks,
     modifier: Modifier = Modifier,
     layoutType: NavigationSuiteType? = null,
+    generationMessage: String? = null,
     content: @Composable () -> Unit,
 ) {
     val adaptiveInfo = currentWindowAdaptiveInfo()
     val resolvedType = layoutType ?: shutterUpNavigationSuiteType(adaptiveInfo)
     when (resolvedType) {
-        NavigationSuiteType.None -> Box(modifier = modifier.fillMaxSize()) { content() }
+        NavigationSuiteType.None -> Box(modifier = modifier.fillMaxSize()) {
+            content()
+            GenerationStatusOverlay(
+                message = generationMessage,
+                modifier = Modifier.align(Alignment.TopCenter),
+            )
+        }
         NavigationSuiteType.NavigationBar -> {
             Scaffold(
                 modifier = modifier,
                 bottomBar = {
-                    NavigationBar {
-                        ShutterUpDestination.entries.filter { it.primaryTab }.forEach { destination ->
-                            val isSelected = destination == selected
-                            NavigationBarItem(
-                                selected = isSelected,
-                                onClick = { callbacks.onSelect(destination) },
-                                icon = {
-                                    Icon(
-                                        imageVector = destination.icon(isSelected),
-                                        contentDescription = destination.label,
-                                    )
-                                },
-                                label = { Text(destination.label) },
-                            )
+                    Column {
+                        GenerationStatusOverlay(message = generationMessage)
+                        NavigationBar {
+                            ShutterUpDestination.entries.filter { it.primaryTab }.forEach { destination ->
+                                val isSelected = destination == selected
+                                NavigationBarItem(
+                                    selected = isSelected,
+                                    onClick = { callbacks.onSelect(destination) },
+                                    icon = {
+                                        Icon(
+                                            imageVector = destination.icon(isSelected),
+                                            contentDescription = destination.label,
+                                        )
+                                    },
+                                    label = { Text(destination.label) },
+                                )
+                            }
                         }
                     }
                 },
@@ -113,10 +125,23 @@ fun ShutterUpAdaptiveScaffold(
                         .fillMaxSize(),
                 ) {
                     content()
+                    GenerationStatusOverlay(
+                        message = generationMessage,
+                        modifier = Modifier.align(Alignment.BottomCenter),
+                    )
                 }
             }
         }
     }
+}
+
+@Composable
+private fun GenerationStatusOverlay(
+    message: String?,
+    modifier: Modifier = Modifier,
+) {
+    if (message == null) return
+    GenerationStatusBar(message = message, modifier = modifier)
 }
 
 /**
@@ -175,11 +200,13 @@ private fun ScaffoldPreviewFontScale() {
 internal fun SampleScaffold(
     selected: ShutterUpDestination,
     layoutType: NavigationSuiteType? = null,
+    generationMessage: String? = null,
 ) {
     ShutterUpAdaptiveScaffold(
         selected = selected,
         callbacks = previewCallbacks(),
         layoutType = layoutType,
+        generationMessage = generationMessage,
     ) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text(selected.label)

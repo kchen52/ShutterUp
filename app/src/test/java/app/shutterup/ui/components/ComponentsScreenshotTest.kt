@@ -18,6 +18,7 @@ import app.shutterup.domain.series.SeriesDot
 import app.shutterup.ui.theme.ShutterUpTheme
 import app.shutterup.ui.theme.themeTint
 import com.github.takahirom.roborazzi.captureRoboImage
+import java.time.LocalDate
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -108,6 +109,32 @@ class ComponentsScreenshotTest {
         composeRule.setContent {
             ShutterUpTheme(darkTheme = true) {
                 CameraPreview()
+            }
+        }
+        composeRule.onRoot().captureRoboImage()
+    }
+
+    @Test
+    fun generationStatusBar_light() {
+        composeRule.setContent {
+            ShutterUpTheme(darkTheme = false) {
+                Surface {
+                    GenerationStatusBar(message = PromptGenerationCopy.SERIES)
+                }
+            }
+        }
+        composeRule.onRoot().captureRoboImage()
+    }
+
+    @Test
+    fun generationStatusBar_dark() {
+        composeRule.setContent {
+            ShutterUpTheme(darkTheme = true) {
+                Surface {
+                    GenerationStatusBar(
+                        message = PromptGenerationCopy.forDate(LocalDate.of(2026, 9, 21)),
+                    )
+                }
             }
         }
         composeRule.onRoot().captureRoboImage()

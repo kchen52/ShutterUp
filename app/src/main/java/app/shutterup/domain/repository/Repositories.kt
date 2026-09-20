@@ -25,6 +25,10 @@ interface DayPromptRepository {
     suspend fun allDays(): List<DayPrompt>
     /** Drops un-shown future buffer prompts after [date] (SPEC §7.5 / §14). */
     suspend fun deleteAfter(date: LocalDate)
+    /** Drops future prompts that are not part of a series, keeping today. */
+    suspend fun deleteIndependentAfter(date: LocalDate) = Unit
+    /** Removes every day belonging to [seriesId]. */
+    suspend fun deleteDaysInSeries(seriesId: Long) = Unit
     fun observeDaysInSeries(seriesId: Long): Flow<List<DayPrompt>>
     suspend fun daysInSeries(seriesId: Long): List<DayPrompt>
     /** Later takes of [original], oldest first. */

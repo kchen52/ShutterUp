@@ -8,6 +8,8 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -24,9 +26,11 @@ import app.shutterup.ui.adaptive.isExpandedWidth
 import app.shutterup.ui.badges.BadgesRoute
 import app.shutterup.ui.calendar.CalendarRoute
 import app.shutterup.ui.completion.CompletionRoute
+import app.shutterup.ui.components.PromptGenerationCopy
 import app.shutterup.ui.day.DayRoute
 import app.shutterup.ui.detail.PromptDetailRoute
 import app.shutterup.ui.feed.FeedRoute
+import app.shutterup.ui.generation.PromptGenerationViewModel
 import app.shutterup.ui.home.HomeRoute
 import app.shutterup.ui.issue.IssueListRoute
 import app.shutterup.ui.issue.IssueRoute
@@ -82,8 +86,11 @@ fun ShutterUpNavGraph(
         route.startsWith("day") ||
         route.startsWith("issue")
     val expanded = isExpandedWidth(currentWindowAdaptiveInfo().windowSizeClass.minWidthDp)
+    val generationVm: PromptGenerationViewModel = hiltViewModel()
+    val generation by generationVm.progress.collectAsStateWithLifecycle()
     ShutterUpAdaptiveScaffold(
         selected = selected,
+        generationMessage = generation?.let(PromptGenerationCopy::message),
         callbacks = ShutterUpTabCallbacks(
             onHome = { navController.navigateTab(ShutterUpDestinations.HOME) },
             onCalendar = { navController.navigateTab(ShutterUpDestinations.CALENDAR) },

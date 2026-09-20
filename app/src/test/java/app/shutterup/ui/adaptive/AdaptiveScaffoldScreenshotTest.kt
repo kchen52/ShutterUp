@@ -45,4 +45,32 @@ class AdaptiveScaffoldScreenshotTest {
         }
         composeRule.onRoot().captureRoboImage()
     }
+
+    @Test
+    fun expandedScaffoldGeneratingLight() {
+        composeRule.setContent {
+            ShutterUpTheme(darkTheme = false) {
+                SampleScaffold(
+                    selected = ShutterUpDestination.Settings,
+                    layoutType = NavigationSuiteType.NavigationRail,
+                    generationMessage = "Generating prompts for a seven-day series",
+                )
+            }
+        }
+        composeRule.onRoot().captureRoboImage()
+    }
+
+    @Test
+    @Config(qualifiers = "w400dp-h800dp")
+    fun compactScaffoldGeneratingLight() {
+        composeRule.setContent {
+            ShutterUpTheme(darkTheme = false) {
+                SampleScaffold(
+                    selected = ShutterUpDestination.Home,
+                    generationMessage = "Generating prompts for Monday",
+                )
+            }
+        }
+        composeRule.onRoot().captureRoboImage()
+    }
 }

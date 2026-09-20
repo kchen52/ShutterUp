@@ -16,7 +16,8 @@ object SeriesCalendar {
 
     /**
      * A new series begins on an empty date when the setting is on and that
-     * date is not already inside a series (SPEC: next ungenerated date).
+     * date is not already inside a series. Enabling the setting starts that
+     * run tomorrow rather than rewriting today.
      * Turning the setting off never starts a series; existing series days
      * stay put.
      */

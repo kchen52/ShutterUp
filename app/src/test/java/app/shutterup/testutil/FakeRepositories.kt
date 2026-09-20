@@ -34,6 +34,12 @@ class FakeDayPrompts(
     override suspend fun deleteAfter(date: LocalDate) {
         days.removeAll { it.date > date }
     }
+    override suspend fun deleteIndependentAfter(date: LocalDate) {
+        days.removeAll { it.date > date && it.seriesId == null }
+    }
+    override suspend fun deleteDaysInSeries(seriesId: Long) {
+        days.removeAll { it.seriesId == seriesId }
+    }
     override fun observeDaysInSeries(seriesId: Long) = flowOf(seriesDays(seriesId))
     override suspend fun daysInSeries(seriesId: Long) = seriesDays(seriesId)
 

@@ -39,9 +39,15 @@ class SettingsCopyAndFocusTest {
     fun seriesCopyMatchesBrief() {
         assertEquals("Series", SettingsCopy.SERIES)
         assertEquals(
-            "Some weeks arrive as a set of seven related prompts instead of seven separate ones.",
+            "Some weeks arrive as a set of seven related prompts instead of seven separate ones. Turning this on starts a series tomorrow. Today's prompt stays.",
             SettingsCopy.SERIES_SUPPORTING,
         )
+        assertEquals(
+            "Some weeks arrive as a set of seven related prompts instead of seven separate ones. The current series finishes even if you turn this off.",
+            SettingsCopy.SERIES_SUPPORTING_ON,
+        )
+        assertFalse(SettingsCopy.SERIES_SUPPORTING.contains("!"))
+        assertFalse(SettingsCopy.SERIES_SUPPORTING_ON.contains("!"))
     }
 
     @Test

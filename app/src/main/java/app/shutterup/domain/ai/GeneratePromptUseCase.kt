@@ -15,10 +15,18 @@ import app.shutterup.domain.series.SeriesCalendar
 import java.time.Clock
 import java.time.LocalDate
 import java.time.ZoneId
+import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Singleton
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
+@Singleton
 class GeneratePromptUseCase @Inject constructor(
     @Named("primaryGenerator") private val primary: PromptGenerator,
     private val library: LibraryPromptGenerator,
@@ -30,75 +38,94 @@ class GeneratePromptUseCase @Inject constructor(
     private val clock: Clock,
     @Suppress("unused") private val zone: ZoneId,
 ) {
-    suspend fun promptFor(date: LocalDate, themeFocus: String?): GeneratedPrompt {
-        prompts.getDay(date)?.let { return it.toGeneratedPrompt() }
-        val covering = seriesRepo.covering(date)
-        val seriesEnabled = preferences.observeSeriesEnabled().first()
-        return when {
-            covering != null -> fillSeriesHole(date, themeFocus, covering)
-            SeriesCalendar.shouldStartSeries(seriesEnabled, alreadyInSeries = false) ->
-                generateSeriesOrSingle(date, themeFocus)
-            else -> generateFresh(date, themeFocus, rerollUsed = false)
-        }
+    private val mutex = Mutex()
+    private val generationDepth = AtomicInteger(0)
+    private val _generation = MutableStateFlow<GenerationProgress?>(null)
+    val generation: StateFlow<GenerationProgress?> = _generation.asStateFlow()
+
+    suspend fun promptFor(date: LocalDate, themeFocus: String?): GeneratedPrompt = mutex.withLock {
+        promptForLocked(date, themeFocus)
     }
 
     /**
      * Library-only path for the notification worker (SPEC §7.6): never calls Nano.
      * Returns the persisted prompt for [date], or picks from the bundled bank.
      */
-    suspend fun ensureLibraryPrompt(date: LocalDate, themeFocus: String?): GeneratedPrompt {
-        prompts.getDay(date)?.let { return it.toGeneratedPrompt() }
-        val covering = seriesRepo.covering(date)
-        val seriesEnabled = preferences.observeSeriesEnabled().first()
-        if (covering != null) {
-            return fillSeriesHole(date, themeFocus, covering, libraryOnly = true)
-        }
-        if (SeriesCalendar.shouldStartSeries(seriesEnabled, alreadyInSeries = false)) {
-            val request = requestFor(date, themeFocus)
-            val picked = library.pickSeries(request)
-            if (picked != null &&
-                validateSeries(picked, validator, prompts.recentTitles(90), recentLedes()) is ValidationResult.Valid
-            ) {
-                persistSeries(date, picked)
-                return picked.prompts.first()
+    suspend fun ensureLibraryPrompt(date: LocalDate, themeFocus: String?): GeneratedPrompt =
+        mutex.withLock {
+            prompts.getDay(date)?.let { return@withLock it.toGeneratedPrompt() }
+            val covering = seriesRepo.covering(date)
+            val seriesEnabled = preferences.observeSeriesEnabled().first()
+            if (covering != null) {
+                return@withLock withGeneration(GenerationProgress(date)) {
+                    fillSeriesHole(date, themeFocus, covering, libraryOnly = true)
+                }
+            }
+            if (SeriesCalendar.shouldStartSeries(seriesEnabled, alreadyInSeries = false)) {
+                return@withLock withGeneration(GenerationProgress(date, series = true)) {
+                    val request = requestFor(date, themeFocus)
+                    val picked = library.pickSeries(request)
+                    if (picked != null &&
+                        validateSeries(picked, validator, prompts.recentTitles(90), recentLedes()) is ValidationResult.Valid
+                    ) {
+                        persistSeries(date, picked)
+                        picked.prompts.first()
+                    } else {
+                        persistLibraryPick(date, themeFocus, rerollUsed = false)
+                    }
+                }
+            }
+            withGeneration(GenerationProgress(date)) {
+                persistLibraryPick(date, themeFocus, rerollUsed = false)
             }
         }
-        return persistLibraryPick(date, themeFocus, rerollUsed = false)
-    }
 
     suspend fun topUpBuffer(
         today: LocalDate,
         themeFocus: String?,
         daysAhead: Int = 2,
-    ): List<LocalDate> {
+    ): List<LocalDate> = mutex.withLock {
         val filled = mutableListOf<LocalDate>()
         var date = today
         val end = today.plusDays(daysAhead.toLong())
         while (!date.isAfter(end)) {
             if (prompts.getDay(date) == null) {
-                promptFor(date, themeFocus)
+                promptForLocked(date, themeFocus)
                 filled += date
             }
             date = date.plusDays(1)
         }
-        return filled
+        filled
     }
 
     /**
      * SPEC §7.5 / §14: changing theme focus discards un-shown future buffer
      * prompts. Today's prompt is kept.
      */
-    suspend fun discardUnshownFuture(today: LocalDate) {
-        prompts.deleteAfter(today)
-        for (row in seriesRepo.all()) {
-            when {
-                row.startDate.isAfter(today) -> seriesRepo.delete(row.id)
-                row.endDate.isAfter(today) -> seriesRepo.update(row.copy(endDate = today))
+    suspend fun discardUnshownFuture(today: LocalDate) = mutex.withLock {
+        discardUnshownFutureLocked(today)
+    }
+
+    /**
+     * Enabling Series keeps today and starts a seven-day run tomorrow, replacing
+     * independent (non-series) buffer prompts. An in-progress series is left alone.
+     */
+    suspend fun startSeriesTomorrow(today: LocalDate, themeFocus: String?) = mutex.withLock {
+        if (prompts.getDay(today) == null) {
+            withGeneration(GenerationProgress(today)) {
+                generateFresh(today, themeFocus, rerollUsed = false)
             }
+        }
+        clearUnshownFutureForNewSeries(today)
+        val start = today.plusDays(1)
+        if (seriesRepo.covering(start) != null) return@withLock
+        if (prompts.getDay(start) != null) return@withLock
+        withGeneration(GenerationProgress(start, series = true)) {
+            generateSeriesOrSingle(start, themeFocus)
         }
     }
 
-    suspend fun reroll(date: LocalDate, themeFocus: String?): GeneratedPrompt {
+    suspend fun reroll(date: LocalDate, themeFocus: String?): GeneratedPrompt = mutex.withLock {
         val existing = prompts.getDay(date) ?: error("No prompt for $date")
         prompts.recordSuperseded(
             SupersededPrompt(
@@ -109,12 +136,52 @@ class GeneratePromptUseCase @Inject constructor(
             ),
         )
         val covering = existing.seriesId?.let { seriesRepo.get(it) } ?: seriesRepo.covering(date)
-        return if (existing.repeatsDate != null) {
-            generateFresh(date, themeFocus, rerollUsed = true, overwrite = true)
-        } else if (covering != null) {
-            rerollInsideSeries(date, themeFocus, existing, covering)
-        } else {
-            generateFresh(date, themeFocus, rerollUsed = true, overwrite = true)
+        withGeneration(GenerationProgress(date, series = covering != null && existing.repeatsDate == null)) {
+            if (existing.repeatsDate != null) {
+                generateFresh(date, themeFocus, rerollUsed = true, overwrite = true)
+            } else if (covering != null) {
+                rerollInsideSeries(date, themeFocus, existing, covering)
+            } else {
+                generateFresh(date, themeFocus, rerollUsed = true, overwrite = true)
+            }
+        }
+    }
+
+    private suspend fun promptForLocked(date: LocalDate, themeFocus: String?): GeneratedPrompt {
+        prompts.getDay(date)?.let { return it.toGeneratedPrompt() }
+        val covering = seriesRepo.covering(date)
+        val seriesEnabled = preferences.observeSeriesEnabled().first()
+        return when {
+            covering != null -> withGeneration(GenerationProgress(date)) {
+                fillSeriesHole(date, themeFocus, covering)
+            }
+            SeriesCalendar.shouldStartSeries(seriesEnabled, alreadyInSeries = false) ->
+                withGeneration(GenerationProgress(date, series = true)) {
+                    generateSeriesOrSingle(date, themeFocus)
+                }
+            else -> withGeneration(GenerationProgress(date)) {
+                generateFresh(date, themeFocus, rerollUsed = false)
+            }
+        }
+    }
+
+    private suspend fun discardUnshownFutureLocked(today: LocalDate) {
+        prompts.deleteAfter(today)
+        for (row in seriesRepo.all()) {
+            when {
+                row.startDate.isAfter(today) -> seriesRepo.delete(row.id)
+                row.endDate.isAfter(today) -> seriesRepo.update(row.copy(endDate = today))
+            }
+        }
+    }
+
+    private suspend fun clearUnshownFutureForNewSeries(today: LocalDate) {
+        prompts.deleteIndependentAfter(today)
+        for (row in seriesRepo.all()) {
+            if (row.startDate.isAfter(today)) {
+                prompts.deleteDaysInSeries(row.id)
+                seriesRepo.delete(row.id)
+            }
         }
     }
 
@@ -365,6 +432,21 @@ class GeneratePromptUseCase @Inject constructor(
     private suspend fun libraryIdFor(result: GeneratedPrompt): String? {
         if (result.source != PromptSource.LIBRARY) return null
         return library.findIdByTitle(result.title)
+    }
+
+    private suspend fun <T> withGeneration(
+        progress: GenerationProgress,
+        block: suspend () -> T,
+    ): T {
+        _generation.value = progress
+        generationDepth.incrementAndGet()
+        try {
+            return block()
+        } finally {
+            if (generationDepth.decrementAndGet() == 0) {
+                _generation.value = null
+            }
+        }
     }
 }
 

@@ -219,6 +219,11 @@ class SettingsViewModel @Inject constructor(
     fun setSeriesEnabled(enabled: Boolean) {
         viewModelScope.launch {
             preferences.setSeriesEnabled(enabled)
+            if (enabled) {
+                val today = LocalDate.now(clock.withZone(zone))
+                val focus = preferences.observeThemeFocus().first()
+                generatePrompt.startSeriesTomorrow(today, focus)
+            }
         }
     }
 
