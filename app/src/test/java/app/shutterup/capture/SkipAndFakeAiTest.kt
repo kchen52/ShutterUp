@@ -187,6 +187,26 @@ class SwitchingPromptGeneratorTest {
         assertEquals("nano headline", issue.headline)
     }
 
+    @Test
+    fun holdEngine_pinsTheActiveGeneratorAcrossAToggle() = runTest {
+        val prefs = FakePrefs()
+        val onDevice = ScriptedGenerator("nano")
+        val fake = ScriptedGenerator("fake")
+        val switcher = SwitchingPromptGenerator(
+            onDevice = onDevice,
+            fake = fake,
+            preferences = prefs,
+        )
+        switcher.holdEngine()
+        prefs.setDebugUseFakeAi(true)
+        assertEquals("nano", switcher.generate(request).getOrThrow().title)
+        switcher.releaseEngine()
+        assertEquals(1, onDevice.engineHolds)
+        assertEquals(1, onDevice.engineReleases)
+        assertEquals(0, fake.engineHolds)
+        assertEquals("fake", switcher.generate(request).getOrThrow().title)
+    }
+
     private val monthlyRequest = MonthlyIssueRequest(
         monthLabel = "September",
         completedCount = 24,
@@ -197,7 +217,21 @@ class SwitchingPromptGeneratorTest {
     )
 
     private class ScriptedGenerator(private val title: String) : PromptGenerator {
+        var engineHolds: Int = 0
+            private set
+        var engineReleases: Int = 0
+            private set
+
         override suspend fun availability() = Availability.AVAILABLE
+
+        override suspend fun holdEngine() {
+            engineHolds += 1
+        }
+
+        override suspend fun releaseEngine() {
+            engineReleases += 1
+        }
+
         override suspend fun generate(request: GenerationRequest) = Result.success(
             GeneratedPrompt(
                 title = title,
