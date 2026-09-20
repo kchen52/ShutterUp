@@ -58,6 +58,7 @@ class RepositoryMappingTest {
         assertTrue(domain.rerollUsed)
         assertNull(domain.seriesId)
         assertNull(domain.seriesIndex)
+        assertNull(domain.repeatsDate)
         assertEquals(entity, domain.toEntity())
     }
 
@@ -80,10 +81,12 @@ class RepositoryMappingTest {
             rerollUsed = false,
             seriesId = 9L,
             seriesIndex = 3,
+            repeatsDate = date.minusDays(83),
         )
         val domain = entity.toDomain()
         assertEquals(9L, domain.seriesId)
         assertEquals(3, domain.seriesIndex)
+        assertEquals(date.minusDays(83), domain.repeatsDate)
         assertEquals(entity, domain.toEntity())
     }
 

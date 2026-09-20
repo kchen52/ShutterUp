@@ -90,3 +90,13 @@ val MIGRATION_3_4 = object : Migration(3, 4) {
         )
     }
 }
+
+/** v4 monthly issues → v5 nullable repeatsDate on day_prompts. */
+val MIGRATION_4_5 = object : Migration(4, 5) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE `day_prompts` ADD COLUMN `repeatsDate` INTEGER")
+        db.execSQL(
+            "CREATE INDEX IF NOT EXISTS `index_day_prompts_repeatsDate` ON `day_prompts` (`repeatsDate`)",
+        )
+    }
+}
