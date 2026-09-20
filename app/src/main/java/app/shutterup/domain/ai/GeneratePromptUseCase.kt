@@ -6,6 +6,7 @@ import app.shutterup.domain.model.LibraryUsage
 import app.shutterup.domain.model.PromptSourceRef
 import app.shutterup.domain.model.Series
 import app.shutterup.domain.model.SupersededPrompt
+import app.shutterup.domain.geo.CityCatalog
 import app.shutterup.domain.repository.DayPromptRepository
 import app.shutterup.domain.repository.GamificationRepository
 import app.shutterup.domain.repository.PreferencesRepository
@@ -352,7 +353,7 @@ class GeneratePromptUseCase @Inject constructor(
             recentTitles = prompts.recentTitles(30),
             recentThemes = prompts.recentThemes(14),
             dayOfWeek = date.dayOfWeek,
-            season = seasonForDate(date),
+            season = seasonForDate(date, CityCatalog.find(preferences.observeCoarseCityId().first())?.latitude),
             excludeConstraintKinds = emptySet(),
         )
 

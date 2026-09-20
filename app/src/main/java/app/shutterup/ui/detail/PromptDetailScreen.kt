@@ -414,3 +414,60 @@ private fun PromptDetailPreviewSeriesDark() {
         }
     }
 }
+
+@Preview(name = "Good light", showBackground = true, widthDp = 360, heightDp = 800)
+@Composable
+private fun PromptDetailPreviewGoodLight() {
+    ShutterUpTheme(darkTheme = false) {
+        Surface {
+            PromptDetailScreen(
+                state = PromptDetailUiState(
+                    date = samplePrompt().date,
+                    prompt = samplePrompt(),
+                    remainingLabel = "2 hours of good light left",
+                    isToday = true,
+                ),
+            )
+        }
+    }
+}
+
+@Preview(
+    name = "Good light dark",
+    showBackground = true,
+    widthDp = 360,
+    heightDp = 800,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+)
+@Composable
+private fun PromptDetailPreviewGoodLightDark() {
+    ShutterUpTheme(darkTheme = true) {
+        Surface {
+            PromptDetailScreen(
+                state = PromptDetailUiState(
+                    date = samplePrompt().date,
+                    prompt = samplePrompt(),
+                    remainingLabel = "2 hours of good light left",
+                    isToday = true,
+                ),
+            )
+        }
+    }
+}
+
+@Preview(name = "Good light font 2x", showBackground = true, widthDp = 360, heightDp = 1200, fontScale = 2f)
+@Composable
+private fun PromptDetailPreviewGoodLightFontScale() {
+    ShutterUpTheme(darkTheme = false) {
+        Surface {
+            PromptDetailScreen(
+                state = PromptDetailUiState(
+                    date = samplePrompt().date,
+                    prompt = samplePrompt(),
+                    remainingLabel = "40 minutes of good light left",
+                    isToday = true,
+                ),
+            )
+        }
+    }
+}

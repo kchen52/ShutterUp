@@ -30,6 +30,7 @@ class PreferencesDataStoreTest {
         assertFalse(repo.observePaused().first())
         assertFalse(repo.observeOnboardingComplete().first())
         assertFalse(repo.observeDebugUseFakeAi().first())
+        assertNull(repo.observeCoarseCityId().first())
     }
 
     @Test
@@ -69,6 +70,15 @@ class PreferencesDataStoreTest {
         assertTrue(repo.observeDebugUseFakeAi().first())
         repo.setDebugUseFakeAi(false)
         assertFalse(repo.observeDebugUseFakeAi().first())
+
+        repo.setCoarseCityId("sydney")
+        assertEquals("sydney", repo.observeCoarseCityId().first())
+        repo.setCoarseCityId("")
+        assertNull(repo.observeCoarseCityId().first())
+        repo.setCoarseCityId("tromso")
+        assertEquals("tromso", repo.observeCoarseCityId().first())
+        repo.setCoarseCityId(null)
+        assertNull(repo.observeCoarseCityId().first())
     }
 
     @Test

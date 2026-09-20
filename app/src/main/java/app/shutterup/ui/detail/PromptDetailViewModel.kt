@@ -16,6 +16,8 @@ import app.shutterup.domain.capture.CaptureDateValidator
 import app.shutterup.domain.capture.CaptureLimits
 import app.shutterup.work.NotificationScheduler
 import app.shutterup.domain.capture.RemainingToday
+import app.shutterup.domain.capture.DaylightRemaining
+import app.shutterup.domain.geo.CityCatalog
 import app.shutterup.domain.model.DayPrompt
 import app.shutterup.domain.model.DayStatus
 import app.shutterup.domain.model.Entry
@@ -125,14 +127,20 @@ class PromptDetailViewModel @Inject constructor(
                 entries.observeEntries(date),
                 gamification.observeStreak(),
                 seriesRepo.observeCovering(date),
-                prompts.observeDays(date.minusDays(6), date.plusDays(6)),
-            ) { prompt, dayEntries, streak, series, nearby ->
+                combine(
+                    prompts.observeDays(date.minusDays(6), date.plusDays(6)),
+                    preferences.observeCoarseCityId(),
+                ) { nearby, cityId -> nearby to cityId },
+            ) { prompt, dayEntries, streak, series, nearbyAndCity ->
+                val (nearby, cityId) = nearbyAndCity
+                val city = CityCatalog.find(cityId)
+                val now = clock.instant().atZone(zone)
                 _state.update {
                     it.copy(
                         prompt = prompt,
                         entries = dayEntries,
                         streak = streak,
-                        remainingLabel = RemainingToday.label(clock.instant().atZone(zone)),
+                        remainingLabel = DaylightRemaining.label(now, city?.latitude, city?.longitude),
                         isToday = date == LocalDate.now(clock.withZone(zone)),
                         seriesProgress = series?.let {
                             SeriesProgressCalculator.progress(it, nearby, date)

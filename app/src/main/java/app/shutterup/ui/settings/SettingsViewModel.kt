@@ -22,6 +22,7 @@ import app.shutterup.domain.model.StreakState
 import app.shutterup.domain.repository.DayPromptRepository
 import app.shutterup.domain.repository.GamificationRepository
 import app.shutterup.domain.repository.PreferencesRepository
+import app.shutterup.domain.geo.CityCatalog
 import app.shutterup.domain.rollover.DayRolloverUseCase
 import app.shutterup.widget.TodayWidgetUpdater
 import app.shutterup.work.NotificationScheduler
@@ -51,6 +52,8 @@ data class SettingsUiState(
     val paused: Boolean = false,
     val themeFocus: String = "",
     val seriesEnabled: Boolean = false,
+    val coarseCityId: String? = null,
+    val coarseCityName: String? = null,
     val freezeCount: Int = 0,
     val aiStatus: String = "",
     val aiSupporting: String? = null,
@@ -74,6 +77,7 @@ private data class PrefSlice(
     val paused: Boolean,
     val fakeAi: Boolean,
     val seriesEnabled: Boolean,
+    val cityId: String?,
 )
 
 private data class AiSlice(
@@ -119,10 +123,13 @@ class SettingsViewModel @Inject constructor(
                 preferences.observePaused(),
                 preferences.observeDebugUseFakeAi(),
             ) { notifyTime, precise, focus, paused, fakeAi ->
-                PrefSlice(notifyTime, precise, focus, paused, fakeAi, seriesEnabled = false)
+                PrefSlice(notifyTime, precise, focus, paused, fakeAi, seriesEnabled = false, cityId = null)
             },
             preferences.observeSeriesEnabled(),
-        ) { slice, seriesEnabled -> slice.copy(seriesEnabled = seriesEnabled) },
+            preferences.observeCoarseCityId(),
+        ) { slice, seriesEnabled, cityId ->
+            slice.copy(seriesEnabled = seriesEnabled, cityId = cityId)
+        },
         gamification.observeStreak(),
         ai,
         storageUsed,
@@ -134,6 +141,8 @@ class SettingsViewModel @Inject constructor(
             paused = prefs.paused,
             themeFocus = prefs.focus.orEmpty(),
             seriesEnabled = prefs.seriesEnabled,
+            coarseCityId = prefs.cityId,
+            coarseCityName = CityCatalog.find(prefs.cityId)?.name,
             freezeCount = streak.freezes,
             aiStatus = aiSlice.status,
             aiSupporting = aiSlice.supporting,
@@ -211,6 +220,30 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             preferences.setSeriesEnabled(enabled)
         }
+    }
+
+    /**
+     * City-level stand-in for daylight and hemisphere. Clearing (null) restores
+     * the northern default. Future buffer prompts are rebuilt only when the
+     * hemisphere actually changes, matching theme-focus invalidation (SPEC §7.5).
+     */
+    fun setCoarseCityId(id: String?) {
+        viewModelScope.launch {
+            val previous = preferences.observeCoarseCityId().first()
+            val normalized = id?.let { CityCatalog.find(it)?.id }
+            preferences.setCoarseCityId(normalized)
+            if (isNorthern(previous) != isNorthern(normalized)) {
+                val today = LocalDate.now(clock.withZone(zone))
+                val focus = preferences.observeThemeFocus().first()
+                generatePrompt.discardUnshownFuture(today)
+                generatePrompt.topUpBuffer(today, focus)
+            }
+        }
+    }
+
+    private fun isNorthern(cityId: String?): Boolean {
+        val latitude = CityCatalog.find(cityId)?.latitude ?: return true
+        return latitude >= 0.0
     }
 
     fun setDebugUseFakeAi(useFake: Boolean) {

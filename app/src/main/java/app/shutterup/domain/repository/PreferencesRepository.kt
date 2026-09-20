@@ -22,4 +22,6 @@ interface PreferencesRepository {
     suspend fun setDebugUseFakeAi(useFake: Boolean)
     fun observeLastNotifiedDate(): Flow<LocalDate?>
     suspend fun setLastNotifiedDate(date: LocalDate?)
+    fun observeCoarseCityId(): Flow<String?>
+    suspend fun setCoarseCityId(id: String?)
 }
