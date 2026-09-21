@@ -46,7 +46,9 @@ import app.shutterup.navigation.DeepLinks
 import java.io.File
 
 /**
- * Glance home-screen widget: 2×2 (small) and 4×2 (medium) (DESIGN.md §8).
+ * Glance home-screen widget: 2×2 (small) and 4×2 (medium) by default (DESIGN.md §8).
+ * Both picker entries are horizontally and vertically resizable; layout flips between
+ * small and medium at [MEDIUM] width via [SizeMode.Responsive].
  */
 class TodayGlanceWidget : GlanceAppWidget() {
     override val sizeMode: SizeMode = SizeMode.Responsive(setOf(SMALL, MEDIUM))
