@@ -11,7 +11,7 @@
 # - Room stays on the 2.x line (2.8.5); Room 3.x is not required for v1.
 
 [versions]
-agp = "9.3.0"
+agp = "9.4.1"
 kotlin = "2.4.10"
 ksp = "2.3.10"
 hilt = "2.60.1"
