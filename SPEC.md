@@ -302,6 +302,9 @@ All generated prompts are persisted immediately with `date` assignments, so a pr
 - `assets/prompt_library.json`: **~2000** prompts with the same schema as `GeneratedPrompt` plus `id` and `tags`.
 - Selection: exclude any library prompt used in the last 180 days; otherwise uniformly random. Theme-focus tag matching stays in the picker for a later revisit but is unused in v1 UI.
 - Entries authored to meet §7.3 rules; spread across ≥ 40 themes (each with ≥ 7 unused entries so Series can run); ≥ 50 % indoor-friendly.
+- Every entry is written individually, never stamped from a template: each carries exactly one of the `indoor` / `outdoor` tags, and no details sentence or tip is reused across many entries.
+- Copy uses Commonwealth spelling (colour, grey, centre) with vocabulary that reads naturally anywhere (sidewalk, counter, outlet). The phone is the camera, so a prompt never asks for its own flashlight as the light source. Never assume a yard, garden or front step without an apartment-friendly alternative, and never carry indoor objects outside just to photograph them.
+- Every library theme has two headlines in `MonthlyIssueHeadlines`.
 - Because every prompt is from the library, do **not** show a "From the library" chip.
 
 ### 7.8 Series (opt-in weekly arc)
@@ -513,7 +516,7 @@ Pure-Kotlin domain must reach high coverage. Required suites:
 - `PromptParserTest` — valid JSON, missing fields, over-length fields, extra fields, non-JSON garbage.
 - `PromptValidatorTest` — blocklist hits, gear mentions, dedup by title/theme, URL/emoji rejection, accepts a corpus of good prompts.
 - `GeneratePromptUseCaseTest` — retries on validation failure, falls back to library after 3 attempts, never generates twice for one date, buffer top-up to 3 days, series generation of seven days, series does not replace today's prompt, enabling series starts tomorrow and replaces independent buffer, in-series reroll stays on theme, library series fallback, reroll of a second take clears `repeatsDate`.
-- `PromptLibraryBankTest` — ~2000 unique ids/titles, ≥ 40 themes with ≥ 7 each, ≥ 50 % indoor, every entry passes `PromptValidator`.
+- `PromptLibraryBankTest` — ~2000 unique ids/titles, ≥ 40 themes with ≥ 7 each, ≥ 50 % indoor, every entry passes `PromptValidator`, exactly one indoor/outdoor tag each, no templated details sentences or tips, no repeated one-liner openings within a theme, and a monthly headline pair for every theme.
 - `SeriesCalendarTest` / `SeriesProgressCalculatorTest` — next series start, enabling does not disrupt today, dots for completed / current / missed.
 - `SecondTakeCalendarTest` / `TakeChainTest` / `TakeIntervalTest` / `StartSecondTakeUseCaseTest` — landing today when pending vs tomorrow when completed/skipped/paused; chain of two and of five; interval phrasing across days / a month / a year; series detachment of only the target day; reroll clears the repeat link.
 - `GenerateMonthlyIssueUseCaseTest` — finished-month windows across timezones and year boundaries, mid-month install, zero completed days, fallback copy, idempotent regeneration, catch-up of skipped empty months.

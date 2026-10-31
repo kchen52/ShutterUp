@@ -71,6 +71,13 @@ object MonthlyIssueHeadlines {
         normalize("Tile Grids") to listOf("A grid of squares.", "Grout and line."),
         normalize("Wall Marks") to listOf("A mark on the wall.", "What the wall kept."),
         normalize("Pocket Objects") to listOf("Emptied pockets.", "Small things out."),
+        normalize("Silhouettes") to listOf("Dark against light.", "Shape, not detail."),
+        normalize("Symmetry") to listOf("Left meets right.", "Folded in half."),
+        normalize("Frames Within Frames") to listOf("A frame inside.", "Through the doorway."),
+        normalize("Leading Lines") to listOf("Follow the line.", "This way in."),
+        normalize("Faces in Things") to listOf("Someone in there.", "It looks back."),
+        normalize("Shoot Through It") to listOf("Seen through.", "Through a gap."),
+        normalize("Blur on Purpose") to listOf("Soft on purpose.", "Out of focus."),
     )
 
     private fun asHeadline(theme: String): String {

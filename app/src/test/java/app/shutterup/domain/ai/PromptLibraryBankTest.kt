@@ -1,5 +1,6 @@
 package app.shutterup.domain.ai
 
+import app.shutterup.domain.monthly.MonthlyIssueHeadlines
 import java.io.File
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -13,11 +14,12 @@ class PromptLibraryBankTest {
         "rooftop", "cliff", "driving", "drugged", "alcohol",
     )
     private val validator = PromptValidator(blockedTerms, DEFAULT_GEAR_TERMS)
+    private val prompts: List<LibraryPrompt> by lazy {
+        PromptParser.parseLibrary(libraryFile().readText()).getOrThrow()
+    }
 
     @Test
     fun bundledLibrary_meetsLibraryOnlyContract() {
-        val json = libraryFile().readText()
-        val prompts = PromptParser.parseLibrary(json).getOrThrow()
         assertEquals("expected about 2000 bundled prompts", 2000, prompts.size)
         assertEquals(prompts.size, prompts.map { it.id }.distinct().size)
         assertEquals(prompts.size, prompts.map { it.title.lowercase() }.distinct().size)
@@ -47,6 +49,45 @@ class PromptLibraryBankTest {
                 result,
             )
         }
+    }
+
+    @Test
+    fun everyPrompt_isEitherIndoorOrOutdoor() {
+        prompts.forEach { prompt ->
+            val placement = prompt.tags.filter { it == "indoor" || it == "outdoor" }
+            assertEquals("${prompt.id} placement tags $placement", 1, placement.size)
+        }
+    }
+
+    @Test
+    fun prompts_areNotStampedFromATemplate() {
+        val sentences = prompts
+            .flatMap { prompt -> prompt.details.split(Regex("(?<=[.!?])\\s+")) }
+            .map { it.trim().lowercase() }
+            .filter { it.isNotEmpty() }
+            .groupingBy { it }
+            .eachCount()
+        sentences.forEach { (sentence, count) ->
+            assertTrue("details sentence used $count times: $sentence", count <= 3)
+        }
+        val tips = prompts.flatMap { it.tips }.map { it.trim().lowercase() }.groupingBy { it }.eachCount()
+        tips.forEach { (tip, count) -> assertTrue("tip used $count times: $tip", count <= 5) }
+    }
+
+    @Test
+    fun sameThemeLedes_doNotRepeat() {
+        prompts.groupBy { it.theme }.forEach { (theme, items) ->
+            val ledes = items.map { prompt ->
+                prompt.oneLiner.lowercase().split(Regex("\\s+")).take(4).joinToString(" ")
+            }
+            assertEquals("$theme repeats a one-liner opening", ledes.size, ledes.distinct().size)
+        }
+    }
+
+    @Test
+    fun everyTheme_hasMonthlyHeadlines() {
+        val themes = prompts.map { it.theme.lowercase() }.toSet()
+        assertEquals(themes, MonthlyIssueHeadlines.BANK.keys)
     }
 
     private fun libraryFile(): File {
